@@ -1,0 +1,129 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\bibAnnoteFile}[1]{%
+  \IfFileExists{#1}{\begin{quotation}\noindent\textsc{Key:} #1\\
+  \textsc{Annotation:}\ \input{#1}\end{quotation}}{}}
+\providecommand{\bibAnnote}[2]{%
+  \begin{quotation}\noindent\textsc{Key:} #1\\
+  \textsc{Annotation:}\ #2\end{quotation}}
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem{garcia1996precautionary}
+Garcia S (1996) The precautionary approach to fisheries and its implications
+  for fishery research, technology and management: an updated review.
+\newblock FAO Fisheries Technical Paper : 1--76.
+\bibAnnoteFile{garcia1996precautionary}
+
+\bibitem{de1986elasticity}
+de~Kroon H, Plaisier A, van Groenendael J, Caswell H (1986) Elasticity: the
+  relative contribution of demographic parameters to population growth rate.
+\newblock Ecology 67: 1427--1431.
+\bibAnnoteFile{de1986elasticity}
+
+\bibitem{grant2003density}
+Grant A, Benton T (2003) Density-dependent populations require
+  density-dependent elasticity analysis: an illustration using the {LPA} model
+  of tribolium {RID} c-6493-2009.
+\newblock Journal of Animal Ecology 72: 94--105.
+\bibAnnoteFile{grant2003density}
+
+\bibitem{heppell1998application}
+Heppell S (1998) Application of life-history theory and population model
+  analysis to turtle conservation.
+\newblock Copeia : 367--375.
+\bibAnnoteFile{heppell1998application}
+
+\bibitem{Benton1999467}
+Benton TG, Grant A (1999) Elasticity analysis as an important tool in
+  evolutionary and population ecology.
+\newblock Trends in Ecology and; Evolution 14: 467 - 471.
+\bibAnnoteFile{Benton1999467}
+
+\bibitem{Hunter2000299}
+Hunter C, Moller H, Fletcher D (2000) Parameter uncertainty and elasticity
+  analyses of a population model: setting research priorities for shearwaters.
+\newblock Ecological Modelling 134: 299 - 324.
+\bibAnnoteFile{Hunter2000299}
+
+\bibitem{Pichancourt200631}
+Pichancourt JB, Burel F, Auger P (2006) A hierarchical matrix model to assess
+  the impact of habitat fragmentation on population dynamics: an elasticity
+  analysis.
+\newblock Comptes Rendus Biologies 329: 31 - 39.
+\bibAnnoteFile{Pichancourt200631}
+
+\bibitem{RogersBennett2006}
+Rogers-Bennett L, Leaf RT (2006) Elasticity analyses of size-based red and
+  white abalone matrix models: Management and conservation.
+\newblock Ecological Applications 16: 213-224.
+\bibAnnoteFile{RogersBennett2006}
+
+\bibitem{Heppell2007}
+Heppell S (2007) Elasticity analysis of green sturgeon life history.
+\newblock Environmental Biology of Fishes 79: 357-368.
+\bibAnnoteFile{Heppell2007}
+
+\bibitem{gislason2008coexistence}
+Gislason H, Pope J, Rice J, Daan N (2008) Coexistence in north sea fish
+  communities: implications for growth and natural mortality.
+\newblock ICES Journal of Marine Science: Journal du Conseil 65: 514--530.
+\bibAnnoteFile{gislason2008coexistence}
+
+\bibitem{roff1984evolution}
+Roff D (1984) The evolution of life history parameters in teleosts.
+\newblock Canadian Journal of Fisheries and Aquatic Sciences 41: 989--1000.
+\bibAnnoteFile{roff1984evolution}
+
+\bibitem{andersen2006asymptotic}
+Andersen K, Beyer J (2006) Asymptotic size determines species abundance in the
+  marine size spectrum.
+\newblock The American Naturalist 168: 54--61.
+\bibAnnoteFile{andersen2006asymptotic}
+
+\bibitem{pope2006modelling}
+Pope J, Rice J, Daan N, Jennings S, Gislason H (2006) Modelling an exploited
+  marine fish community with 15 parameters--results from a simple size-based
+  model.
+\newblock ICES Journal of Marine Science: Journal du Conseil 63: 1029--1044.
+\bibAnnoteFile{pope2006modelling}
+
+\bibitem{russell1931some}
+Russell E (1931) Some theoretical considerations on the overfishing problem.
+\newblock Journal du conseil 6: 3.
+\bibAnnoteFile{russell1931some}
+
+\bibitem{von1957quantitative}
+Von~Bertalanffy L (1957) Quantitative laws in metabolism and growth.
+\newblock Quarterly Review of Biology : 217--231.
+\bibAnnoteFile{von1957quantitative}
+
+\bibitem{ISSF2011steep}
+Anonymous (2011) Report of the 2011 issf stock assessment workshop.
+\newblock ISSF Technical Report 2011-­‐02 .
+\bibAnnoteFile{ISSF2011steep}
+
+\bibitem{gislason2010does}
+Gislason H, Daan N, Rice J, Pope J (2010) Does natural mortality depend on
+  individual size.
+\newblock Fish and Fisheries 11: 149--158.
+\bibAnnoteFile{gislason2010does}
+
+\bibitem{Hilbornetal2000}
+Hilborn R, Maunder M, Parma A, Ernst B, Paynes J, et~al. (2000) Documentation
+  for a general age-structured Bayesian stock assessment model: code named
+  Coleraine.
+\newblock FRI/UW 00/01. Fisheries Research Institute, University of Washington.
+\bibAnnoteFile{Hilbornetal2000}
+
+\bibitem{wetherall1987estimating}
+Wetherall J, Polovina J, Ralston S (1987) Estimating growth and mortality in
+  steady-state fish stocks from length-frequency data.
+\newblock In: ICLARM Conf. Proc. pp. 53--74.
+\bibAnnoteFile{wetherall1987estimating}
+
+\end{thebibliography}

@@ -1,0 +1,837 @@
+---
+title: "Cross test using Operating Model based on Life History"
+subtitle: "VPA"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{FLife}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+github_document:
+    mathjax: TRUE
+tags: FLife
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               fig.height=10,
+               fig.width =8,
+               cache.path="../cache/simtest/vpa",
+               fig.path  ="../tex/simtest/vpa-")
+
+options(digits=3)
+
+iFig=0
+```
+```{r pkgs}
+library(ggplot2)
+library(reshape)
+library(plyr)
+library(dplyr)
+library(FLCore)
+library(ggplotFL)
+
+library(FLBRP)
+library(FLAssess)
+library(FLXSA)
+library(mydas)
+
+library(GGally)
+
+library(doParallel)
+library(foreach)
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+
+xsaCtrl=list("default"=FLXSA.control(
+                         tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE))
+```
+
+```{r, source}
+#source("/home/laurence/Desktop/sea++/mydas/R/refpts4hcr.R")
+#source("/home/laurence/Desktop/sea++/mydas/R/xsaTest.R")
+#source("/home/laurence/Desktop/sea++/mydas/R/mydas:::my_ggpairs.R")
+```
+
+## Brill
+
+```{r, xsa-brill}
+load(file.path(dirDat,"brill.RData"))               
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=mydas:::xsaTest(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["brill"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl.RData"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test for brill.
+
+```{r, xsa-brill-refpts-segreg}
+eqS=mydas:::eqSegreg(om)
+```
+```{r}
+#bug
+dimnames(refpts(eqS))$refpt[3]="fcrash"
+refpts(eqS)["fcrash","ssb"]=c(refpts(eqS)["fcrash","rec"])/c(params(eqS)["a"])
+refpts(eqS)=computeRefpts(eqS)
+dimnames(refpts(eqS))$refpt[3]="crash"
+```
+```{r}
+#bug
+dimnames(refpts(eqS))$refpt[3]="fcrash"
+refpts(eqS)["fcrash","ssb"]=c(refpts(eqS)["fcrash","rec"])/c(params(eqS)["a"])
+refpts(eqS)=computeRefpts(eqS)
+dimnames(refpts(eqS))$refpt[3]="crash"
+```
+```{r, xsa-brill-refpts-bevholt}
+eqB=mydas:::eqBevholt(om)
+```
+```{r, xsa-brill-refpts-geomean}
+eqM=mydas:::eqGeomean(om)
+```
+
+```{r, refs-brill, fig.height=8, fig.width =8}
+dat=rbind.fill(
+  cbind("SRR"="SR",
+    as.data.frame(refpts(eqS)[c("f0.1","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="PR",
+    as.data.frame(refpts(eqM)[c("f0.1","virgin"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="BH",
+    as.data.frame(refpts(eqB)[c("msy","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="SR",
+        transform(as.data.frame(params(eqS)["b"]),refpt=params,quant="ssb")))[,-6]
+dat=subset(dat,!is.na(data))
+
+ggpairs(cast(subset(dat,quant=="ssb"),iter~SRR+refpt,value="data")[,-1],            
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test SSB reference points for brill.
+
+
+```{r, refs2-brill, fig.height=8, fig.width =8}
+#bug no fcrash for segreg
+ggpairs(cast(subset(dat,quant=="harvest"&refpt!="virgin"),iter~SRR+refpt,value="data")[,-1],            
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test F reference points for brill.
+
+## Turbot
+
+```{r, xsa-turbot}
+load(file.path(dirDat,"turbot.RData"))               
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=mydas:::xsaTest(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["turbot"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl.RData"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Simulation test for turbot.
+
+```{r, xsa-turbot-refpts-segreg}
+eqS=mydas:::eqSegreg(om)
+```
+```{r}
+#bug
+dimnames(refpts(eqS))$refpt[3]="fcrash"
+refpts(eqS)["fcrash","ssb"]=c(refpts(eqS)["fcrash","rec"])/c(params(eqS)["a"])
+refpts(eqS)=computeRefpts(eqS)
+dimnames(refpts(eqS))$refpt[3]="crash"
+```
+```{r, xsa-turbot-refpts-bevholt}
+eqB=mydas:::eqBevholt(om)
+```
+```{r, xsa-turbot-refpts-geomean}
+eqM=mydas:::eqGeomean(om)
+```
+
+```{r, refs-turbot, fig.height=8, fig.width =8}
+dat=rbind.fill(
+  cbind("SRR"="SR",
+    as.data.frame(refpts(eqS)[c("f0.1","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="PR",
+    as.data.frame(refpts(eqM)[c("f0.1","virgin"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="BH",
+    as.data.frame(refpts(eqB)[c("msy","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="SR",
+        transform(as.data.frame(params(eqS)["b"]),refpt=params,quant="ssb")))[,-6]
+dat=subset(dat,!is.na(data))
+
+ggpairs(cast(subset(dat,quant=="ssb"),iter~SRR+refpt,value="data")[,-1],            
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test SSB reference points for turbot.
+
+
+```{r, ref2-turbot, fig.height=8, fig.width =8}
+#bug no fcrash for segreg
+ggpairs(cast(subset(dat,quant=="harvest"&refpt!="virgin"),iter~SRR+refpt,value="data")[,-1],            
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test F reference points for turbot.
+
+## Ray
+
+```{r, xsa-ray}
+load(file.path(dirDat,"ray.RData"))               
+
+om=trim(om,age=3:40)
+#om=FLCore:::iter(om,1:10)
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=75)
+mp=mydas:::xsaTest(om,ctrl=xsaControl,pg=20)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["ray"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl.RData"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Simulation test for ray.
+
+```{r, xsa-ray-refpts-segreg}
+eqS=mydas:::eqSegreg(om)
+```
+```{r}
+#bug
+dimnames(refpts(eqS))$refpt[3]="fcrash"
+refpts(eqS)["fcrash","ssb"]=c(refpts(eqS)["fcrash","rec"])/c(params(eqS)["a"])
+refpts(eqS)=computeRefpts(eqS)
+dimnames(refpts(eqS))$refpt[3]="crash"
+```
+
+```{r, xsa-ray-refpts-bevholt}
+eqB=mydas:::eqBevholt(om)
+```
+```{r, xsa-ray-refpts-geomean}
+eqM=mydas:::eqGeomean(om)
+```
+
+```{r, ref-ray, fig.height=8, fig.width =8}
+dat=rbind.fill(
+  cbind("SRR"="SR",
+    as.data.frame(refpts(eqS)[c("f0.1","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="PR",
+    as.data.frame(refpts(eqM)[c("f0.1","virgin"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="BH",
+    as.data.frame(refpts(eqB)[c("msy","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="SR",
+        transform(as.data.frame(params(eqS)["b"]),refpt=params,quant="ssb")))[,-6]
+dat=subset(dat,!is.na(data))
+
+ggpairs(cast(subset(dat,quant=="ssb"),iter~SRR+refpt,value="data")[,-1],        
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test SSB reference points for ray.
+
+
+```{r, ref2-ray, fig.height=8, fig.width =8}
+#bug no fcrash for segreg
+ggpairs(cast(subset(dat,quant=="harvest"&refpt!="virgin"),iter~SRR+refpt,value="data")[,-1],        
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test F reference points for ray.
+
+## Pollack
+
+```{r, xsa-pollack}
+load(file.path(dirDat,"pollack.RData"))               
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 3,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=mydas:::xsaTest(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["pollack"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl.RData"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Simulation test for pollack.
+
+```{r, xsa-pollack-refpts-segreg}
+eqS=mydas:::eqSegreg(om)
+```
+```{r}
+#bug
+dimnames(refpts(eqS))$refpt[3]="fcrash"
+refpts(eqS)["fcrash","ssb"]=c(refpts(eqS)["fcrash","rec"])/c(params(eqS)["a"])
+refpts(eqS)=computeRefpts(eqS)
+dimnames(refpts(eqS))$refpt[3]="crash"
+```
+```{r, xsa-pollack-refpts-bevholt}
+eqB=mydas:::eqBevholt(om)
+```
+```{r, xsa-pollack-refpts-geomean}
+eqM=mydas:::eqGeomean(om)
+```
+
+```{r, ref-pollack, fig.height=8, fig.width =8}
+dat=rbind.fill(
+  cbind("SRR"="SR",
+    as.data.frame(refpts(eqS)[c("f0.1","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="PR",
+    as.data.frame(refpts(eqM)[c("f0.1","virgin"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="BH",
+    as.data.frame(refpts(eqB)[c("msy","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="SR",
+        transform(as.data.frame(params(eqS)["b"]),refpt=params,quant="ssb")))[,-6]
+dat=subset(dat,!is.na(data))
+
+ggpairs(cast(subset(dat,quant=="ssb"),iter~SRR+refpt,value="data")[,-1],        
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test SSB reference points for pollack.
+
+
+```{r, ref2-pollack,fig.height=8, fig.width =8}
+#bug no fcrash for segreg
+ggpairs(cast(subset(dat,quant=="harvest"&refpt!="virgin"),iter~SRR+refpt,value="data")[,-1],        
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test F reference points for pollack.
+
+## Sprat
+
+```{r, xsa-sprat}
+load(file.path(dirDat,"sprat.RData"))               
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+  
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=mydas:::xsaTest(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["sprat"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl.RData"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Simulation test for sprat.
+
+```{r, xsa-sprat-refpts-segreg}
+eqS=mydas:::eqSegreg(om)  
+```
+```{r}
+#bug
+dimnames(refpts(eqS))$refpt[3]="fcrash"
+refpts(eqS)["fcrash","ssb"]=c(refpts(eqS)["fcrash","rec"])/c(params(eqS)["a"])
+refpts(eqS)=computeRefpts(eqS)
+dimnames(refpts(eqS))$refpt[3]="crash"
+```
+```{r, xsa-sprat-refpts-bevholt}
+eqB=mydas:::eqBevholt(om)   
+```
+```{r, xsa-sprat-refpts-geomean}
+eqM=mydas:::eqGeomean(om)  
+```
+
+```{r, ref-sprat, fig.height=8, fig.width =8}
+dat=rbind.fill(      
+  cbind("SRR"="SR",
+    as.data.frame(refpts(eqS)[c("f0.1","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="PR",
+    as.data.frame(refpts(eqM)[c("f0.1","virgin"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="BH",
+     as.data.frame(refpts(eqB)[c("msy","virgin","crash"),
+                             c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="SR",
+        transform(as.data.frame(params(eqS)["b"]),refpt=params,quant="ssb")))[,-6]
+dat=subset(dat,!is.na(data))
+
+ggpairs(cast(subset(dat,quant=="ssb"),iter~SRR+refpt,value="data")[,c(2:8)],
+  #upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  #lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  #diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test SSB reference points for sprat.
+
+
+```{r, ref2-sprat, fig.height=8, fig.width =8}
+#bug no fcrash for segreg   
+ggpairs(cast(subset(dat,quant=="harvest"&refpt!="virgin"),iter~SRR+refpt,value="data")[,-1],        
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test F reference points for sprat.
+
+
+
+## Lobster
+
+```{r, xsa-lobster}
+load(file.path(dirDat,"lobster.RData"))            
+
+om=trim(om,age=3:40)
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=75)
+mp=mydas:::xsaTest(om,ctrl=xsaControl,pg=20)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["lobster"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl.RData"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Simulation test for lobster.
+
+```{r, xsa-lobster-refpts-segreg}
+eqS=mydas:::eqSegreg(om)
+```
+```{r}
+#bug
+dimnames(refpts(eqS))$refpt[3]="fcrash"
+refpts(eqS)["fcrash","ssb"]=c(refpts(eqS)["fcrash","rec"])/c(params(eqS)["a"])
+refpts(eqS)=computeRefpts(eqS)
+dimnames(refpts(eqS))$refpt[3]="crash"
+```
+```{r, xsa-lobster-refpts-bevholt}
+eqB=mydas:::eqBevholt(om)
+```
+```{r, xsa-lobster-refpts-geomean}
+eqM=mydas:::eqGeomean(om)
+```
+
+```{r, ref-lobster, fig.height=8, fig.width =8}
+dat=rbind.fill(
+  cbind("SRR"="SR",
+    as.data.frame(refpts(eqS)[c("f0.1","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="PR",
+    as.data.frame(refpts(eqM)[c("f0.1","virgin"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="BH",
+    as.data.frame(refpts(eqB)[c("msy","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="SR",
+        transform(as.data.frame(params(eqS)["b"]),refpt=params,quant="ssb")))[,-6]
+dat=subset(dat,!is.na(data))
+
+ggpairs(cast(subset(dat,quant=="ssb"),iter~SRR+refpt,value="data")[,-1],            
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test SSB reference points for lobster.
+
+
+```{r, ref2-lobster, fig.height=8, fig.width =8}
+#bug no fcrash for segreg
+ggpairs(cast(subset(dat,quant=="harvest"&refpt!="virgin"),iter~SRR+refpt,value="data")[,-1],          
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test F reference points for lobster.
+
+
+## Razors
+
+```{r, xsa-razors}
+load(file.path(dirDat,"razor.RData"))            
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=mydas:::xsaTest(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["razors"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl.RData"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Simulation test for razor.
+
+```{r, xsa-razor-refpts-segreg}
+eqS=mydas:::eqSegreg(om)
+```
+```{r}
+#bug
+dimnames(refpts(eqS))$refpt[3]="fcrash"
+refpts(eqS)["fcrash","ssb"]=c(refpts(eqS)["fcrash","rec"])/c(params(eqS)["a"])
+refpts(eqS)=computeRefpts(eqS)
+dimnames(refpts(eqS))$refpt[3]="crash"
+```
+```{r, xsa-razor-refpts-bevholt}
+eqB=mydas:::eqBevholt(om)
+```
+```{r, xsa-razor-refpts-geomean}
+eqM=mydas:::eqGeomean(om)
+```
+
+```{r, ref-razor, fig.height=8, fig.width =8}
+dat=rbind.fill(
+  cbind("SRR"="SR",
+    as.data.frame(refpts(eqS)[c("f0.1","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="PR",
+    as.data.frame(refpts(eqM)[c("f0.1","virgin"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="BH",
+    as.data.frame(refpts(eqB)[c("msy","virgin","crash"),
+                            c("ssb","biomass","rec","yield","harvest")])),
+  cbind("SRR"="SR",
+        transform(as.data.frame(params(eqS)["b"]),refpt=params,quant="ssb")))[,-6]
+dat=subset(dat,!is.na(data))
+
+ggpairs(cast(subset(dat,quant=="ssb"),iter~SRR+refpt,value="data")[,-1],            
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test SSB reference points for razor.
+
+
+```{r, ref2-razor, fig.height=8, fig.width =8}
+#bug no fcrash for segreg
+ggpairs(cast(subset(dat,quant=="harvest"&refpt!="virgin"),iter~SRR+refpt,value="data")[,-1],            
+  #mapping = ggplot2::aes(color=SRR),
+  upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+  lower = list(continuous = wrap(mydas:::my_smooth,size=1)),
+  #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+  diag=list(continuous=wrap(mydas:::my_density,alpha=0.2)),
+  title = "")+theme_bw(14)+
+  theme(legend.position ="none", 
+       panel.grid.major =element_blank(), 
+       axis.ticks       =element_blank(), 
+       axis.text.x      =element_blank(), 
+       axis.text.y      =element_blank(),
+       panel.border     =element_rect(linetype = 1, colour="black", fill=NA)) 
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test F reference points for razors.
+
+```{r, xsa-fwd, eval=FALSE}
+registerDoParallel(4)
+
+load(file.path(dirDat,"turbot.RData"))            
+om=window(om,start=25)
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+xsafwd=foreach(assYr=seq(75,40,-5), 
+              .combine=list,
+              .multicombine=TRUE,
+              .packages=c("FLCore","FLAssess","FLXSA","FLasher","FLBRP","plyr")) %dopar%{
+
+    mp =xsa(window(om,end=assYr),ctrl=xsaControl)
+    sr =fmle(as.FLSR(mp,model="bevholt"),control=list(trace=FALSE))
+    mp =fwdWindow(mp,end=assYr+10,FLBRP(mp))
+          
+    fwd(mp,catch=catch(om)[,assYr+0:10],sr=sr)
+    }
+
+xsafwd=as(xsafwd,"FLStocks")
+
+theme_set(theme_bw())
+
+names(xsafwd)=seq(75,40,-5)
+plot(xsafwd)+
+  guides(col=guide_legend(title="Assessment\n Year"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Retrospective test
+
+
+```{r, eval=FALSE}
+theme_set(theme_bw())
+
+plot(iter(xsafwd,67))+
+  guides(col=guide_legend(title="Assessment\n Year"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Single retrospective test
+
+
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLife:     `r packageVersion('FLife')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLAssess:  `r packageVersion('FLAssess')`
+* FLXSA:     `r packageVersion('FLXSA')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+## Session Info
+
+```{r}
+sessionInfo()
+```

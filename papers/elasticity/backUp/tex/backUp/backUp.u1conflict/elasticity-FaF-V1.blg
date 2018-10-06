@@ -1,0 +1,74 @@
+This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
+The top-level auxiliary file: elasticity-FaF-V1.aux
+The style file: abbrvnat.bst
+Database file #1: refs.bib
+Repeated entry---line 355 of file refs.bib
+ : @article{kell2007flr
+ :                     ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 387 of file refs.bib
+ : @article{garcia1996precautionary
+ :                                 ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 397 of file refs.bib
+ : @article{cooke1999improvement
+ :                              ,
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 668 of file refs.bib
+ :   author={Nadsh, R.D.M. and Geffen, A.J.}
+ :                                          .
+I'm skipping whatever remains of this entry
+Warning--I didn't find a database entry for "kirkwood1995assessing"
+Warning--I didn't find a database entry for "smith2008experience"
+Warning--I didn't find a database entry for "francis1992use"
+Warning--I didn't find a database entry for "mcallister2001using"
+Warning--I didn't find a database entry for "simon2012effects"
+Warning--I didn't find a database entry for "punt2007developing"
+Warning--I didn't find a database entry for "haapasaari2010formalizing"
+Warning--I didn't find a database entry for "uusitalo2007advantages"
+Warning--I didn't find a database entry for "levontin2011integration"
+Warning--I didn't find a database entry for "beverton1956review"
+Warning--I didn't find a database entry for "gislason2008does"
+Warning--I didn't find a database entry for "taylor2012srr"
+You've used 21 entries,
+            2773 wiz_defined-function locations,
+            761 strings with 9044 characters,
+and the built_in function-call counts, 10271 in all, are:
+= -- 950
+> -- 541
+< -- 16
++ -- 186
+- -- 165
+* -- 853
+:= -- 1579
+add.period$ -- 74
+call.type$ -- 21
+change.case$ -- 117
+chr.to.int$ -- 21
+cite$ -- 42
+duplicate$ -- 450
+empty$ -- 844
+format.name$ -- 196
+if$ -- 2152
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 21
+newline$ -- 124
+num.names$ -- 84
+pop$ -- 197
+preamble$ -- 1
+purify$ -- 96
+quote$ -- 0
+skip$ -- 347
+stack$ -- 0
+substring$ -- 513
+swap$ -- 45
+text.length$ -- 3
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 231
+warning$ -- 0
+while$ -- 99
+width$ -- 0
+write$ -- 301
+(There were 4 error messages)

@@ -1,0 +1,15 @@
+base
+knitr
+ggplot2
+GGally
+plyr
+dplyr
+reshape
+DBI
+RPostgreSQL
+popbio
+lattice
+FLCore
+FLBRP
+FLife
+numDeriv

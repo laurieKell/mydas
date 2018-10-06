@@ -1,0 +1,75 @@
+%cd /home/lkel	l/Desktop/Stuff/Publications/inPrep/3stocks/trunk/Rnw
+%R CMD Sweave 3stocks_figs.Rnw
+
+\documentclass[a4paper,10pt]{article}
+\usepackage{fullpage}
+\usepackage[latin1]{inputenc}
+\usepackage[OT1]{fontenc}
+\usepackage{graphicx}
+\usepackage{morefloats}
+\usepackage{lscape}
+
+
+% figs to be 75% of test width
+\setkeys{Gin}{width=0.75\textwidth}
+
+
+\title{Figures: Elastocities}
+\author{}
+
+\begin{document}  
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[height=4in, width=4in]{fig1.png}
+\end{center}
+\caption{\bf{Mass, natural mortality, proportion mature and selection pattern-at-age.}}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[height=2.1in, width=4in]{fig2.png}
+\end{center}
+\caption{Equilibrium (i.e. expected) values of SSB and yield verses fishing mortality and recruitment and yield verses SSB; points correspond to
+MSY and MSY proxies ($F_{0.1}$, $F_{Max}$, SPR30\%) and limit ($F_{crash}$) reference points.}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[height=2.1in, width=4in]{fig3.png}
+\end{center}
+\caption{Simulated trajectories of recruitment, SSB and yield for a increasing F.}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[height=3.0in, width=4in]{fig4.png}
+\end{center}
+\caption{Plot of SSB and F relative to MSY reference points for the simulated trajectories.}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[height=2.1in, width=4in]{fig5.png}
+\end{center}
+\caption{An example plot of elasticities for for M1 (average level of M) and steepness (bottom panel) for SSB relative to $B_{MSY}$ (top panel); vertical lines 
+correspond to the quadrants in figure 3, i.e. to the left of the green line the stock is in the green quardrant, to the right of the red line it is in
+the red quadrant.}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[height=3in, width=4in]{fig6.png}
+\end{center}
+\caption{Plots of elasticities for processess by year with respect to fishing mortality for  MSY, $F_{0.1}$ and $F_{crash}$ reference points.}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[height=3in, width=4in]{fig7.png}
+\end{center}
+\caption{Plots of elasticities for processess by year with respect to SSB for  MSY, $F_{0.1}$ and $F_{crash}$ reference points.}
+\end{figure}
+
+\end{document}
+

@@ -1,0 +1,23 @@
+Elasticity
+========================================================
+
+```{r, echo=FALSE}
+opts_chunk$set(comment=NA, fig.width =8, 
+                           fig.height=6,
+                           fig.path  ="../tex/par",
+                           warning=FALSE, 
+                           message=FALSE, 
+                           error  =FALSE, 
+                           echo   =FALSE,
+                           cache  =FALSE)
+```
+
+
+```{r-par}
+library(FLBRP)
+
+dirMy="/home/laurie/Ubuntu One/papers/journal/elasticity"
+
+load(paste(dirMy,"data/parWg.RData",sep="/"))
+load(paste(dirMy,"data/parLh.RData",sep="/"))
+```

@@ -1,0 +1,24 @@
+\begin{thebibliography}{2}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Francis(1992)]{francis1992use}
+R.~I.~C. Francis.
+\newblock Use of risk analysis to assess fishery management strategies: a case
+  study using orange roughy (hoplostethus atlanticus) on the chatham rise, new
+  zealand.
+\newblock \emph{Canadian Journal of Fisheries and Aquatic Sciences},
+  49\penalty0 (5):\penalty0 922--930, 1992.
+
+\bibitem[Simon et~al.(2012)Simon, Fromentin, Bonhommeau, Gaertner, Brodziak,
+  and Etienne]{simon2012effects}
+M.~Simon, J.-M. Fromentin, S.~Bonhommeau, D.~Gaertner, J.~Brodziak, and M.-P.
+  Etienne.
+\newblock Effects of stochasticity in early life history on steepness and
+  population growth rate estimates: An illustration on atlantic bluefin tuna.
+\newblock \emph{PloS one}, 7\penalty0 (10):\penalty0 e48583, 2012.
+
+\end{thebibliography}

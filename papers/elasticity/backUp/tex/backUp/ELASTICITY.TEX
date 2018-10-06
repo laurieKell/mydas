@@ -1,0 +1,981 @@
+%% PNAStmpl.tex
+%% Template file to use for PNAS articles prepared in LaTeX
+%% Version: Apr 14, 2008
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% BASIC CLASS FILE 
+%% PNAStwo for two column articles is called by default.
+%% Uncomment PNASone for single column articles. One column class
+%% and style files are available upon request from pnas@nas.edu.
+%% (uncomment means get rid of the '%' in front of the command)
+
+%\documentclass{pnasone}
+\documentclass{pnastwo}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Changing position of text on physical page:
+%% Since not all printers position
+%% the printed page in the same place on the physical page,
+%% you can change the position yourself here, if you need to:
+
+% \advance\voffset -.5in % Minus dimension will raise the printed page on the 
+                         %  physical page; positive dimension will lower it.
+
+%% You may set the dimension to the size that you need.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% OPTIONAL GRAPHICS STYLE FILE
+
+%% Requires graphics style file (graphicx.sty), used for inserting
+%% .eps files into LaTeX articles.
+%% Note that inclusion of .eps files is for your reference only;
+%% when submitting to PNAS please submit figures separately.
+
+%% Type into the square brackets the name of the driver program 
+%% that you are using. If you don't know, try dvips, which is the
+%% most common PC driver, or textures for the Mac. These are the options:
+
+% [dvips], [xdvi], [dvipdf], [dvipdfm], [dvipdfmx], [pdftex], [dvipsone],
+% [dviwindo], [emtex], [dviwin], [pctexps], [pctexwin], [pctexhp], [pctex32],
+% [truetex], [tcidvi], [vtex], [oztex], [textures], [xetex]
+
+%\usepackage[dvips]{graphicx}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% OPTIONAL POSTSCRIPT FONT FILES
+
+%% PostScript font files: You may need to edit the PNASoneF.sty
+%% or PNAStwoF.sty file to make the font names match those on your system. 
+%% Alternatively, you can leave the font style file commands commented out
+%% and typeset your article using the default Computer Modern 
+%% fonts (recommended). If accepted, your article will be typeset
+%% at PNAS using PostScript fonts.
+
+
+% Choose PNASoneF for one column; PNAStwoF for two column:
+%\usepackage{PNASoneF}
+%\usepackage{PNAStwoF}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ADDITIONAL OPTIONAL STYLE FILES
+
+%% The AMS math files are commonly used to gain access to useful features
+%% like extended math fonts and math commands.
+
+\usepackage{amssymb,amsfonts,amsmath}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% OPTIONAL MACRO FILES
+%% Insert self-defined macros here.
+%% \newcommand definitions are recommended; \def definitions are supported
+
+%\newcommand{\mfrac}[2]{\frac{\displaystyle #1}{\displaystyle #2}}
+%\def\s{\sigma}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Don't type in anything in the following section:
+%%%%%%%%%%%%
+%% For PNAS Only:
+\contributor{Submitted to Proceedings
+of the National Academy of Sciences of the United States of America}
+\url{www.pnas.org/cgi/doi/10.1073/pnas.0709640104}
+\copyrightyear{2008}
+\issuedate{Issue Date}
+\volume{Volume}
+\issuenumber{Issue Number}
+%%%%%%%%%%%%
+
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% For titles, only capitalize the first letter
+\title{Elasticity}
+
+%% Enter authors via the \author command.  
+%% Use \affil to define affiliations.
+%% (Leave no spaces between author name and \affil command)
+
+%% Note that the \thanks{} command has been disabled in favor of
+%% a generic, reserved space for PNAS publication footnotes.
+
+%% \author{<author name>
+%% \affil{<number>}{<Institution>}} One number for each institution.
+%% The same number should be used for authors that
+%% are affiliated with the same institution, after the first time
+%% only the number is needed, ie, \affil{number}{text}, \affil{number}{}
+%% Then, before last author ...
+%% \and
+%% \author{<author name>
+%% \affil{<number>}{}}
+
+%% For example, assuming Garcia and Sonnery are both affiliated with
+%% Universidad de Murcia:
+%% \author{Roberta Graff\affil{1}{University of Cambridge, Cambridge,
+%% United Kingdom},
+%% Javier de Ruiz Garcia\affil{2}{Universidad de Murcia, Bioquimica y Biologia
+%% Molecular, Murcia, Spain}, \and Franklin Sonnery\affil{2}{}}
+
+\author{Laurence T. Kell \affil{1}{ICCAT Secretariat, C/Coraz\'{o}n de Mar\'{\i}a, 8. 28002 Madrid, Spain.},
+        Finlay Scott     \affil{2}{The Fisheries Laboratory, Lowestoft, NR33 0HT, Suffolk, England.},
+        Paul De Bruyn    \affil{3}{AZTI Tecnalia. Herrera kaia portualdea z/g, 20110 Pasaia, Gipuzkoa, Spain},
+        Richard D.M. Nash\affil{4}{Institute of Marine Research, PO Box 1870 Nordnes, 5817 Bergen, Norway}
+\and
+        Mark Dickey-Collas\affil{5}{Wageningen IMARES, P.O. Box 68, 1970 AB IJmuiden, The Netherlands  ICES, 
+                                    H. C. Andersens Boulevard 44-46, DK-1553 Copenhagen V, Denmark.}} 
+
+\contributor{Submitted to Proceedings of the National Academy of Sciences of the United States of America}
+
+%% The \maketitle command is necessary to build the title page.
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{article}
+
+\begin{abstract}
+When exploiting populations, references points for exploitation 
+rate or biomass are often set as targets or limits. Determining these 
+reference points can be difficult, especially when there is little 
+understanding of a populations dynamics. A lack of understanding
+is often confused with a lack of data on exploitation or trends 
+over time of a population. Here we show that elasticity analysis can 
+be used to investigate and prioritise which elements of uncertainty 
+in life history dynamics are relevant when determining reference 
+points for exploited populations. The analysis allowes several important 
+questions to be addressed. What is the relative impact of the
+different biological processes and parameters on the estimates of 
+population status and exploitation? Does the impact depend on the 
+reference point and quantity (e.g. SSB or F) chosen or on the status 
+of the stock i.e. does knowledge of particular parameters and
+processes depend on whether the population is depleted or within 
+safe biological limits? Does the exploitation rate impact on the 
+suitability of reference points? We suggest that answering these 
+questions with the aid of elasticity analysis will help in choosing 
+robust target and limit reference points and prioritising research effort.
+\end{abstract}
+
+
+%% When adding keywords, separate each term with a straight line: |
+\keywords{term | term | term}
+
+
+\keywords{Elasticity | fisheries management | life history}
+
+%% Optional for entering abbreviations, separate the abbreviation from
+%% its definition with a comma, separate each pair with a semicolon:
+%% for example:
+%% \abbreviations{SAM, self-assembled monolayer; OTS,
+%% octadecyltrichlorosilane}
+
+\abbreviations{MSY, maximum sustainable yield; SRP, spawning reproduction potential}
+
+%% The first letter of the article should be drop cap: \dropcap{}
+%\dropcap{I}n this article we study the evolution of ''almost-sharp'' fronts
+
+%% Enter the text of your article beginning here and ending before
+%% \begin{acknowledgements}
+%% Section head commands for your reference:
+%% \section{}
+%% \subsection{}
+%% \subsubsection{}
+
+\dropcap{T}he adoption of the Precautionary Approach to fisheries management 
+\cite{garcia1996precautionary} requires a formal consideration of uncertainty. 
+An important principle of the approach is that the level of precaution should 
+increase as uncertainty increases so that risk remains constant. So that yields  
+are greater in data rich than poor situations. Where the definition of data rich 
+and poor is often made on the availablity of fisheries data. 
+This can obscure the fact that considerable uncertainty also often exists about 
+biological processes such as natural mortality, recruitment and population structure
+for commercially important fish populations. For example natural mortality is unknown
+for many stocks and is commonly assumed to be constant. However, even when 
+data are  limited, empirical studies have shown that life history parameters, such 
+natural mortality and as age at first reproduction are strongly correlated with 
+and growth rate and size \cite{roff1984evolution}. 
+
+Biological knowledge can therefore be important both for evaluating the robustness 
+of advice obtained from data-rich stock assessments and in allowing general rules, 
+to be derived and transferable to all populations. For example about choice of 
+indicators of stock status, i.e. reference points to indicate whether biomass is too low 
+or fishing pressure too high, for use in fisheries management. 
+
+Fisheries management is concerned with setting and then trying to achieve, realistic management 
+objectives.  This requires defining limit and target reference points, e.g. for spawning stock 
+biomass (SSB) and  fishing mortality (F) and agreeing associated management measures.
+
+However, achieving agreed management objectives is made difficult by, amongst other 
+things, the impact of biological and ecological uncertainty on the dynamics of the population.
+A key question for fisheries management is therefore how can research be prioritised
+so that the impact of biological uncertainty on achieving management objectives
+be reduced? In other words, how can we provide advice that is robust to uncertainty?
+Answering this question requires the evaluation of the relative importance of the
+underlying biological assumptions made  with respect to the
+management measures of interest. For example, does uncertainty about recruitment
+have a relatively bigger effect on longterm yield and sustainability than uncertainty
+about natural mortality? 
+
+Senstivity and elasticity analyses can be used to evaluate the effect of changes in system 
+parameters on system outputs. Sensitivities measure absolute changes, for example, by how much does 
+the estimate of MSY change as the estimate of age at first maturity change. Elasticities measure 
+the relative change and can be used to compare between a range of different sources of uncertainty. 
+For example, does the length of first maturity have a larger proportional impact on estimates of MSY 
+than the steepness of the stock recruitment relationship? 
+
+Sensitivity analysis is often used in stock assessment to see how much the perception of the stock changes
+when an option of a stock assessment program is changed. However, elasticity analysis has seldom been used 
+although commonly used in financial and economic managment and despite being applied in conservation biology \cite{de1986elasticity}.
+In the latter case it is has been used to relate
+changes in vital rates to changes in the population life history \cite{grant2003density} and to quantities
+of importance in management such as population viability \cite{heppell1998application}. Previously, 
+elasticity anaysis has focused on terrestrial ecology \cite{Benton1999467, Hunter2000299, Pichancourt200631} 
+with limited application to marine populations \cite{RogersBennett2006, Heppell2007}. The applicability of 
+this approach to resource management has therefore been demonstrated and here we use it to evaluate the 
+relative importance of the biological assumptions made in fishery stock assessment that are too seldom questioned.
+
+Consideration of uncertainty within fisheries advice frameworks has been conducted using Bayesian approaches 
+or Management Strategy Evaluation (MSE) and is regarded as state-of-the-art. MSE is commonly used to evaluate the 
+impact of different management measures, given a broad
+range of uncertainty. However, performing an MSE is a costly process in terms of human
+resources, can take several years and requires a high level of expertise. Therefore, tools 
+such as elasticity analysis, which is comparatively less demanding to carry out, will be important 
+to help identify and focus and prioritise research and management efforts. For example, to answer such questions as
+is it more important to reduce uncertainty the biology or to develop better management measures such 
+as reference points that are robust to such uncertainty?  
+
+Elasticity analyses can also shift the current focus from defining populations either as data poor or
+rich defined solely on fishery catch and effort towards a better understanding of
+biological processes. Here we demonstrate the use of elasticity analysis for
+prioritising research effort with a study of the population dynamics of a fish population
+based on life history theory. Ourstudy is not a case study that considers a single species, 
+instead we simulate a population based on life history relationships in order to develop
+a framework that can be used to derive general rules and applied to a range of
+case studies.
+
+Our elasticity analysis evaluates the relative importance of the biological processes
+and assumptions for assessing a stock relative to biological reference points. We do this by projecting 
+a population from an unfished to an over-exploited state and then evaluate
+the elasticity of stock status and fishing mortality relative to a range of reference points.
+The elasticities allow us to evaluate the relative importance of
+the different biological parameters when assessing the population relative
+to system characteristics defined by the reference points.
+We use relative estimates since these have been shown to be more robust that absolute estimates \cite{kell2003evaluation} and
+are used ny the tuna Regional Fisheries Management Organisations (tRFMOs) when providing advice.
+This allows us to address two important questions: what is the relative importance of the different
+biological processes in providing advice and how robust is advice based on the
+common biological reference points?
+
+\section{Results}
+
+The assumed growth, natural mortality, proportion mature and selectivity-at-age for the simulated stock are shown in Figure 1.
+The relationship between the equilibrium values of SSB, yield, recruitment and $F$ are are shown in Figure 2;
+the corresponding values for the MSY, $F_{0.1}$ and $F_{crash}$ reference points are also shown. 
+
+The equilibrium dynamics over a range of fishing mortalities from 0 to 75\% of $F_{crash}$ are presented as a phase plot in figure 3,
+where the x-axis corresponds to $biomass$ relative to $B_{MSY}$ and the y-axis to $harvest$ relative to $F_{MSY}$.
+The quadrants are defined for stock and fishing mortality relative to $B_{MSY}$ and $F_{MSY}$; i.e. red when $B<B_{MSY}$ and $F>F_{MSY}$, green 
+if $B$ $\geq$ $B_{MSY}$ and $F$ $\leq$ $F_{MSY}$ and yellow otherwise. The red quadrant therefore refers to an overfished stock subject to overfishing and  
+green to a stock which is neither overfished or subject to overfishing.
+
+The results of the elasticity analysis, i.e. SSB and fishing mortality relative to each of the three reference points with respect to the 
+biologicalparameters are plotted in figures 4 and 5. The vertical line indicates the boundary between the red and green quadrants and the 
+horizontal line where the value of the elasticity is 0, i.e. where varying a parameter has no effect on the measure of interest. 
+
+The plots allow us to idntify the relative importance of the different biological processesand and how robust is advice based on the three reference points?
+Figure 4 shows that elasticites of are similar for MSY and $F_{0.1}$, i.e. increasing in magnitude as fishing mortality increases (and SSB declines). Natural mortality
+is the parameter with the biggest effect, followed by steepness and $L_{\infty}$. Trends and relative importance by parameter are similar for $F_{Crash}$.
+However the magnitudes of the elasticities are not, changing sign as fishing mortality increases. This means that $F_{Crash}$ is robust to chanegs in M when 
+the target levels of $B_{MSY}$ is reached and robust to the assummed value of steepness at high fishing mortalities and for a depleted stock.
+
+Inspection by process shows that for growth the key parameter is $L_{\infty}$, for Maturity it is age at first maturity, for M both the average level and 
+how fast declines as fish grow are equally important and for selectivity the age at recruitment to the fishery is more important than whether
+selectivity declines at older ages.
+
+Figure 5 repeats the analysis for fishing mortality; in this case elasticity is not a function of the level of
+fishing mortality or SSB. M is again the most important parameter, followed by steepness and $L_{\infty}$ and parameters have the same relative importance
+by process.  
+  
+
+\section{Discussion}
+
+%Modern fishery management, particularly in the context of the implementation of the precautionary approach, 
+%has become closely associated with harvest management strategy and control rules evolved from control theory. 
+%Saila (1997) notes that although “conventional control theory has been a tremendous success where the system 
+%is very well defined, such as in missile and space station guidance” the theory is perhaps not appropriate to 
+%control complex systems such as commercial fisheries. Amongst the reasons, he mentions that the precise structure 
+%of the system is virtually unknown and that there are no reliable models of the process to be controlled. He 
+%suggests that success in fishery management requires a system that can handle qualitative information and uncertainty, 
+%in a straightforward, transparent and not computationally intensive manner. This is not the direction in which most 
+%fishery management processes are heading.
+
+There is a need for a conceptual change from catagorisng stocks as data or information
+rich or poor based on the requirements of stock assessment models. An understanding 
+of biology and how to provide robust advice given is equally if not more important.
+Elasticity analysis can help in identifying where a better understanding is required and
+the benifits of obtaining it.	
+
+The collection of information needed to support the science that underpins
+advice needs to be prioritised based on management objectives. For example, the definition
+of data rich often means data sufficient to conduct aged based assessments such as virtual 
+population analysis (VPA). Rather, researchers should ask do we have sufficient knowledge, e.g. about stock structure
+and the variability in productivity to ensure that the assumptions of VPA are met
+and that the advice based on the analysis is robust.
+
+Fisheries science often focuses on favoured factors, such as catch and time trends in
+abundance, and pretends that other processes, such as natural mortality and spatial
+structure are unimportant to the sustainable exploitation of the populations.
+
+The approach described here will allow researchers to rationally prioritise what uncertainty
+in the assumptions about biological processes impact on the setting of management objectives.
+Stock assessment mainly considers uncertainty in observations and processes such
+as recruitment variability when uncertainty about the dynamics (i.e. model uncertainty)
+has a larger impact on achieving management objectives \cite{punt2008refocusing}. 
+Relationships between body size and life history parameters have been described for 
+many taxonomic groups 
+\cite{blueweiss1978relationships}.
+This means that biological parameters are often strongly correlated and so life
+history theory can be used to evaluate the assumptions made in stock assessments,
+infer parameters for data poor stocks and allow general rules and principles to be
+derived. A main aim of this study is to use life histories relationships and elasticity
+analysis to evaluate the relative importance of different biological processes and
+provide robust advice on the uncertainty about those processes.
+
+This approach will provide insight into what characteristics from population considered
+data rich can reliably be transferred to data poor populations.
+Currently the length and reproductive traits of populations are being used to
+link data rich and data poor populations. However, it has not yet been tested if this is appropriate.
+
+The evaluation of the value of biological information can be done through a variety of approaches,
+e.g. developing priors for use in Bayesian estimation or by conducting MSE.
+However, such approaches can be relatively complex and time consuming so that they are
+unlikely to be routinely applied to many stocks. Applications also tend to be case specific and so difficult
+to compare. While sensitivity analyses are often conducted when assessing a stock and in
+some fora alternative assessment models when making projections to set catch quotas. The 
+choice of scenarios is often made on an ad-hoc basis, elasticity analysis can be conducted
+to identify scenarios which potentially have the biggest impact and there provide a
+basis for discussing and agree which scenarios to run.
+
+Elasticity analysis is relatively simple to apply and using life histories 
+relationships allows models to be readily parameterised and case studies to be compared. This provides 
+a readily available tool to researchers to pin point where uncertainty is most relevant to the sustainable 
+exploitation of their particular population. 
+
+Considering life history relationships ensures consistency in advice, allows the transfer of
+knowledge about biological processes from one stock to another. It will also assist
+in designing research to provide a better understanding of biological processes and
+how to develop robust advice frameworks. For example, why is natural mortality of cod in the Irish Sea and bluefin tuna
+in the West Atlantic assumed to be 0.2 and 0.14 respectively at all ages but for North Sea
+cod and East Atlantic and Mediterranean bluefin assumed to vary with age?
+What are the consequences of these assumptions and are they relatively more important than
+the assumptions about spawning reproductive potential. To be consistent with life history theory $M$
+should vary with age and comparative studies could help in estimating appropriate
+functional relationships especially when considering exploitation at MSY.
+
+The elasticities of SSB varied with the level of depletion and F. However, the F elasticities
+did not vary. There was little difference between $F_{MSY}$ and $_{F0.1}$, but for $F_{crash}$
+bigger differences were seen. In our generic simulated study, these questions were
+relatively easy to answer so when applied to existing populations, elasticity analysis
+will help in the choice of robust target and limit reference points to be incorporated into harvest control rules .
+
+This study has shown that the uncertainty in some processes are more relevant to
+the setting of reference points in certain situations. For the simulated population,
+for both SSB and F, the natural mortality parameters $M1$ and $M2$ had the biggest
+proportional effect. The next most important parameter for SSB was $a1$ (the selectivity
+parameter for age at full selection). The steepness of the stock recruitment relationship
+is important when considering SSB relative to $SSB_{MSY}$ and $SSB_{F0.1}$ but less
+so relative to $SSB_{Fcrash}$. The other processes (growth and maturity) have similar
+impacts to each other; the most important parameters are K, age at 50\% mature and age
+at recruitment to the fishery. The natural mortality parameters ($M1$ and $M2$) are
+again the most important process. Steepness has less of an affect compared to the
+analysis for SSB. MSY has the lowest elasticites and so is the more robust reference
+point for fishing mortality. Not all of these outcomes are intuitive without the analysis.
+This illustrates that elasticity analysis is a potentially important method for
+determining robustness of scientific advice. Since if a particular reference point
+is dependent upon a parameter or process which is highly uncertain then it may be
+better to find a reference point that is less dependent on that parameter or process,
+especially if reducing uncertainty on that parameter is costly or difficult.
+For example, if a reference points depends upon a parameter such as $M$ or steepness
+that cannot be observed directly it may be better to use a reference point that is
+less sensitivity to knowledge about these processes, i.e use a reference point where
+uncertainty can more readily be reduced through data collection, e.g. growth and maturity.
+
+Although we concentrated on assessing stock status relative
+to reference points any system output could have been evaluated with respect to any system
+parameter.
+
+Typically, elasticity analysis is only concerned with the magnitude of the elasticity.
+However, the sign or direction of the elasticity can be important when the uncertainty,
+or noise, driving the parameter has an autocorrelation structure i.e. can not be
+represented by white noise. For example, it has been shown that there can be important
+cohort effects and autocorrelation in growth processes (REF 3 stocks paper). This
+may result in several continuous years of high or low values for $K$. The direction of
+the elasticity in such cases may provide enough guidance for the determination of robust reference points.
+Although we considered growth, maturity, natural mortality and recruitment as separate
+processes, these processes are linked. The steepness of the stock recruitment relationship
+depends on spawning reproductive potential (SRP), which depends on viable egg production \cite{trippel1999estimation}
+and subsequent recruitment. Recruitment is also linked with the assumptions about gonadal
+growth and the processes involved in the first year of life. A single independent
+estimate of $M$ is often used for the earliest life history stage i.e. eggs to the
+end of the first year of life \cite{houde1989subtleties} and \cite{houde2002mortality}. 
+Various mortality processes serially
+affect life history stages through the first year of life, e.g. in relation to
+settlement, overwintering and juvenile stages \cite{Nash2012mearly}, 
+\cite{mcgurk1986natural} and  \cite{pepin1991effect}. However, there
+is very little information on many of the commercially important species that will
+allow an estimate of stock recruitment parameters such as steepness (e.g. \cite{mangel2010reproductive}).
+The growth trajectories of individuals may not follow a von Bertalanffy growth curve
+due to $M$ causing differential mortality within a cohort. Length-weight relationships
+and condition can affect the maturity ogives and schedules and these can vary due to
+changes in ecosystem productivity and density-dependent effects. Other factors that
+need to be considered include sub-stock structure and their associated dynamics.
+Examples include herring \cite{dickey2010lessons} and the influence on the assessment process \cite{kell2009lumpers}
+and sub-stock structure or metapopulations are known to exist for quite a few stocks
+e.g. cod in the Western \cite{frank2001contemporary} and Eastern Atlantic (North Sea) \cite{heath2008model} and bluefin tuna
+in the Mediterranean \cite{rooker2007life}.
+Elasticity analysis can be extended to consider such problems e.g. \cite{root1998evaluating} and \cite{henle2004role} and help identify key processes.
+This study offers a simple, effective approach to not only prioritise what uncertainty
+impacts the determination of reference points for exploited populations but also
+provides insight in how to rationally transfer understanding between data rich
+and data poor populations. It is very clear that the overall objective is not just
+to reduce all uncertainty for informations sake, but to provide information for
+the sustainable exploitation of populations through the setting of robust reference
+points. It also highlights that uncertainty in various processes may not matter
+to sustainable exploitation, whereas increasing effort to reducing uncertainty
+in other processes may be of great value. The study also highlights that the ranking
+of releavnt processes may change based on the exploitation status of the population.
+
+
+%% == end of paper:
+
+%% Optional Materials and Methods Section
+%% The Materials and Methods section header will be added automatically.
+
+%% Enter any subheads and the Materials and Methods text below.
+\begin{materials}
+
+
+\subsection{Elasticity}
+Elasticity analysis is used to measure the proportional change of a system characteristic to a 
+change in a system parameter. The general equation for calculating the elasticity of 
+system characteristic $y$ with respect to system parameter $x$ is:
+
+\begin{equation}
+E_{y,x} = \left| \frac{\partial \ln y}{\partial \ln x} \right|        
+%%     = \left| \frac{\partial  y}{\partial  x} \cdot \frac{x}{y} \right|
+%%       \approx \left| \frac{ \%\bigtriangleup  y}{\%\bigtriangleup x} \right|  
+%
+\end{equation} 
+
+The absolute value operator is used for simplicity although the elasticity can also be defined without the absolute value operator when the direction of 
+change is important, e.g. to evaluate if a reduction in natural mortality increases or decreases MSY reference points.	
+
+Here we calculate the elasticities of the management measures described above with respect to the life history and selectivty parameters grouped into the
+categories: growth ($K$, $t_0$, $a$, $b$, $L_{\infty}$), maturity ($a50$, $ato95$ and $asym$), natural mortality ($M1$ and $M2$), the stock recruitment
+relationship ($h$ and $vb$) and the selectivity ($a1$, $sl$ and $sr$). For example, the elasticity of $SSB$ relative to $SSB_{MSY}$ with respect to $L_{\infty}$ is calculated as:
+
+\begin{equation}
+E_{SSB_{MSY},L_{\infty}} = \left| \frac{\partial \ln relSSB_{MSY}}{\partial \ln L_{\infty}} \right|
+\end{equation}
+
+Elasticities are calculated for every level of $F$ used in the projections and therefore show how the current state of the stock and exploitation rate
+affect the relative importance of the different life history parameters, i.e. where the most important source of uncertainty is.
+
+Elasticities could have been calculated conditional on $L_{\infty}$ alone since paramters such as $K$, age at first maturity
+and natural mortality at age can be derived from $L_{\infty}$ based on life history relationships. However, in this study these values 
+were set before the elasticities are calculated, i.e. the elasticities  with respect to $L_{\infty}$ do not reflect the impact 
+of $L_{\infty}$ on these life history relationships, only on the impact of the stock dynamics  through the von Bertalanffy growth and other equations.  
+
+Mangement advice requires estimates of stock status and fishing mortality relative to target and limit reference points.
+Although often aged based assessment methods are assumed to provide absolute
+estimates of stock status a small change in $M$ can result in a large change in the
+estimates of abundance and fishing mortality. Since $M$ is never known exactly then
+advice is actually relative i.e. advice is based on whether stock or fishing mortality
+is increasing or decreasing. Relative advice i.e. stock or
+fishing mortality relative to a reference point has been shown to be more robust than absolute estimate \cite{kell2003evaluation}
+and therefore management advice is often based on relative values.
+
+The analysis allows use to pose questions such as are fishing mortality reference points based more robust than biomass
+reference points?, are target reference points more robust than limits? is a particular reference points more robust when used as targets than a limit?
+and what are the most importance biological assumptions in each case?
+
+The elasticities in each year, (i.e. for the different levels of SSB and F) were then used to
+evaluate the relative importance of the parameterisation (e.g. $K$ the rate of growth and $L_{\infty}$) 
+of the various processes (i.e. growth, maturation, stock recruitment, 
+natural mortality and selectivity of the fishery). 
+
+%[Uh oh just realised we have a problem with F for fishing mortality and fecundity - maybe best to switch the F for fecundity to EP i.e. egg production or have it as Fec]
+
+%In regard to the E for elasticity and Emigration I suggest Emigration becomes Em and Immigration becomes Im - the equation and the text needs to be fixed.
+
+
+\subsection{Life History Relationships}
+
+
+Empirical studies have shown that in teleosts there are significant correlations between
+the life history parameters such as age at first reproduction, natural mortality, 
+and growth rate \cite{roff1984evolution}. Additionally, size-spectrum theory 
+and multispecies models suggest that natural mortality scales with body size 
+\cite{andersen2006asymptotic}, \cite{pope2006modelling} \cite{gislason2008coexistence}. 
+This means that from something that is observable, like the largest sized individuals in 
+a population, it is possible to infer life history parameters for are not easily 
+observed or are unavailable.
+
+Life history characteristics and relationships between a range of stocks and species 
+\cite{gislason2008coexistence} were used to parameterise an age-structured population 
+model using relationships that describe growth, maturation and natural mortality.
+This population was then projected at a constant fishing mortality until equilibrium 
+was reached for a wide range of fishing mortalities.
+
+The Russell equation \cite{russell1931some} summarises the key processes influencing the dynamics 
+of exploited populations i.e.
+ 
+\begin{equation}f(B_2) = B_1 + (G + R) - (F+M)\end{equation}
+
+where biomass $B_2$ is a function of the biomass in the previous year ($B_1$), gains due to growth 
+(G) and recruitment (R) and losses due to fishing (F) and natural mortality (M). Two other 
+factors have been recognised since Russel originally formulated this equation: the gains through 
+immigration (I) and losses through emigration (E). These modify the original equation i.e.
+
+\begin{equation}f(B_2) = B_1 + (G+R+I) - (F+M+H)\end{equation}
+
+Knowledge about these processes determines our ability to provide robust scientific advice. 
+In this paper we concentrate  on G,R,F and M as we assume a single heterogenerous population 
+with out emmigration (H) or immigration (I); however our approach could be extended to include 
+H and I.
+
+In order to provide a generic framework for modelling stock dymanics, life history relationships 
+were used to parameterise appropriate functional forms for the different processes. This allows 
+processes to be modelled for a range of species and stocks under a variety of assumptions.
+
+ Growth was modelled by the Von Bertalanffy growth equation \cite{von1957quantitative}
+      \begin{equation} L_t = L_{\infty}(1 - exp(-k(t-t_0)) \end{equation}
+         
+where $K$ is the rate at which the rate of growth in length declines as length approaches the asymptotic length $L_{\infty}$ 
+and $t_{0}$ is the time at which an individual is of zero length. 
+
+Length is converted to mass using the condition factor, $a$ and allometric growth coefficient, $b$.
+
+\begin{equation} W = a \cdot L_t^b \end{equation}
+
+
+\textbf{Recruitment} is split into Stock Reproductive Potential (SRP) and the stock recruitment relationship (SRR).
+
+SRP is the sum of the products of the numbers of females, $n$, proportion mature-at-age, $Q$ and their mean fecundity-at-age, $G$:
+
+   \begin{equation} SRP = \sum_{i=1}^m {n_iQ_iO_i } \end{equation}
+
+where $m$ is the maximum age and mean fecundity-at-age is equal to 
+\begin{equation} O	 = a \cdot L^{b^{\prime}} \end{equation}
+
+If $a$ and $b$ are the same as in equation 3 then SRP is equivalent to female spawning stock biomss (SSB). However, generally the
+fecundity to length relationship differs from the weight to length relationship due to variations caused by condition and age 
+effects altering the relationship between weight and the number of eggs produced \cite{perez2012study}.
+
+Proportion mature is modelled by the logistic equation with three parameters: age at 50\% ($a_{50}$) 
+and 95\% ($a_{95}$) mature and the asymptotic value $m_{\infty}$. The latter allows SRP to not be equivalent 
+to stock mass-at-age.
+
+\begin{equation}
+f(x) = \left\{ \begin{array}{ll}
+			0                                 &\mbox{ if $(a_{50}-x)/a_{95} >  5$} \\
+			a_{\infty}                        &\mbox{ if $(a_{50}-x)/a_{95} < -5$} \\
+			\frac{m_{\infty}}{1.0+19.0^{(a_{50}-x)/_{95})}} &\mbox{ otherwise}
+		\end{array}
+       \right.
+\end{equation}
+
+%Parameters can be derived as in \cite{williams2003implications} from the theoretical relationship between $M$, $K$, and age at maturity $a_{Q}$ based on the 
+%dimensionless ratio of length at maturity to asymptotic length \cite{beverton1992patterns}.
+
+The value of $a50$ comes from the empirical relationship between $L_{\infty}$ and age at maturity \cite{gislason2008coexistence}:
+
+\begin{equation}
+  a50=0.72 logL_{\infty}^{0.93}
+\end{equation}
+
+We use a Beverton and Holt stock recruitment relationship reformulated in terms of steepness ($h$), virgin biomass ($v$) and $S/R_{F=0}$, 
+where steepness is the ratio of recruitment at 20\% of virgin biomass to virgin recruitment ($R_0$). 
+
+For the Beverton and Holt stock-recruit formulation:
+
+\begin{equation}
+R=\frac{0.8 \cdot R_0 \cdot h \cdot S}{0.2 \cdot S/R_{F=0} \cdot R_0(1-h)+(h-0.2)S}
+\end{equation} 
+
+Steepness is difficult to estimate from stock assessment data sets and there is 
+often insufficient range in biomass levels that is required for its estimation 
+\cite{ISSF2011steep}. Steepness and virgin biomass were set to 0.9 and 1000 t 
+respectively.
+
+Natural mortality at size is derived from the life history relationship \cite{gislason2010does}.
+               
+\begin{equation}
+           log(M) = M1 + M2 log(L) + 1.51log(L_{\infty}) + 0.97log(k) 
+\end{equation} 
+where $M1$ (which determines the average natural mortality) = -2.11, $M2$ (which determines 
+the rate at which natural mortality declines with length) = -1.70 and $L$ is 
+the average length of the fish (in cm) for which the $M$ estimate applies. Here
+we use the length at mid-year to calculate the natural mortality at age.
+
+
+The model is a discrete population model where the number of individuals 
+in a year-class in a year is a function of the number of individuals in 
+the previous year. However, processes like growth, maturation, natural 
+mortality and fishing can occur in different seasons of the year. The 
+stock mass and lengths-at-age are calculated at spawning time (the start 
+of year), catch mass-at-age is calculated in mid year and natural mortality 
+is a function of the lengths-at-age mid year.  
+
+
+\subsection{Stock projections}
+
+Using the relationships described above we generate a fully specified 
+age-structured stock based on a value of $L_{\infty}$=100 cm. The 
+stock is projected forward through time at different levels of constant 
+fishing pressure ranging from no fishing ($F$=0) to over exploited ($F=F_{crash}$).
+
+Therefore, in our elasticity analysis we used relative values, i.e. SSB relative to $B_{MSY}$
+and F relative to $F_{MSY}$. We also compared types of reference points, i.e. reference points designed as targets such as those
+based on MSY and those designed as limits such as $F_{crash}$.
+
+$B_{MSY}$ and $F_{MSY}$ correspond to the stock level and level of exploitation 
+that provides the maximum sustainable yield.  $F_{0.1}$ is a proxy for $F_{MSY}$ and is 
+the fishing mortality that corresponds to a point on the yield per recruit curve where the slope is
+10\% of that at the origin. $F_{crash}$ the level of $F$ that will drive the stock to extinction.
+
+
+The management measures of interest are the equilibrum SSB, yield and biomass 
+relative to their reference point values corresponding to $F_{MSY}$, $F_{0.1}$ (a 
+proxy for $F_{MSY}$) and $F_{crash}$ (a limit reference point), e.g. $SSB / SSB_{MSY}$, 
+$SSB / SSB_{F0.1}$ etc.
+
+SSB and $F$ relative to $F_{MSY}$, $F_{0.1}$ and $F_{crash}$ reference points were used 
+as indices of stock status and exploitation. $F_{MSY}$ corresponds to the level of exploitation 
+that provides the maximum sustainable yield,  $F_{0.1}$ is a proxy for $F_{MSY}$ and is 
+the fishing mortality that corresponds to a point on the yield per recruit curve where the slope is
+10\% of that at the origin and $F_{crash}$ the level of $F$ that will drive the stock to extinction.
+
+In the case of $F$ equal to $F_{crash}$, SSB is 0 by definition, therefore an SSB corresponding 
+to 75\% of $F_{crash}$ was used.
+
+The calculation of reference points and fishing mortality also depend upon the selection pattern,
+since not all ages are equally vulnerable to a fishery. For example, if there is a refuge for older fish,
+a higher level of fishing effort will be sustainable. Also, if the fecundity of older fish is greater 
+than the fecudity of younger fish of the same mass-at-age, e.g. due to maternal effects or repeat 
+spawners being more fecund then a condideration of the interactions between biology and selectivity 
+will be important.
+
+Selection pattern of the fishery is represented by a double normal
+(see \cite{Hilbornetal2000}) with three parameters that describe the age at 
+maximum selection ($a1$), the rate at which the lefthand 
+limb increases ($sl$) and the righthand limb decreases ($sr$) which 
+allows flat topped or domed shaped selection patterns to be chosen.
+
+Even in data poor situtations where catch-at-age for the entire catch time series 
+is not available, some data will normally exist for some years or gears or for 
+similar stocks and species. In cases where some length frequency data are available 
+the shape of selection pattern, i.e. age at recruitment to the fishery, 
+can be estimated using a method like that of \cite{wetherall1987estimating}.
+
+\begin{equation}
+f(x) = \left\{ \begin{array}{rl}
+ 2^{-[(x-a_1)/s_L]^2} &\mbox{ if $x<a_1$} \\
+ 2^{-[(x-a_1)/s_R]^2} &\mbox{ otherwise}
+       \end{array} \right.
+\end{equation}
+ 
+
+\end{materials}
+
+
+%% Optional Appendix or Appendices
+%% \appendix Appendix text...
+%% or, for appendix with title, use square brackets:
+%% \appendix[Appendix Title]
+
+\begin{acknowledgments}
+Finlay Scott was funded by the UK government projects MF12-5 and MF12-1.
+\end{acknowledgments}
+
+%% PNAS does not support submission of supporting .tex files such as BibTeX.
+%% Instead all references must be included in the article .tex document. 
+%% If you currently use BibTeX, your bibliography is formed because the 
+%% command \verb+\bibliography{}+ brings the <filename>.bbl file into your
+%% .tex document. To conform to PNAS requirements, copy the reference listings
+%% from your .bbl file and add them to the article .tex file, using the
+%% bibliography environment described above.  
+
+%%  Contact pnas@nas.edu if you need assistance with your
+%%  bibliography.
+
+% Sample bibliography item in PNAS format:
+%% \bibitem{in-text reference} comma-separated author names up to 5,
+%% for more than 5 authors use first author last name et al. (year published)
+%% article title  {\it Journal Name} volume #: start page-end page.
+%% ie,
+% \bibitem{Neuhaus} Neuhaus J-M, Sitcher L, Meins F, Jr, Boller T (1991) 
+% A short C-terminal sequence is necessary and sufficient for the
+% targeting of chitinases to the plant vacuole. 
+% {\it Proc Natl Acad Sci USA} 88:10362-10366.
+
+
+%% Enter the largest bibliography number in the facing curly brackets
+%% following \begin{thebibliography}
+\bibliography{ELASTICITY} 
+
+\begin{thebibliography}{10}
+
+\bibitem{garcia1996precautionary}
+Garcia S (1996) The precautionary approach to fisheries and its implications
+  for fishery research, technology and management: an updated review.
+FAO Fisheries Technical Paper : 1--76.
+
+\bibitem{roff1984evolution}
+Roff D (1984) The evolution of life history parameters in teleosts.
+Canadian Journal of Fisheries and Aquatic Sciences 41: 989--1000.
+
+\bibitem{de1986elasticity}
+de~Kroon H, Plaisier A, van Groenendael J, Caswell H (1986) Elasticity: the
+  relative contribution of demographic parameters to population growth rate.
+Ecology 67: 1427--1431.
+
+\bibitem{grant2003density}
+Grant A, Benton T (2003) Density-dependent populations require
+  density-dependent elasticity analysis: an illustration using the {LPA} model
+  of tribolium {RID} c-6493-2009.
+Journal of Animal Ecology 72: 94--105.
+
+\bibitem{heppell1998application}
+Heppell S (1998) Application of life-history theory and population model
+  analysis to turtle conservation.
+Copeia : 367--375.
+
+\bibitem{Benton1999467}
+Benton TG, Grant A (1999) Elasticity analysis as an important tool in
+  evolutionary and population ecology.
+Trends in Ecology and; Evolution 14: 467 - 471.
+
+\bibitem{Hunter2000299}
+Hunter C, Moller H, Fletcher D (2000) Parameter uncertainty and elasticity
+  analyses of a population model: setting research priorities for shearwaters.
+Ecological Modelling 134: 299 - 324.
+
+\bibitem{Pichancourt200631}
+Pichancourt JB, Burel F, Auger P (2006) A hierarchical matrix model to assess
+  the impact of habitat fragmentation on population dynamics: an elasticity
+  analysis.
+Comptes Rendus Biologies 329: 31 - 39.
+
+\bibitem{RogersBennett2006}
+Rogers-Bennett L, Leaf RT (2006) Elasticity analyses of size-based red and
+  white abalone matrix models: Management and conservation.
+Ecological Applications 16: 213-224.
+
+\bibitem{Heppell2007}
+Heppell S (2007) Elasticity analysis of green sturgeon life history.
+Environmental Biology of Fishes 79: 357-368.
+
+\bibitem{kell2003evaluation}
+Kell, LT and Die, DJ and Restrepo, VR and Fromentin, J.M. and Ortiz de Zarate, V. and Pallares, P. and others (2010)
+  An evaluation of management strategies for Atlantic tuna stocks,
+Sci. Mar. (Barc.) 2003: 353-370
+
+\bibitem{gislason2008coexistence}
+Gislason H, Pope J, Rice J, Daan N (2008) Coexistence in north sea fish
+  communities: implications for growth and natural mortality.
+ICES Journal of Marine Science: Journal du Conseil 65: 514--530.
+
+\bibitem{andersen2006asymptotic}
+Andersen K, Beyer J (2006) Asymptotic size determines species abundance in the
+  marine size spectrum.
+The American Naturalist 168: 54--61.
+
+\bibitem{pope2006modelling}
+Pope J, Rice J, Daan N, Jennings S, Gislason H (2006) Modelling an exploited
+  marine fish community with 15 parameters--results from a simple size-based
+  model.
+ICES Journal of Marine Science: Journal du Conseil 63: 1029--1044.
+
+\bibitem{russell1931some}
+Russell E (1931) Some theoretical considerations on the overfishing problem.
+Journal du conseil 6: 3.
+
+\bibitem{von1957quantitative}
+Von~Bertalanffy L (1957) Quantitative laws in metabolism and growth.
+Quarterly Review of Biology : 217--231.
+
+\bibitem{perez2012study}
+P{\'e}rez-Rodr{\'\i}guez A, Morgan M, Rideout R, Dominguez-Petit R,
+  Saborido-Rey F, et~al. (2012) Study of the relationship between total egg
+  production, female spawning stock biomass, and recruitment of flemish cap cod
+  (gadus morhua .
+
+\bibitem{ISSF2011steep}
+Anonymous (2011) Report of the 2011 issf stock assessment workshop.
+ISSF Technical Report 2011-­‐02 .
+
+\bibitem{gislason2010does}
+Gislason H, Daan N, Rice J, Pope J (2010) Does natural mortality depend on
+  individual size.
+Fish and Fisheries 11: 149--158.
+
+\bibitem{Hilbornetal2000}
+Hilborn R, Maunder M, Parma A, Ernst B, Paynes J, et~al. (2000) Documentation
+  for a general age-structured Bayesian stock assessment model: code named
+  Coleraine.
+FRI/UW 00/01. Fisheries Research Institute, University of Washington.
+
+\bibitem{wetherall1987estimating}
+Wetherall J, Polovina J, Ralston S (1987) Estimating growth and mortality in
+  steady-state fish stocks from length-frequency data.
+In: ICLARM Conf. Proc. pp. 53--74.
+
+\bibitem{punt2008refocusing}
+Punt A (2008) Refocusing stock assessment in support of policy evaluation.
+Fisheries for Global Welfare and Environment : 139--152.
+
+\bibitem{blueweiss1978relationships}
+Blueweiss L, Fox H, Kudzma V, Nakashima D, Peters R, et~al. (1978)
+  Relationships between body size and some life history parameters.
+Oecologia 37: 257--272.
+
+\bibitem{trippel1999estimation}
+Trippel E (1999) Estimation of stock reproductive potential: history and
+  challenges for canadian atlantic gadoid stock assessments.
+Journal of Northwest Atlantic Fishery Science 25: 61--82.
+
+\bibitem{houde1989subtleties}
+Houde E (1989) Subtleties and episodes in the early life of fishes.
+Journal of Fish Biology 35: 29--38.
+
+\bibitem{houde2002mortality}
+Houde E (2002) Mortality.
+Fishery science: the unique contributions of early life stages
+  Blackwell Science, Oxford : 64--87.
+
+\bibitem{Nash2012mearly}
+Nadsh R, Geffen A Mortality through the early life-history of fish: What can we
+  learn from european plaice (pleuronectes platessa l.)? .
+
+\bibitem{mcgurk1986natural}
+McGurk M (1986) Natural mortality of marine pelagic fish eggs and larvae: role
+  of spatial patchiness.
+Marine Ecology Progress Series 34: 227--242.
+
+\bibitem{pepin1991effect}
+Pepin P (1991) Effect of temperature and size on development, mortality, and
+  survival rates of the pelagic early life history stages of marine fish.
+Canadian Journal of Fisheries and Aquatic Sciences 48: 503--518.
+
+\bibitem{mangel2010reproductive}
+Mangel M, Brodziak J, DiNardo G (2010) Reproductive ecology and scientific
+  inference of steepness: a fundamental metric of population dynamics and
+  strategic fisheries management.
+Fish and Fisheries 11: 89--104.
+
+\bibitem{dickey2010lessons}
+Dickey-Collas M, Nash R, Brunel T, Van~Damme C, Marshall C, et~al. (2010)
+  Lessons learned from stock collapse and recovery of north sea herring: a
+  review.
+ICES Journal of Marine Science: Journal du Conseil 67: 1875.
+
+\bibitem{kell2009lumpers}
+Kell L, Dickey-Collas M, Hintzen N, Nash R, Pilling G, et~al. (2009) Lumpers or
+  splitters? evaluating recovery and management plans for metapopulations of
+  herring.
+ICES Journal of Marine Science: Journal du Conseil 66: 1776--1783.
+
+\bibitem{frank2001contemporary}
+Frank K, Brickman D (2001) Contemporary management issues confronting fisheries
+  science.
+Journal of Sea Research 45: 173--187.
+
+\bibitem{heath2008model}
+Heath M, Kunzlik P, Gallego A, Holmes S, Wright P (2008) A model of
+  meta-population dynamics for north sea and west of scotland cod--the dynamic
+  consequences of natal fidelity.
+Fisheries Research 93: 92--116.
+
+
+
+\bibitem{rooker2007life}
+  Rooker, J.R. and Bremer, J.R.A. and Block, B.A. and Dewar, H. and De Metrio, G. and Corriero, A. 
+   and Kraus, R.T. and Prince, E.D. and Rodriguez-Marin, E. and Secor, D.H. (2007)
+  Life history and stock structure of Atlantic bluefin tuna (Thunnus thynnus).
+Reviews in Fisheries Science 15:4 265--310.
+
+\bibitem{root1998evaluating}
+Root K (1998) Evaluating the effects of habitat quality, connectivity, and
+  catastrophes on a threatened species.
+Ecological Applications 8: 854--865.
+
+
+\bibitem{henle2004role}
+Henle K, Sarre S, Wiegand K (2004) The role of density regulation in extinction
+  processes and population viability analysis.
+Biodiversity and Conservation 13: 9--52.
+
+
+\end{thebibliography}
+
+\end{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Adding Figure and Table References
+%% Be sure to add figures and tables after \end{article}
+%% and before \end{document}
+
+%% For figures, put the caption below the illustration.
+%%
+%% \begin{figure}
+%% \caption{Almost Sharp Front}\label{afoto}
+%% \end{figure}
+
+%% For Tables, put caption above table
+%%
+%% Table caption should start with a capital letter, continue with lower case
+%% and not have a period at the end
+%% Using @{\vrule height ?? depth ?? width0pt} in the tabular preamble will
+%% keep that much space between every line in the table.
+
+%% \begin{table}
+%% \caption{Repeat length of longer allele by age of onset class}
+%% \begin{tabular}{@{\vrule height 10.5pt depth4pt  width0pt}lrcccc}
+%% table text
+%% \end{tabular}
+%% \end{table}
+
+%% For two column figures and tables, use the following:
+
+%% \begin{figure*}
+%% \caption{Almost Sharp Front}\label{afoto}
+%% \end{figure*}
+
+%% \begin{table*}
+%% \caption{Repeat length of longer allele by age of onset class}
+%% \begin{tabular}{ccc}
+%% table text
+%% \end{tabular}
+%% \end{table*}
+
+
+\bf{Figure 1} Mass, natural mortality, proportion mature and selection pattern-at-age. \newline
+
+\bf{Figure 2} Equilibrium (i.e. expected) values of SSB and yield verses fishing mortality and recruitment and yield verses SSB; points correspond to
+MSY and MSY proxies ($F_{0.1}$, $F_{Max}$, SPR30\%) and limit ($F_{crash}$) reference points. \newline
+
+\bf{Figure 3} Simulated trajectories of recruitment, SSB and yield for a increasing F. \newline
+
+For figures with multiple panels, the first sentence of  the legend should be a brief overview of the entire figure.
+\bf{Figure 4} Plots of elasticities of SSB relative to the MSY, $F_{0.1}$ and $F_{crash}$ reference points. \newline
+
+\bf{Figure 5} Plots of elasticities of F relative to the MSY, $F_{0.1}$ and $F_{crash}$ reference points. \newline
+
+
+
+
+\end{document}
+

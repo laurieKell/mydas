@@ -1,0 +1,370 @@
+---
+title: "Summary of OMs"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+vignette: >
+  %\VignetteIndexEntry{FLife}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+github_document:
+    mathjax: TRUE
+tags: FLife
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               cache.path="../cache/smry-om/",
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               fig.height=12,
+               fig.width =12,
+               fig.path  ="../tex/smry-om")
+
+options(digits=3)
+
+iFig=0
+```
+```{r pkgs}
+library(plyr)
+library(reshape)
+library(ggplot2)
+library(dplyr)
+
+library(FLCore)
+library(ggplotFL)
+library(FLBRP)
+library(FLife)
+library(mydas)
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+```
+
+```{r, funcs}
+library(GGally)
+ 
+my_density <- function(data,mapping,...){
+   ggplot(data=data,mapping=mapping)+
+     geom_density(...,lwd=1)}
+ 
+ my_smooth <- function(data,mapping,...){
+   ggplot(data=data,mapping=mapping)+
+     geom_smooth(...,method="lm",se=FALSE)+
+     geom_point(...)}
+```
+
+## Turbot
+```{r, turbot}
+load(file.path(dirDat,"turbot.RData"))
+
+#source('~/Desktop/flr/FLife/R/omOut.R')
+
+res=omSmry(om,eq,lh)
+res=transform(subset(res,year%in%20:90),increase=(year%in%20:49))
+res=res[sample(seq(dim(res)[1]),100),]
+
+ggpairs(res[,c(3:5,8,6:7,18:22)],
+         mapping = ggplot2::aes(color=increase),
+         upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+         lower = list(continuous = wrap(my_smooth,size=1)),
+         #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+         diag=list(continuous=wrap(my_density,alpha=0.2)),
+         title = "")+theme_bw(14)+
+   theme(legend.position ="none", 
+         panel.grid.major =element_blank(), 
+         axis.ticks       =element_blank(), 
+         axis.text.x      =element_blank(), 
+         axis.text.y      =element_blank(),
+         panel.border     =element_rect(linetype = 1, 
+                                        colour="black", fill=NA))
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model quantities for turbot. 
+
+```{r,fig.height=5,fig.width=8}
+ggduo(
+  res,
+  c(3:4,8), c(20:21),
+  mapping = aes(color = increase),
+  types = list(continuous = "smooth_lm",
+      alpha = 0.7,
+      line_color = "blue",
+      line_size = 3))+
+  theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Correlation with length for turbot. 
+
+
+## Brill
+```{r, brill}
+load(file.path(dirDat,"brill.RData"))
+
+res=omSmry(om,eq,lh)
+res=transform(subset(res,year%in%20:90),increase=(year%in%20:49))
+res=res[sample(seq(dim(res)[1]),100),]
+
+ggpairs(res[,c(3:5,8,6:7,18:22)],
+         mapping = ggplot2::aes(color=increase),
+         upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+         lower = list(continuous = wrap(my_smooth,size=1)),
+         #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+         diag=list(continuous=wrap(my_density,alpha=0.2)),
+         title = "")+theme_bw(14)+
+   theme(legend.position ="none", 
+         panel.grid.major =element_blank(), 
+         axis.ticks       =element_blank(), 
+         axis.text.x      =element_blank(), 
+         axis.text.y      =element_blank(),
+         panel.border     =element_rect(linetype = 1, 
+                                        colour="black", fill=NA))
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model quantities for brill. 
+
+
+```{r,fig.height=5,fig.width=8}
+ggduo(
+  res,
+  c(3:4,8), c(20:21),
+  mapping = aes(color = increase),
+  types = list(continuous = "smooth_lm",
+      alpha = 0.7,
+      line_color = "blue",
+      line_size = 3))+
+  theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Correlation with length for brill. 
+
+
+## Ray
+```{r, ray}
+load(file.path(dirDat,"ray.RData"))
+
+res=omSmry(om,eq,lh)
+res=transform(subset(res,year%in%20:90),increase=(year%in%20:49))
+res=res[sample(seq(dim(res)[1]),100),]
+
+ggpairs(res[,c(3:5,8,6:7,18:22)],
+         mapping = ggplot2::aes(color=increase),
+         upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+         lower = list(continuous = wrap(my_smooth,size=1)),
+         #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+         diag=list(continuous=wrap(my_density,alpha=0.2)),
+         title = "")+theme_bw(14)+
+   theme(legend.position ="none", 
+         panel.grid.major =element_blank(), 
+         axis.ticks       =element_blank(), 
+         axis.text.x      =element_blank(), 
+         axis.text.y      =element_blank(),
+         panel.border     =element_rect(linetype = 1, 
+                                        colour="black", fill=NA))
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model quantities for ray. 
+
+
+```{r,fig.height=5,fig.width=8}
+ggduo(
+  res,
+  c(3:4,8), c(20:21),
+  mapping = aes(color = increase),
+  types = list(continuous = "smooth_lm",
+      alpha = 0.7,
+      line_color = "blue",
+      line_size = 3))+
+  theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Correlation with length for ray. 
+
+
+## Pollack
+```{r, pollack}
+load(file.path(dirDat,"pollack.RData"))
+
+res=omSmry(om,eq,lh)
+res=transform(subset(res,year%in%20:90),increase=(year%in%20:49))
+res=res[sample(seq(dim(res)[1]),100),]
+
+ggpairs(res[,c(3:5,8,6:7,18:22)],
+         mapping = ggplot2::aes(color=increase),
+         upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+         lower = list(continuous = wrap(my_smooth,size=1)),
+         #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+         diag=list(continuous=wrap(my_density,alpha=0.2)),
+         title = "")+theme_bw(14)+
+   theme(legend.position ="none", 
+         panel.grid.major =element_blank(), 
+         axis.ticks       =element_blank(), 
+         axis.text.x      =element_blank(), 
+         axis.text.y      =element_blank(),
+         panel.border     =element_rect(linetype = 1, 
+                                        colour="black", fill=NA))
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model quantities for pollack. 
+
+
+```{r,fig.height=5,fig.width=8}
+ggduo(
+  res,
+  c(3:4,8), c(20:21),
+  mapping = aes(color = increase),
+  types = list(continuous = "smooth_lm",
+      alpha = 0.7,
+      line_color = "blue",
+      line_size = 3))+
+  theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Correlation with length for pollack. 
+
+## Sprat
+```{r, sprat}
+load(file.path(dirDat,"sprat.RData"))
+
+res=omSmry(om,eq,lh)
+res=transform(subset(res,year%in%20:90),increase=(year%in%20:49))
+res=res[sample(seq(dim(res)[1]),100),]
+
+ggpairs(res[,c(3:5,8,6:7,18:22)],
+         mapping = ggplot2::aes(color=increase),
+         upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+         lower = list(continuous = wrap(my_smooth,size=1)),
+         #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+         diag=list(continuous=wrap(my_density,alpha=0.2)),
+         title = "")+theme_bw(14)+
+   theme(legend.position ="none", 
+         panel.grid.major =element_blank(), 
+         axis.ticks       =element_blank(), 
+         axis.text.x      =element_blank(), 
+         axis.text.y      =element_blank(),
+         panel.border     =element_rect(linetype = 1, 
+                                        colour="black", fill=NA))
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model quantities for sprat. 
+
+
+```{r,fig.height=5,fig.width=8}
+ggduo(
+  res,
+  c(3:4,8), c(20:21),
+  mapping = aes(color = increase),
+  types = list(continuous = "smooth_lm",
+      alpha = 0.7,
+      line_color = "blue",
+      line_size = 3))+
+  theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Correlation with length for sprat. 
+
+
+## Razor
+```{r, razor}
+load(file.path(dirDat,"razor.RData"))
+
+res=omSmry(om,eq,lh)
+res=transform(subset(res,year%in%20:90),increase=(year%in%20:49))
+res=res[sample(seq(dim(res)[1]),100),]
+
+ggpairs(res[,c(3:5,8,6:7,18:22)],
+         mapping = ggplot2::aes(color=increase),
+         upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+         lower = list(continuous = wrap(my_smooth,size=1)),
+         #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+         diag=list(continuous=wrap(my_density,alpha=0.2)),
+         title = "")+theme_bw(14)+
+   theme(legend.position ="none", 
+         panel.grid.major =element_blank(), 
+         axis.ticks       =element_blank(), 
+         axis.text.x      =element_blank(), 
+         axis.text.y      =element_blank(),
+         panel.border     =element_rect(linetype = 1, 
+                                        colour="black", fill=NA))
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model quantities for razor clams. 
+
+
+```{r,fig.height=5,fig.width=8}
+ggduo(
+  res,
+  c(3:4,8), c(20:21),
+  mapping = aes(color = increase),
+  types = list(continuous = "smooth_lm",
+      alpha = 0.7,
+      line_color = "blue",
+      line_size = 3))+
+  theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Correlation with length for razor clams. 
+
+
+## Lobster
+```{r, lobster}
+load(file.path(dirDat,"lobster.RData"))
+
+res=omSmry(om,eq,lh)
+res=transform(subset(res,year%in%20:90),increase=(year%in%20:49))
+res=res[sample(seq(dim(res)[1]),100),]
+
+ggpairs(res[,c(3:5,8,6:7,18:22)],
+         mapping = ggplot2::aes(color=increase),
+         upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
+         lower = list(continuous=wrap(my_smooth,size=1)),
+         #diag = list(continuous = wrap("densityDiag",alpha=.1)),
+         diag=list(continuous=wrap(my_density,alpha=0.2)),
+         title = "")+theme_bw(14)+
+   theme(legend.position ="none", 
+         panel.grid.major =element_blank(), 
+         axis.ticks       =element_blank(), 
+         axis.text.x      =element_blank(), 
+         axis.text.y      =element_blank(),
+         panel.border     =element_rect(linetype = 1, 
+                                        colour="black", fill=NA))
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model quantities for lobster. 
+
+
+```{r,fig.height=5,fig.width=8}
+ggduo(
+  res,
+  c(3:4,8), c(20:21),
+  mapping = aes(color = increase),
+  types = list(continuous = "smooth_lm",
+      alpha = 0.7,
+      line_color = "blue",
+      line_size = 3))+
+  theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Correlation with length for lobster. 
+
+\newpage
+## Session Info
+
+```{r}
+sessionInfo()
+```
+
+## Software Versions
+
+* `r version$version.string`
+* FLCore: `r packageVersion('FLCore')`
+* FLife:  `r packageVersion('FLife')`
+* FLBRP:  `r packageVersion('FLBRP')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+

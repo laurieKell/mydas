@@ -1,0 +1,61 @@
+This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
+The top-level auxiliary file: elasticities_plosOne_V3.aux
+The style file: plos2009.bst
+Database file #1: refs.bib
+Repeated entry---line 387 of file refs.bib
+ : @article{garcia1996precautionary
+ :                                 ,
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 668 of file refs.bib
+ :   author={Nadsh, R.D.M. and Geffen, A.J.}
+ :                                          .
+I'm skipping whatever remains of this entry
+`journal' is a missing field, not a string, for entry perez2012study
+while executing---line 3964 of file plos2009.bst
+Warning--empty journal in perez2012study
+Warning--empty year in Nash2012mearly
+`journal' is a missing field, not a string, for entry Nash2012mearly
+while executing---line 3964 of file plos2009.bst
+Warning--empty journal in Nash2012mearly
+You've used 35 entries,
+            2441 wiz_defined-function locations,
+            775 strings with 11293 characters,
+and the built_in function-call counts, 28320 in all, are:
+= -- 2676
+> -- 372
+< -- 1
++ -- 186
+- -- 93
+* -- 2468
+:= -- 3403
+add.period$ -- 70
+call.type$ -- 35
+change.case$ -- 36
+chr.to.int$ -- 0
+cite$ -- 73
+duplicate$ -- 2834
+empty$ -- 2984
+format.name$ -- 114
+if$ -- 6298
+int.to.chr$ -- 0
+int.to.str$ -- 35
+missing$ -- 331
+newline$ -- 188
+num.names$ -- 35
+pop$ -- 361
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 201
+stack$ -- 0
+substring$ -- 4253
+swap$ -- 652
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 3
+while$ -- 193
+width$ -- 37
+write$ -- 386
+(There were 4 error messages)

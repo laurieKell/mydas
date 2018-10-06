@@ -1,0 +1,534 @@
+---
+title: "Cross test using Operating Model based on Life History"
+subtitle: "LBSPR, length based assessment"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{FLife}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+github_document:
+    mathjax: TRUE
+tags: FLife
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               fig.height=6,
+               fig.width =8,
+               fig.path  ="../tex/simtest/lbspr-",
+               cache.path="../cache/simtest/lbspr/")
+
+options(digits=3)
+
+iFig=0
+```
+```{r pkgs}
+library(plyr)
+library(reshape)
+library(ggplot2)
+library(dplyr)
+
+library(FLCore)
+library(ggplotFL)
+library(FLBRP)
+library(FLife)
+library(mydas)
+
+library(LBSPR)
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+```
+
+```{r}
+#source('~/Desktop/flr/FLife/R/oemLn.R') 
+#source('~/Desktop/flr/FLife/R/lbspr.R') 
+```
+
+## Turbot
+```{r, turbot-om}
+load(file.path(dirDat,"turbot.RData"))
+
+om=iter(om,1:500)
+lh=iter(lh,1:500)
+prior=iter(prior,1:500)
+
+plot(om)   
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model for turbot. 
+
+```{r}
+source('~/Desktop/sea++/mydas/pkgs/mydas/R/oemLn.R')
+```
+
+```{r, turbot-alk}
+alk=setALK(lh)  
+```
+
+```{r, turbot-lfd}
+lfd=lenSample(catch.n(om)[,20:65],alk,nsample=500)
+```
+
+```{r, turbot-oemplot}
+ggplot(melt(lfd[,seq(1,45,10),,,,1:4]))+
+  geom_histogram(aes(length,weight=value),binwidth=1)+
+  facet_grid(year~iter,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")+
+  coord_cartesian(xlim=c(0,mean(lh["linf"])))
+```
+**Figure `r iFig=iFig+1; iFig`** Observation error model for turbot. 
+
+
+
+
+```{r, turbot-sa}
+lbsprFn<-function(len,params,species="",units="cm"){
+  
+  pars        =new("LB_pars")
+  pars@Linf   =c(params["linf"]) 
+  pars@L50    =vonB(c(params["a50"]),params) 
+  pars@L95    =pars@L50+vonB(c(params["ato95"]),params)
+  pars@MK     =c(params["mk"])
+  pars@Species=species
+  pars@L_units=units
+  
+  #labs=dimnames(len)[[1]]
+  #brks=cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", labs) ),
+  #           upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", labs) ))
+  #mid=aaply(brks,1,mean)
+  
+  LBlen       =new("LB_lengths")
+  LBlen@LMids =as.numeric(dimnames(len)[[1]])
+  LBlen@LData =len
+  LBlen@Years =as.numeric(dimnames(len)[[2]])
+  LBlen@NYears=dim(len)[2] 
+  
+  res=LBSPRfit(pars,LBlen,verbose=FALSE)
+  
+  res@Ests}
+
+lbspr<-function(object,params){
+  
+  nits=max(dim(object)[6],dim(params)[2])
+  
+  if (!(dim(object)[6]%in%c(1,nits)|(dim(params)[2]%in%c(1,nits))))
+    stop("iters should be equal to n or 1")
+  
+  res=mdply(data.frame(iter=seq(nits)), function(iter)
+    lbsprFn(iter(object,iter)[drop=T],iter(params,iter)))
+  res=data.frame(year=dimnames(object)$year,res)
+  
+  rtn=FLPar(cast(melt(res,id=c("year","iter")),variable~year~iter),units="NA")
+  
+  rtn}
+
+
+lb=lbspr(lfd,prior)  
+```
+
+```{r}
+save(lb,file="/home/laurence/Desktop/tmp/lb.RData")
+```
+
+```{r, turbot-spr}
+ggplot(melt(lb["SPR"]))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("SPR")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR for turbot. 
+
+```{r, turbot-fm}
+ggplot(melt(lb["FM"]))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("F")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of $F/M$ for turbot. 
+
+## Brill
+```{r, brill-om}
+load(file.path(dirDat,"brill.RData"))
+
+om   =iter(om,1:500)
+lh   =iter(lh,1:500)
+prior=iter(prior,1:500)
+
+plot(om)
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model for Brill. 
+
+```{r, brill-alk}
+alk=setALK(lh)
+```
+
+```{r, brill-lfd}
+lfd=lenSample(catch.n(om)[,20:65],alk,nsample=500)
+```
+
+```{r, brill-oemplot}
+ggplot(melt(lfd[,seq(1,45,10),,,,1:4]))+
+  geom_histogram(aes(length,weight=value),binwidth=1)+
+  facet_grid(year~iter,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")+
+  coord_cartesian(xlim=c(0,mean(lh["linf"])))
+```
+**Figure `r iFig=iFig+1; iFig`** Observation error model for Brill. 
+
+
+```{r, brill-sa}
+lb=lbspr(lfd,prior)
+```
+
+```{r, brill-spr}
+ggplot(melt(lb["SPR"]))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("SPR")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR for brill. 
+
+```{r, brill-fm}
+ggplot(melt(lb["FM"]))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("F")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of $F/M$ for brill. 
+
+## Ray
+```{r, ray-om}
+load(file.path(dirDat,"ray.RData"))
+
+om=iter(om,1:500)
+lh=iter(lh,1:500)
+prior=iter(prior,1:500)
+
+plot(om)
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model for ray. 
+
+```{r, ray-alk}
+alk=setALK(lh)
+```
+
+```{r, ray-lfd}
+lfd=lenSample(catch.n(om)[,20:65],alk,nsample=500)
+```
+
+```{r, ray-oemplot}
+ggplot(melt(lfd[,seq(1,45,10),,,,1:4]))+
+  geom_histogram(aes(length,weight=value),binwidth=1)+
+  facet_grid(year~iter,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")+
+  coord_cartesian(xlim=c(0,mean(lh["linf"])))
+```
+**Figure `r iFig=iFig+1; iFig`** Observation error model for ray. 
+
+
+```{r, ray-sa}
+lb=lbspr(lfd,prior)
+```
+
+```{r, ray-spr}
+ggplot(melt(lb["SPR"]))+
+  geom_boxplot(aes(ac(year),value))+
+  xlab("SPR")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR for ray. 
+
+```{r, ray-fm}
+ggplot(melt(lb["FM"]))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("F")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of $F/M$ for ray. 
+
+## sprat
+```{r, sprat-om}
+load(file.path(dirDat,"sprat.RData"))
+
+om=iter(om,1:500)
+lh=iter(lh,1:500)
+prior=iter(prior,1:500)
+
+plot(om)
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model for sprat. 
+
+```{r, sprat-alk}
+alk=setALK(lh)
+```
+
+```{r, sprat-lfd}
+lfd=lenSample(catch.n(om)[,20:65],alk,nsample=500)
+```
+
+```{r, sprat-oemplot}
+ggplot(melt(lfd[,seq(1,45,10),,,,1:4]))+
+  geom_histogram(aes(length,weight=value),binwidth=1)+
+  facet_grid(year~iter,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")+
+  coord_cartesian(xlim=c(0,mean(lh["linf"])))
+```
+**Figure `r iFig=iFig+1; iFig`** Observation error model for sprat. 
+
+
+```{r, sprat-sa}
+lb=lbspr(lfd,prior)
+```
+
+```{r, sprat-spr}
+ggplot(melt(lb["SPR"]))+
+  geom_boxplot(aes(ac(year),value))+
+  xlab("SPR")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR for pollack. 
+
+```{r, sprat-fm}
+ggplot(melt(lb["FM"]))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("F")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of $F/M$ for pollack. 
+
+## pollack
+```{r, pollack-om}
+load(file.path(dirDat,"pollack.RData"))
+
+om=iter(om,1:500)
+lh=iter(lh,1:500)
+prior=iter(prior,1:500)
+
+plot(om)
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model for pollack. 
+
+```{r, pollack-alk}
+alk=setALK(lh)
+```
+
+```{r, pollack-lfd}
+lfd=lenSample(catch.n(om)[,20:65],alk,nsample=500)
+```
+
+```{r, pollack-oemplot}
+ggplot(melt(lfd[,seq(1,45,10),,,,1:4]))+
+  geom_histogram(aes(length,weight=value),binwidth=1)+
+  facet_grid(year~iter,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")+
+  coord_cartesian(xlim=c(0,mean(lh["linf"])))
+```
+**Figure `r iFig=iFig+1; iFig`** Observation error model for pollack. 
+
+
+```{r, pollack-sa}
+lb=lbspr(lfd,prior)
+```
+
+```{r, pollack-spr}
+ggplot(melt(lb["SPR"]))+
+  geom_boxplot(aes(ac(year),value))+
+  xlab("SPR")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR for pollack. 
+
+```{r, pollack-fm}
+ggplot(melt(lb["FM"]))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("F")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of $F/M$ for pollack. 
+
+## razor
+```{r, razor-om}
+load(file.path(dirDat,"razor.RData"))
+
+om=iter(om,1:500)
+lh=iter(lh,1:500)
+prior=iter(prior,1:500)
+
+plot(om)
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model for razor. 
+
+```{r, razor-alk}
+alk=setALK(lh)
+```
+
+```{r, razor-lfd}
+lfd=lenSample(catch.n(om)[,20:65],alk,nsample=500)
+```
+
+```{r, razor-oemplot}
+ggplot(melt(lfd[,seq(1,45,10),,,,1:4]))+
+  geom_histogram(aes(length,weight=value),binwidth=1)+
+  facet_grid(year~iter,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")+
+  coord_cartesian(xlim=c(0,mean(lh["linf"])))
+```
+**Figure `r iFig=iFig+1; iFig`** Observation error model for razor. 
+
+
+```{r, razor-sa}
+lb=lbspr(lfd,prior)
+```
+
+```{r, razor-spr}
+ggplot(melt(lb["SPR"]))+
+  geom_boxplot(aes(ac(year),value))+
+  xlab("SPR")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR for razors. 
+
+
+```{r, razor-fm}
+ggplot(melt(lb["FM"]))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("F")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of $F/M$ for razors. 
+
+
+## lobster
+```{r, lobster-om}
+load(file.path(dirDat,"lobster.RData"))
+
+om=iter(om,1:500)
+lh=iter(lh,1:500)
+prior=iter(prior,1:500)
+
+plot(om)
+```
+**Figure `r iFig=iFig+1; iFig`** Operating model for lobster. 
+
+```{r, lobster-alk}
+alk=setALK(lh,lmax=1.50,cv=0.1)[-1]  
+```
+
+```{r, lobster-lfd}
+lfd=lenSample(catch.n(om)[-1,20:65],alk,nsample=1000) 
+```
+
+```{r, lobster-oemplot}
+ggplot(melt(lfd[,seq(1,45,10),,,,1:4]))+   
+  geom_histogram(aes(length,weight=value),binwidth=1)+
+  facet_grid(year~iter,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")+
+  coord_cartesian(xlim=c(0,mean(lh["linf"])*1.5))  
+```
+**Figure `r iFig=iFig+1; iFig`** Observation error model for lobster. 
+
+
+```{r, lobster-sa}
+lb=lbspr(lfd,prior)        
+```
+
+```{r, lobster-spr}
+ggplot(melt(lb["SPR"]))+   
+  geom_boxplot(aes(ac(year),value))+
+  xlab("SPR")+ylab("Year")+theme_bw()  
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR for lobster. 
+
+```{r, lobster-fm}
+ggplot(melt(lb["FM"]))+   
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  xlab("F")+ylab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of $F/M$ for lobster. 
+
+
+```{r, fm, eval=FALSE}
+len=t(daply(lfq,.(year,length), with, sum(freq)))  
+brl=lbspr(len,prior[,1])  
+
+save(brl,file="/home/laurence/Desktop/tmp/brl.RData")
+ggplot(data.frame("Year"=21:40,
+               "MP"=brl@Ests[,"FM"],
+               "OM"=c(apply(harvest(om[,ac(21:40)])%/%m(om[,ac(21:40)]),c(2),mean))))+
+  geom_line(aes(Year,OM),col="red")+
+  geom_line(aes(Year,MP))
+```
+
+```{r, spr, eval=FALSE}
+ggplot(data.frame("Year"=21:100,    
+               "MP"=brl@Ests[,"SPR"],
+               "OM"=c(apply(ssb(om[,ac(21:100)])%/%rec(om[,ac(21:100)]),c(2),mean))/1000))+
+  geom_line(aes(Year,OM),col="red")+
+  geom_line(aes(Year,MP))
+```
+
+
+```{r, oem-old}
+# Length frequency distribution
+om1=window(iter(om,1),start=21,end=100)  
+
+n  =catch.n(om1)
+ln =vonB(ages(catch.n(om1)),iter(lh,1))
+sd =ln*0.2
+bin=0:ceiling(max(ln)*1.10)+0.5
+
+### Create lengths-at-age 
+lfq=ddply(model.frame(FLQuants(ln=ln,sd=sd,n=n)),.(age,year,unit,season,area,iter), 
+           with, data.frame(length=bin,data=dnorm(bin,ln,sd)*n))
+  
+### sum up by length 
+lfq=ddply(lfq,.(length,year,unit,season,area,iter), 
+           with, data.frame(freq=sum(data)))
+```
+
+```{r, oemplot-old, eval=FALSE}
+ggplot(subset(lfq,year %in% seq(50,100,5)))+  
+  geom_histogram(aes(length,weight=freq),binwidth=1)+
+  facet_grid(year~.,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")
+```
+
+
+
+
+\newpage
+## Session Info
+
+```{r}
+sessionInfo()
+```
+
+## Software Versions
+
+* `r version$version.string`
+* FLCore: `r packageVersion('FLCore')`
+* FLife:  `r packageVersion('FLife')`
+* FLBRP:  `r packageVersion('FLBRP')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+

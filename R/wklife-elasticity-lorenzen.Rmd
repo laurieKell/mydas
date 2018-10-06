@@ -1,0 +1,296 @@
+---
+title: "MyDas: Elasticty Analysis"
+subtitle: "Lorenzen M"
+author: "Laurie Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r dir, echo=FALSE}
+source('~/Desktop/flr/FLife/R/getScriptPath.R')
+
+dirMy=dirname(dirname(getScriptPath()))
+dirInp=file.path(dirMy,"inputs")
+getdirDat=file.path(dirMy,"data")
+```
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+
+## Global options
+opts_chunk$set(echo       =FALSE,
+               eval       =TRUE,
+               prompt     =FALSE,
+               comment    =NA,
+               message    =FALSE,
+               warning    =FALSE,
+               tidy       =FALSE,
+               fig.height =6,
+               fig.width  =8,
+               fig.path   ="tex/elas-lorenzen/",
+               cache      =TRUE,
+               cache.path="cache/elas-lorenzen/")
+
+iFig=0
+iTab=0
+```
+
+```{r, pkgs, message=FALSE}
+library(ggplot2)
+library(GGally)
+
+library(plyr)
+library(dplyr)
+library(reshape)
+
+library(RPostgreSQL)
+library(popbio)
+
+library(FLBRP)
+library(FLife)
+
+library(numDeriv)
+```
+
+```{r, theme, echo=FALSE}
+theme_set(theme_bw())
+options(digits=3)
+```
+
+```{r}
+ProdFn<-function(x){
+  res=lhPar(FLPar(x))
+  eql=lhEql(res,m=function(wt,params){
+                          res=wt%^%params["m2"] 
+                          res=params["m1"]%*%res
+                          res})
+    
+  c(log(lambda(leslie(eql,fbar=c(refpts(eql)["crash","harvest"]))[drop=TRUE])),
+    log(lambda(leslie(eql,fbar=c(refpts(eql)["msy",  "harvest"]))[drop=TRUE])))}
+
+rFn=function(x){
+    eql=lhEql(lhPar(FLPar(x)),m=function(wt,params){
+                          res=wt%^%params["m2"] 
+                          res=params["m1"]%*%res
+                          res})
+    
+    c("r"  =log(lambda(leslie(eql,fbar=c(refpts(eql)["crash","harvest"]))[drop=TRUE])),
+      "r.c"=log(lambda(leslie(eql,fbar=c(refpts(eql)["msy","harvest"]))[drop=TRUE])))}
+
+refFn<-function(x){
+  
+  rf=refpts(lhEql(lhPar(FLPar(x)),m=function(wt,params){
+                          res=wt%^%params["m2"] 
+                          res=params["m1"]%*%res
+                          res}))
+    
+  res=c(hmsy  =c(rf["msy","yield"]/rf["msy","ssb"]),
+        fcrash=c(rf["crash","harvest"]),
+        fmsy  =c(rf["msy","harvest"]),
+        bmsy  =c(rf["msy","ssb"]),
+        msy   =c(rf["msy","yield"]),
+        shape =c(rf["msy","ssb"]/rf["virgin","ssb"]))
+    
+  res}
+
+my_smooth <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+  geom_point(...,size=.5)+
+  geom_smooth(...,method="lm",se=FALSE)}
+
+my_density <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+  geom_density(...,lwd=1)}
+```
+
+```{r}
+#source('~/Desktop/flr/FLife/R/sim.R')
+data(wklife)
+```
+
+```{r, lifepar, fig.height=6, fig.width=6}
+lh=wklife[-13,c("species","linf","k","t0","a","b","l50")]
+
+ggpairs(transform(lh,linf=log(linf),winf=log(a*linf^b),
+                  k=log(k),lmat=log(l50))[,c("b","linf","k","t0","lmat","winf")],
+  lower = list(continuous = wrap(my_smooth)),
+  diag=list(continuous=wrap(my_density,alpha=0.2)),
+  title = "")+
+  theme(legend.position ="none",
+  panel.grid.major =element_blank(),
+  axis.ticks       =element_blank(),
+  axis.text.x      =element_blank(),
+  axis.text.y      =element_blank(),
+  panel.border     =element_rect(linetype = 1, colour="black", fill=NA))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Correlation between between life history parameters
+
+Fill in missing values
+```{r, par}
+lh=wklife[-13,c("species","linf","k","t0","a","b","l50")]
+lh[lh[,"t0"]>0&!is.na(lh[,"t0"]),"t0"]=NA
+
+lh=lhPar(lh)[c("k","linf","t0","a50","a","b","bg","s","a1","sl","sr"),]  
+lh=rbind(lh,propagate(FLPar(m1=0.3,m2=-0.288),dim(lh)[1]))
+lh=lhPar(lh)
+```
+
+\newpage
+#Tables
+
+**Table `r iTab=iTab+1; iTab`** Population growth rate at low population size (r) and at $B_{MSY}$ (r.c).
+
+```{r r2}
+fn=function(x){
+  res=rFn(x)
+  names(res)=c("r","r.c")
+
+  res}
+
+r=aaply(lh,2,fn)
+dimnames(r)=list(species=wklife[-13,"species"],params=c("r","r.c"))
+
+r
+```
+
+**Table `r iTab=iTab+1; iTab`** Population doubling time at low population size (r) and at $B_{MSY}$ (r.c).
+
+```{r r-double}
+log(2)/r[,"r"]
+```
+
+```{r jacobian-r}
+fn=function(x){
+  res=jacobian(rFn,x)
+  dimnames(res)=list(var=c("r","r.c"),params=dimnames(x)$params)
+  
+  res}
+
+jacR=aaply(lh,2,fn)
+dimnames(jacR)$params=dimnames(lh)$params
+jacR=FLPar(aperm(jacR,c(2:3,1)))
+```
+
+```{r, jacobian-r2}
+#dimnames(jacR)=list(var=c("r","r.c"),params=dimnames(res)$params,spp=lh[,"species"])
+save(jacR,file="/home/laurence/Desktop/tmp/jacR.RData")  
+```
+
+**Table `r iTab=iTab+1; iTab`** Elasticity of parameters with respect to productivity at low population size (r) and at $B_{MSY}$ (r.c).
+
+```{r, elasticity-r}
+res  =FLPar(t(aaply(lh,2,rFn)))
+elasR=FLPar(sweep(jacR,c(1,3),res,"/"))
+```
+
+```{r jacobian-refs}
+fn=function(x){
+  
+  res=jacobian(refFn,x)
+  dimnames(res)=list(var=c("hmsy","fcrash","fmsy","bmsy","msy","shape"),params=dimnames(x)$params)
+  
+  res}
+
+jacRef=aaply(lh,2,fn)
+jacRef=FLPar(aperm(jacRef,c(2:3,1)))
+dimnames(jacRef)$params=dimnames(lh)$params
+```
+
+```{r}
+save(jacRef,file="/home/laurence/Desktop/tmp/jacRef.RData")
+```
+
+**Table `r iTab=iTab+1; iTab`** Elasticity of parameters with respect to productivity at low population size (r) and at $B_{MSY}$ (r.c).
+```{r}
+elasRef=sweep(jacRef,c(1,3), FLPar(t(aaply(lh,2,refFn))), "/")
+```
+
+# Figures
+
+```{r, params, fig.height=6, fig.width=6, eval=FALSE}
+dat=cbind(lh,log(2)/pr)
+
+ggpairs(transform(dat[,-1],linf=log(linf),k=log(k),lmat=log(l50))[,c("r","r.c","linf","k","t0","l50")],
+  lower = list(continuous = wrap(my_smooth)),
+  diag=list(continuous=wrap(my_density,alpha=0.2)),
+  title = "")+
+  theme(legend.position ="none",
+  panel.grid.major =element_blank(),
+  axis.ticks       =element_blank(),
+  axis.text.x      =element_blank(),
+  axis.text.y      =element_blank(),
+  panel.border     =element_rect(linetype = 1, colour="black", fill=NA))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Correlation between population growth rate at low population size (r) and at $B_{MSY}$ (r.c).
+
+
+```{r, elasR, fig.height=4}
+theme_set(theme_bw())
+dat=subset(melt(model.frame(elasR,id=c("params","iter"))),
+         params%in%c("k","linf","t0","a50","s","b","m1","m2"))
+dat$species=wklife[dat$iter,"species"]
+dat$params=factor(dat$params,level=c("linf","k","t0","b","a50","m1","m2","s"))
+
+ggplot(dat)+
+  geom_boxplot(aes(params,abs(value)))+
+  facet_grid(variable~.,scale="free")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Elasticity analysis (r) and at $B_{MSY}$ (r.c).
+
+
+```{r, elasRef}
+theme_set(theme_bw())
+
+dat=subset(melt(model.frame(elasRef,id=c("params","iter"))),
+         params%in%c("k","linf","t0","a50","s","b","m1","m2"))
+dat$species=wklife[dat$iter,"species"]
+dat$params=factor(dat$params,level=c("linf","k","t0","b","a50","m1","m2","s"))
+dat$variable=factor(dat$variable,level=c("msy","bmsy","fmsy","hmsy","shape","fcrash"))
+
+ggplot(dat)+
+  geom_boxplot(aes(params,abs(value)))+
+  facet_grid(variable~.,scale="free")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Elasticity analysis
+
+```{r, comp, fig.height=8}
+save(dat,file="/home/laurence/Desktop/tmp/dat.RData") 
+theme_set(theme_bw())
+
+dat=subset(dat,params%in%c("m1","m2","s","k"))
+dat$species=factor(dat$species,level=unique(wklife[order(wklife[,"k"]),"species"]))
+ggplot(ddply(dat,.(variable,params), with, 
+             data.frame(spp=species,rel=abs(value)/mean(abs(value)))))+
+  geom_boxplot(aes(spp,rel,fill=spp))+
+  facet_grid(variable~.)+
+  theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+```
+**Figure `r iFig=iFig+1; iFig`** Elasticity analysis
+
+```{r, eval=FALSE}
+vc=diag(13)
+diag(vc)=(res[,10]*0.1)^2
+
+j =jacP@.Data[,,10]
+# The variance of our estimate is the cross product of the jacobian and the model's
+# variance-covariance matrix
+
+vcov =j %*% vc %*% t(j)
+```
+
+```{r}
+lh=lhPar(lh)
+vr=c("linf","k","t0","b","a50")
+cr=cov2cor(var(model.frame(lh[vr])[,-6]))
+
+J=apply(jacRef,1:2,mean)
+
+vc=J[,vr,drop=T]%*%cr[vr,vr,drop=T]%*%t(J[,vr,drop=T])
+
+cov2cor(vc)
+```
+

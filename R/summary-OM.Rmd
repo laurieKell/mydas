@@ -1,0 +1,57 @@
+---
+title: "Operating Models"
+subtitle: "Summary Statistics"
+author: "Laurie Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+```{r dir, echo=FALSE}
+dirMy ="/home/laurence/Desktop/sea++/Cefas"
+dirInp=file.path(dirMy,"inputs")
+dirDat=file.path(dirMy,"data")
+```
+
+```{r knitr, echo=FALSE}
+library(knitr)
+
+opts_chunk$set(comment=NA, fig.width =8, 
+               fig.height=6,
+               fig.path  ="../tex/",
+               warning=FALSE, 
+               message=FALSE, 
+               error  =FALSE, 
+               echo   =FALSE,
+               cache  =TRUE)
+iFig=0
+iTab=0
+```
+
+
+```{r}
+library(FLCore)
+library(ggplotFL)
+library(plyr)
+library(dplyr)
+library(stringr)
+
+theme_set(theme_bw())
+```
+
+# Stocks
+```{r stocks, echo=FALSE}
+om1=readRDS("/home/laurence/Downloads/10.rds")
+```
+
+# Reference Points
+```{r stocks, echo=FALSE}
+```
+
+# Productivity
+```{r stocks, echo=FALSE}
+```
+
+# Time series
+```{r stocks, echo=FALSE}
+```
+

@@ -1,0 +1,113 @@
+---
+title: "Task 4"
+subtitle: "Stocks by Assessment Cat"
+author: "Laurie Kell & Alex Tidd"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+```{r dir, echo=FALSE}
+dirMy ="/home/laurence/Desktop/sea++/mydas"
+dirInp=file.path(dirMy,"inputs")
+dirDat=file.path(dirMy,"data")
+```
+
+```{r knitr, echo=FALSE}
+library(knitr)
+
+opts_chunk$set(comment=NA, fig.width =8, 
+               fig.height=6,
+               fig.path  ="../tex/",
+               warning=FALSE, 
+               message=FALSE, 
+               error  =FALSE, 
+               echo   =FALSE,
+               cache  =TRUE)
+iFig=0
+iTab=0
+```
+
+```{r}
+library(FLCore)
+library(ggplotFL)
+library(plyr)
+library(dplyr)
+library(stringr)
+
+theme_set(theme_bw())
+```
+
+# Stocks
+```{r stocks, echo=FALSE}
+wgs=rbind(cbind(wg="Celtic Sea",
+      read.csv(file.path(dirInp,"cs/StockAssessmentGraphs_2017128ijaewuckpic5ftyotcrcu20f.csv"),
+            stringsAsFactors=FALSE)[,seq(61)]),
+          cbind(wg="North Sea", 
+      read.csv(file.path(dirInp,"ns/StockAssessmentGraphs_2017128ijaewuckpic5ftyotcrcu20f.csv"),
+            stringsAsFactors=FALSE)[,seq(61)]))
+ names(wgs)[9]="desc"
+
+wgs$code  =with(wgs,mdply(FishStock,        
+                          function(x) substr(x, 1,regexec('\\.',x)[[1]][1]-1)))[,2]
+wgs$x1    =with(wgs,mdply(FishStock,        
+                          function(x) substr(x,   regexec('\\.',x)[[1]][1]+1,nchar(x))))[,2]
+wgs$region=with(wgs,mdply(x1,               
+                          function(x) substr(x, 1,regexec('\\.',x)[[1]][1]-1)))[,2]
+wgs$area  =with(wgs,mdply(x1,               
+                          function(x) substr(x,   regexec('\\.',x)[[1]][1]+1,nchar(x1))))[,2]
+wgs$spp   =with(wgs,mdply(desc, 
+                          function(x) substr(x, 1,regexec(')',x)[[1]][1])))[,2]
+
+range=ddply(wgs,.(wg,spp,area,desc),with, range(Year))
+refs =ddply(wgs[!duplicated(wgs[,c("wg","desc")]),],
+            .(wg,spp,area,desc),with, 
+            data.frame(fpa =Fpa,        bpa  =Bpa,
+                       flim=Flim,       blim =Blim,
+                       fmsy=FMSY,       btrig=MSYBtrigger,
+                       fman=Fmanagement,bman =Bmanagement))
+ts =ddply(wgs,.(wg,spp,area,desc,code),with, 
+            data.frame(year    =Year,
+                       yearAss =AssessmentYear,
+                       rec     =Recruitment,
+                       stock   =TBiomass,
+                       ssb     =StockSize,
+                       landings=Landings,
+                       catch   =Catches,
+                       discards=Discards,
+                       prod    =YieldSSB,
+                       f       =F_Landings,
+                       fdisc   =F_Discards,
+                       fibc    =F_IBC))
+
+stocks=wgs[,c("wg","code","spp","region","area","desc")]
+stocks=stocks[!duplicated(stocks[,c("wg","spp","area")]),]
+stocks=stocks[do.call("order",stocks[,c("wg","spp","area")]),]
+
+spp=read.csv(file.path(dirInp,"species.txt"),header=FALSE)[,-2]
+spp=transmute(spp,code=str_trim(tolower(V1)),spp=str_trim(tolower(V3)),worm=V4)
+
+dimnames(stocks)[[1]]=seq(dim(stocks)[1])
+
+save(spp,stocks,range,refs,ts,file=file.path(dirDat,"stocks.RData"),compress="xz")
+
+flats=unique(stocks$spp)[c(2,5,6,10,15,19,24,26,30,31)]
+rays =unique(stocks$spp)[c(1,4,16,20,23)]
+dogs =unique(stocks$spp)[c(11,27,29)]
+hers =unique(stocks$spp)[c(8,21)]
+gads =unique(stocks$spp)[c(3,7,14,17,25,32)]
+```
+
+#Flat fish stocks
+```{r flats}
+subset(stocks,spp%in%flats)[,c("spp","area","wg")]
+```
+
+```{r sam}
+csSam=read.csv(file.path(dirInp,"cs/celtic_laurie.txt"),sep="\t")
+nsSam=read.csv(file.path(dirInp,"ns/nsea_laurie.txt"),sep="\t")
+```
+
+```{r cats}
+cats=data.frame(cat=as.integer())
+```
+
