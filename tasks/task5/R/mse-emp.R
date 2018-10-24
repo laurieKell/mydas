@@ -9,69 +9,132 @@ library(FLasher)
 library(FLBRP)
 library(FLife)
 
+library(rdrop2)
+
 library(devtools)
 devtools::install_github("lauriekell/mydas", subdir="pkgs/mydas")
 
 library(mydas)
 
+source('~/Desktop/sea++/mydas/pkg/R/hcrSBTD.R')
+source('~/Desktop/sea++/mydas/pkg/R/mseSBTD.R')
+source('~/Desktop/flr/kobe/R/kobe-funcs.R')
+source("/home/laurence/Desktop/sea++/mydas/pkg/R/smryStat.R")
+
 sessionInfo()
 
 dirMy ="/home/laurence/Desktop/sims/wklife"
-dirDat=file.path(dirMy,"data")
-dirRes=file.path(dirMy,"results")
+dirDat="/home/laurence/Desktop/Dropbox/mydasOMs"
+dirRes=dirDat
 
 mseStart=c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,"sprat"=52,"razor"=54,"lobster"=57)
 
 ### Stochasticity
 nits=500
 set.seed(1234)
-srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:500)),0.2,b=0.0)
+srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.2,b=0.0)
 
 ### OEM
-uDev =FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:500)),0.3,b=0.0)
+uDev =FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.3,b=0.0)
 
-## MSE for Derivate empirical MP
-scen=expand.grid(spp=c("turbot","lobster","ray","pollack","razor","brill","sprat")[1],
-                 k1=seq(1.5,2.5,0.5),k2=seq(1.5,2.5,0.5),gamma=seq(1.0,1.25,0.25),
-                 stringsAsFactors=FALSE)
-
-empD=NULL
-for (i in seq(dim(scen)[1])){
-  load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
-  om=iter(om,seq(nits))
-  eq=iter(eq,seq(nits))
-  lh=iter(lh,seq(nits))
-  
-  res =mseSBTD(om,eq,control=with(scen[i,],c(k1=k1,k2=k2,gamma=gamma)),
-               start=mseStart[scen[i,"spp"]],end=mseStart[scen[i,"spp"]]+45,srDev=srDev,uDev=uDev)
-  empD=rbind(empD,cbind(scen=i,stock=scen[i,"spp"],k1r=scen[i,"k1"],k2=scen[i,"k2"],gamma=scen[i,"gamma"],omSmry(res,eq,lh)))
-  
-  save(empD,file=file.path(dirRes,"empD.RData"))}
+## MSE for Derivative empirical MP
+set.seed(1234)
+k1=runif(nits, 0.5, 5.0)
+k2=runif(nits, 0.5, 5.0)
+controlD=rbind(FLPar(k1   =k1),
+               FLPar(k2   =k2),
+               FLPar(gamma=runif(nits, 1, 1)))
+save(controlD,file=file.path(dirRes,"controlD.RData"))
 
 ## MSE for Proportion empirical MP
-scen=expand.grid(spp=c("turbot","lobster","ray","pollack","razor","brill","sprat")[1],
-                 k1=c(0.50,0.25),k2=c(0.50,0.25),
+set.seed(1234)
+controlP=rbind(FLPar(k1=runif(nits, 0.1,0.5)),
+               FLPar(k2=runif(nits, 0.1,0.5)))
+save(controlP,file=file.path(dirRes,"controlP.RData"))
+
+scen=expand.grid(spp=c("turbot","lobster","ray","pollack","razor","brill","sprat"),
                  stringsAsFactors=FALSE)
-empP=NULL
+
+##### P ##########################################################
+empD=NULL
+for (i in rev(seq(dim(scen)[1]))){
+  load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
+  om=iter(om,seq(nits))
+  eq=iter(eq,seq(nits))
+  lh=iter(lh,seq(nits))
+  
+  res=mseSBTD(om,eq,
+              control=controlD,
+              srDev=srDev,uDev=uDev,
+              start  =mseStart[scen[i,"spp"]]+5,end=mseStart[scen[i,"spp"]]+45,nyrs=3)
+  empD=rbind(empD,cbind(spp=scen[i,"spp"],omSmry(res,eq,lh)))
+  
+  save(empD,controlD,file=file.path(dirRes,"empd-results.RData"))}
+
+parD=NULL
 for (i in seq(dim(scen)[1])){
+  #drop_download(path=paste(file.path("mydasOMs",scen[i,"spp"]),".RData",sep=""),overwrite=T)
+  load(file.path(dirRes,paste(scen[i,"spp"],".RData",sep="")))
+  parD=rbind(parD,cbind(spp=scen[i,"spp"],model.frame(prior),model.frame(controlD)[,-4]))
+  }
+
+empD$spp =ac(empD$spp)
+empD     =subset(empD,year>=mseStart[spp]&year<=mseStart[spp]+45)
+empD$year=empD$year-mseStart[empD$spp]
+empd_pm=ddply(empD,.(spp,iter), smryStat)
+
+empd_pm=merge(transform(empd_pm,iter=as.numeric(ac(iter)),spp=ac(spp)),
+              transform(parD,   iter=as.numeric(ac(iter)),spp=ac(spp)),by=c("spp","iter"))
+save(empD,empd_pm,controlD,file=file.path(dirRes,"empd-results.RData"))
+
+
+##### P ##########################################################
+empP=NULL
+for (i in seq(dim(scen)[1])[(1:5)]){
   load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
   om=iter(om,seq(nits))
   eq=iter(eq,seq(nits))
   lh=iter(lh,seq(nits))
 
-  res =mseSBTP(om,eq,control=with(scen[i,],c(k1=k1,k2=k2)),
-               start=mseStart[scen[i,"spp"]],end=mseStart[scen[i,"spp"]]+45,
-               srDev=srDev,uDev=uDev,refYr=40)
-  empP=rbind(empP,cbind(scen=i,spp=scen[i,"spp"],k1=scen[i,"k1"],k2=scen[i,"k2"],omSmry(res,eq,lh)))
+  res =mseSBTP(om,eq,
+               control =controlP,
+               start   =mseStart[scen[i,"spp"]],end=mseStart[scen[i,"spp"]]+45,
+               srDev   =srDev,uDev=uDev,
+               refU    =39:41,
+               refCatch=23:25)
+  empP=rbind(empP,cbind(spp=scen[i,"spp"],omSmry(res,eq,lh)))
   
-  save(empP,file=file.path(dirRes,"empP.RData"))}
+  save(empP,file=file.path(dirRes,"empp-results.RData"))}
 
-names(empP)[10]="catchJuv"
-names(empP)[2]="spp"
-pm   =ddply(empP,.(spp,iter,k1,k2),smryStat)
-empP.=subset(empP,iter%in%101:500)
-pm.  =subset(pm,  iter%in%101:500)
+parP=NULL
+for (i in seq(dim(scen)[1])){
+  #drop_download(path=paste(file.path("mydasOMs",scen[i,"spp"]),".RData",sep=""),overwrite=T)
+  load(file.path(dirRes,paste(scen[i,"spp"],".RData",sep="")))
+  parD=rbind(parD,cbind(spp=scen[i,"spp"],model.frame(prior),model.frame(controlD)[,-4]))
+  parP=rbind(parP,cbind(spp=scen[i,"spp"],model.frame(prior),model.frame(controlP)[,-3]))
+  }
 
-dbWriteTable(conLK, "mydas_empp",    value=empP., append=!FALSE,overwrite=!TRUE,row.names=FALSE)
-dbWriteTable(conLK, "mydas_empp_pm", value=pm.,   append=!FALSE,overwrite=!TRUE,row.names=FALSE)
+empP$spp =ac(empP$spp)
+empP     =subset(empP,year>=mseStart[spp]&year<=mseStart[spp]+45)
+empP$year=empP$year-mseStart[empP$spp]
+empp_pm=ddply(empP,.(spp,iter), smryStat)
 
+empp_pm=merge(transform(empp_pm,iter=as.numeric(ac(iter)),spp=ac(spp)),
+              transform(parP,   iter=as.numeric(ac(iter)),spp=ac(spp)),by=c("spp","iter"))
+
+save(empP,empp_pm,controlP,file=file.path(dirRes,"empp-results.RData"))
+
+
+#https://stats.stackexchange.com/questions/160479/practical-hyperparameter-optimization-random-vs-grid-search
+
+#There is a simple probabilistic explanation for the result: for any distribution over a sample space with a finite maximum, the maximum of 60 random observations lies within the top 5% of the true maximum, with 95% probability. That may sound complicated, but it’s not. Imagine the 5% interval around the true maximum. Now imagine that we sample points from his space and see if any of it lands within that maximum. Each random draw has a 5% chance of landing in that interval, if we draw n points independently, then the probability that all of them miss the desired interval is (1−0.05)n
+
+#So the probability that at least one of them succeeds in hitting the interval is 1 minus that quantity. We want at least a .95 probability of success. To figure out the number of draws we need, just solve for n in the equation:
+  
+  1−(1−0.05)^n>0.95
+
+We get n⩾60
+
+. Ta-da!
+  
+  The moral of the story is: if the close-to-optimal region of hyperparameters occupies at least 5% of the grid surface, then random search with 60 trials will find that region with high probability.

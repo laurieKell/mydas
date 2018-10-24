@@ -29,7 +29,7 @@ conLK=dbConnect(drv,
 dbListTables(conLK)
 
 om  =dbGetQuery(conAl,"SELECT * from om")
-xsa =dbGetQuery(conAl,"SELECT * from xsanew")
+xsa =dbGetQuery(conAl,"SELECT * from xsa")
 mpb =dbGetQuery(conAl,"SELECT * from mpb")
 sbt1=dbGetQuery(conAl,"SELECT * from sbt1")
 sbt2=dbGetQuery(conAl,"SELECT * from sbt2")
@@ -90,7 +90,7 @@ ggplot(melt(subset(mpbPM,spp=="pollack"),id=c("spp","iter","ftar","btrig")))+
   theme_bw()
 b3=melt(subset(mpbPM,spp=="pollack"&ftar==0.7))
 
-ggplot(melt(subset(xsaPM,spp=="pollack"),
+ggplot(melt(subset(xsaPM,spp=="turbot"),
             id=c("spp","iter")))+
   geom_boxplot(aes(1,as.numeric(value)),outlier.size=0.2)+
   facet_grid(variable~.,scale="free_y",space="free_x")+
@@ -125,4 +125,56 @@ dbWriteTable(conLK, "mydas_empp",   value=sbt2,   append=FALSE,overwrite=TRUE,ro
 dbWriteTable(conLK, "mydas_mpb",    value=mpb,    append=FALSE,overwrite=TRUE,row.names=FALSE)
 dbWriteTable(conLK, "mydas_xsa",    value=xsa,    append=FALSE,overwrite=TRUE,row.names=FALSE)
 
+xsa=dbReadTable(conLK,"mydas_xsa")
+xsa.=subset(xsa,year>60)
+
+ggplot(ddply(xsa.,.(spp,year), with, data.frame(ssb=mean(ssb/msy_ssb))))+
+  geom_line(aes(year,ssb))+
+  geom_line(aes(year,ssb/msy_ssb,col=iter),data=subset(xsa,iter%in%10:13))+
+  facet_wrap(~spp,scale="free_y",ncol=2)+
+  theme(legend.position="none")
+
+res=ddply(xsa.,.(spp,iter), with, FLife:::spectra(FLQuant(ssb/msy_ssb)))
+res=ddply(subset(res,f>0.01), .(spp,f),    with, data.frame(mx=mean(mx)))
+res=ddply(res, .(spp),                     with, data.frame(f=f,m=mx/max(mx)))
+ggplot(res)+
+  geom_errorbar(aes(f,ymin=0,ymax=m))+
+  facet_wrap(~spp,ncol=2,scale="free")+
+  xlab("Frequency")+ylab("")+theme_bw()
+
+res=ddply(xsa.,.(spp,iter), with, {
+  rtn=acf(ssb,plot=FALSE)
+  data.frame(acf=rtn$acf,lag=rtn$lag)})
+dat=ddply(res,.(spp,lag), with, data.frame(val=mean(acf)))
+ggplot(dat)+
+  geom_errorbar(aes(lag,ymin=0,ymax=val))+
+  facet_wrap(~spp,ncol=2)+
+  scale_x_continuous(breaks=seq(-12,0))
+
+
+res=ddply(xsa.,.(spp,iter), with, {
+            rtn=ccf(rec,catch,plot=FALSE)
+            data.frame(acf=rtn$acf,lag=rtn$lag)})
+dat=ddply(res,.(spp,lag), with, data.frame(val=mean(acf)))
+ggplot(subset(dat,lag<0))+
+  geom_errorbar(aes(lag,ymin=0,ymax=val))+
+  facet_wrap(~spp,ncol=2)+
+  scale_x_continuous(breaks=seq(-12,0))
+
+fl=ddply(xsa.,.(spp,iter), with, {
+  rtn=ccf(fbar,sln,plot=FALSE)
+  data.frame(acf=rtn$acf,lag=rtn$lag)})
+fl=ddply(fl,.(spp,lag), with, data.frame(val=mean(acf)))
+rl=ddply(xsa.,.(spp,iter), with, {
+  rtn=ccf(rec,sln,plot=FALSE)
+  data.frame(acf=rtn$acf,lag=rtn$lag)})
+rl=ddply(rl,.(spp,lag), with, data.frame(val=mean(acf)))
+
+dat=rbind(cbind("type"="rec",rl),cbind("type"="F",fl))
+ggplot(subset(dat,lag<0))+
+  geom_errorbar(aes(lag,ymin=0,ymax=val,col=type))+
+  facet_wrap(~spp,ncol=2)+
+  scale_x_continuous(breaks=seq(-12,0))
+
+lm(data~year,data=data.frame(year=1:100,data=rlnorm(100)))$coefficients[2]
 

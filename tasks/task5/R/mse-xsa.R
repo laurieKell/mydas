@@ -16,8 +16,8 @@ library(mydas)
 theme_set(theme_bw())
 
 dirMy ="/home/laurence/Desktop/sea++/mydas/tasks/task4"
-dirDat=file.path(dirMy,"data")
-source('~/Desktop/sea++/mydas/pkgs/mydas/R/omOut.R')
+dirDat="/home/laurence/Desktop/Dropbox/mydasOMs"
+source('/home/laurence/Desktop/sea++/mydas/pkg/R/omOut.R')
 
 ## sets up intial MP 
 xsaMP<-function(om,pg=10,ctrl=xsaControl){
@@ -28,9 +28,9 @@ xsaMP<-function(om,pg=10,ctrl=xsaControl){
 
 mseStart=c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,"sprat"=52,"razor"=54,"lobster"=57)
 
-source('~/Desktop/sea++/mydas/pkgs/mydas/R/mseXSA.R')
+source('/home/laurence/Desktop/sea++/mydas/pkg/R/mseXSA.R')
 
-runXSA<-function(stock,ftar=1,bpa=0.5,sigma=0.3) {
+runXSA<-function(stock,ftar=1,bpa=0.5,sigma=0.3,firstYr=60) {
   load(file.path(dirDat,paste(stock,".RData",sep="")))
   load(file.path(dirDat,"xsaCtrl.RData"))
   #om  =iter(om,1:10)
@@ -48,30 +48,30 @@ runXSA<-function(stock,ftar=1,bpa=0.5,sigma=0.3) {
   uDev =FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:100,age=dimnames(m(om))$age)),0.2,b=0.0)
   
   if (stock=="ray")
-    mp=xsaMP(trim(window(om,end=60),age=3:40),ctrl=xsaCtrl[[stock]],pg=ifelse(stock=="ray",15,10))
+    mp=xsaMP(trim(window(om,end=firstYear),age=3:40),ctrl=xsaCtrl[[stock]],pg=ifelse(stock=="ray",15,10))
   else
-    mp=xsaMP(window(om,end=60),ctrl=xsaCtrl[[stock]],pg=ifelse(stock=="ray",15,10))
+    mp=xsaMP(window(om,end=firstYear),ctrl=xsaCtrl[[stock]],pg=10)
   
   res=mseXSA(om,
              eq,
              mp,control=xsaCtrl[[stock]],
              ftar=ftar,bpa=bpa,sigma=sigma,
-             interval=1,start=60,end=90,
+             interval=1,start=firstYr,end=firstYr+35,
              srDev=srDev,uDev=uDev)
   
   res=data.frame("stock"=stock,"ftar"=ftar,"bpa"=bpa,omSmry(res,eq,lh[c("a","b")]))
   
   res}
 
-scen=expand.grid(stock=c("turbot","lobster","ray","pollack","razor","brill","sprat"),
+scen=expand.grid(stock=c("turbot","lobster","ray","pollack","razor","brill","sprat")[3],
                  ftar=c(1.0),bpa=c(0.5))
 
 xsa=NULL
 for (i in seq(dim(scen)[1])){
-  res=with(scen[i,],runXSA(stock,ftar,bpa))
+  res=with(scen[i,],runXSA(stock,ftar,bpa,firstYear=mseStart[stock]))
   
   xsa=rbind(xsa,res)
   
-  save(xsa,file="/home/laurence/Desktop/sea++/mydas/tasks/task5/data/xsa.RData")}
+  save(xsa,file="/home/laurence/Desktop/sea++/mydas/project/tasks/task5/results/xsa.RData")}
 
 

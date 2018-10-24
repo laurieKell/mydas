@@ -12,12 +12,10 @@ dbListTables(con1)
 # "albnsbt1"  "albnsbt2" "albnwg"  "albnpella"
 
 # only get 1st 10 to demonstrate
-alb1=dbGetQuery(con1,"SELECT * from albnsbt1 #LIMIT 10")
+alb1=dbGetQuery(con1,"SELECT * from albnsbt1")
 alb2=dbGetQuery(con1,"SELECT * from albnsbt2")
 alb3=dbGetQuery(con1,"SELECT * from albnpella")
-alb4=dbGetQuery(con1,"SELECT * from albnwg")
-
-
+alb4=dbGetQuery(con1,"SELECT * from albnrobust")
 
 # eval of right hand side of formula 
 #eval(mod[[3]], c(as(par, 'list'), list(ssb=ssb(psr))))

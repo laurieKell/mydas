@@ -85,11 +85,24 @@ source('~/Desktop/sea++/mydas/pkgs/mydas/R/mlz.R')
 res=mlz(mnLen[,ac(40:60)],prior)
 ```
 
-```{r, brill-z}
-ggplot(melt(model.frame(res$z)))+ 
+```{r, brill-save}
+ggplot(melt(model.frame(res$z[2]/res$z[1])))+ 
   geom_boxplot(aes(x=variable,as.numeric(as.character(value))),outlier.colour = NA)+
   xlab("Block")+ylab("Z")+
   scale_y_continuous(limits=c(0,1))
+```
+**Figure `r iFig=iFig+1; iFig`** Zs
+
+```{r, brill-z}
+save(res,file="/home/laurence/Desktop/tmp/r.RData")
+ggplot(model.frame(log(res[[1]])))+
+  geom_point(aes(`1`,`2`))
+  #scale_x_continuous(limits=c(0,5))+scale_y_continuous(limits=c(0,5))
+
+# ggplot(melt(model.frame(res$z)))+ 
+#   geom_point(aes(x=variable,as.numeric(as.character(value))),outlier.colour = NA)+
+#   xlab("Block")+ylab("Z")+
+#   scale_y_continuous(limits=c(0,1))
 ```
 **Figure `r iFig=iFig+1; iFig`** Zs
 
@@ -127,7 +140,7 @@ res=mlz(mnLen[,ac(40:60)],prior)
 ```
 
 ```{r, turbot-z}
-ggplot(melt(model.frame(res$z)))+ 
+ggplot(melt(model.frame(res$z[2]/res$z[1])))+ 
   geom_boxplot(aes(x=variable,as.numeric(as.character(value))),outlier.colour = NA)+
   xlab("Block")+ylab("Z")+
   scale_y_continuous(limits=c(0,1))+
@@ -169,7 +182,7 @@ res=mlz(mnLen[,ac(40:60)],prior)
 ```
 
 ```{r, ray-z}
-ggplot(melt(model.frame(res$z)))+ 
+ggplot(melt(model.frame(res$z[2]/res$z[1])))+ 
   geom_boxplot(aes(x=variable,as.numeric(as.character(value))),outlier.colour = NA)+
   xlab("Block")+ylab("Z")+
   scale_y_continuous(limits=c(0,1))
@@ -210,7 +223,7 @@ res=mlz(mnLen[,ac(40:60)],prior)
 ```
 
 ```{r, pollack-z}
-ggplot(melt(model.frame(res$z)))+ 
+ggplot(melt(model.frame(res$z[2]/res$z[1])))+ 
   geom_boxplot(aes(x=variable,as.numeric(as.character(value))),outlier.colour = NA)+
   xlab("Block")+ylab("Z")+
   scale_y_continuous(limits=c(0,1))
@@ -251,7 +264,7 @@ res=mlz(mnLen[,ac(40:60)],prior)
 ```
 
 ```{r, sprat-z}
-ggplot(melt(model.frame(res$z)))+ 
+ggplot(melt(model.frame(res$z[2]/res$z[1])))+ 
   geom_boxplot(aes(x=variable,as.numeric(as.character(value))),outlier.colour = NA)+
   xlab("Block")+ylab("Z")+
   scale_y_continuous(limits=c(0,1))
@@ -292,7 +305,7 @@ res=mlz(mnLen[,ac(40:60)],prior)
 ```
 
 ```{r, razor-z}
-ggplot(melt(model.frame(res$z)))+ 
+ggplot(melt(model.frame(res$z[2]/res$z[1])))+ 
   geom_boxplot(aes(x=variable,as.numeric(as.character(value))),outlier.colour = NA)+
   xlab("Block")+ylab("Z")+
   scale_y_continuous(limits=c(0,1))
@@ -333,7 +346,7 @@ res=mlz(mnLen[,ac(40:60)],prior)
 ```
 
 ```{r, lobster-z}
-ggplot(melt(model.frame(res$z)))+ 
+ggplot(melt(model.frame(res$z[2]/res$z[1])))+ 
   geom_boxplot(aes(x=variable,as.numeric(as.character(value))),outlier.colour = NA)+
   xlab("Block")+ylab("Z")+
   scale_y_continuous(limits=c(0,1))

@@ -1,0 +1,242 @@
+---
+title: "Time Series Analysis"
+subtitle: "WKLife"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{FLife}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+github_document:
+    mathjax: TRUE
+tags: FLife
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               fig.height=10,
+               fig.width =8,
+               cache.path="../cache/spectra/simon/",
+               fig.path  ="../tex/spectra/simon-")
+
+options(digits=3)
+
+iFig=0
+```
+```{r pkgs}
+library(ggplot2)
+library(reshape)
+library(plyr)
+library(dplyr)
+library(FLCore)
+library(ggplotFL)
+
+library(FLBRP)
+library(FLAssess)
+library(FLife)
+library(mydas)
+
+library(RPostgreSQL)
+library(DBI)
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+```
+
+```{r, db}
+lh=readRDS("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/papers-2018/data/lhpars.rds")
+om=readRDS("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/papers-2018/data/stk.rds")
+eq=readRDS("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/papers-2018/data/brp.rds")
+eq=propagate(eq,50)
+
+names(dimnames(refpts(eq)))[2]="quant"
+smry=subset(cbind(spp="1",omSmry(om,eq,lh)),year>120)  
+```
+```{r}
+#' @export omSmry
+
+omStock<-function(object){
+  sage<-function(object) apply(stock.n(object)%*%ages(stock.n(object)),2:6,sum)%/%
+                           apply(stock.n(object),2:6,sum)
+  cage<-function(object) apply(catch.n(object)%*%ages(catch.n(object)),2:6,sum)%/%
+                           apply(catch.n(object),2:6,sum) 
+  swt<-function(object) apply(stock.n(object)%*%stock.wt(object),2:6,sum)%/%
+    apply(stock.n(object),2:6,sum)
+  cwt<-function(object) apply(catch.n(object)%*%catch.wt(object),2:6,sum)%/%
+    apply(catch.n(object),2:6,sum) 
+  hvt   <-function(object) catch(object)/stock(object)
+  
+  recs  <-function(object) {res=rec(object)
+                            dimnames(res)[[1]]="all"
+                            res}
+  
+  catchJuv<-function(object) apply(catch.n(object)%*%(1-mat(object))%*%catch.wt(object),2:6,sum)
+
+  res=FLQuants(object,"ssb"=ssb,"stock"=FLCore:::stock,"rec"=recs,"catch"=FLCore:::catch,"catchjuv"=catchJuv,
+                      "fbar"=fbar,
+                      "swt"=swt,"cwt"=cwt,"sage"=sage,"cage"=cage)
+  
+  model.frame(mcf(res),drop=TRUE)}
+
+omRefs<-function(object){
+  
+  refs=rbind(as.data.frame(object["crash",c("harvest")]),
+             as.data.frame(object["virgin",c("rec","ssb")]),
+             as.data.frame(object["msy",c("yield","ssb","harvest")]))
+  refs=cast(refs,iter~refpt+quant,value="data")
+
+  refs}
+
+
+omSmry<-function(x,y="missing",z="missing"){
+  
+  nms=c("iter","year","ssb","stock","rec","catch","catchjuv","fbar",
+        "crash_harvest","virgin_rec","virgin_ssb","msy_harvest","msy_ssb","msy_yield","rec_hat",
+        "swt","cwt","sage","cage","sln","cln") 
+  
+  res=omStock(x)
+  
+  if ("FLBRP" %in% is(y)){
+    res=merge(res,omRefs(refpts(y)))
+    rec=as.data.frame((params(y)["a"]%*%ssb(x))%/%(params(y)["b"]%+%ssb(x)),drop=T)
+    
+    names(rec)[(seq(dim(rec)[2]))[names(rec)=="data"]]="rec_hat"
+    res=merge(res,rec)
+    }
+  else if ("FLPar" %in% is(y))  
+    res=merge(res,omRefs(y))
+  
+  if ("FLPar" %in% is(z))
+    if (all(c("a","b") %in% dimnames(z)$params))
+      res=merge(res,lenFn(x,z))
+
+  res=res[,names(res)[names(res)%in%nms]]
+  
+  res=res[do.call(order,res[,c("iter","year")]),]
+
+  return(res)}
+
+lenFn<-function(x,y){
+  sln<-function(object) apply(stock.n(object)%*%exp(log(stock.wt(object)%/%y["a"])%/%y["b"]),2:6,sum)%/%
+    apply(stock.n(object),2:6,sum)
+  cln<-function(object) apply(catch.n(object)%*%exp(log(catch.wt(object)%/%y["a"])%/%y["b"]),2:6,sum)%/%
+    apply(catch.n(object),2:6,sum) 
+  
+  model.frame(FLQuants(x,"sln"=sln,"cln"=cln),drop=TRUE)}
+
+```
+
+```{r, ts, fig.height=8}
+ggplot(ddply(smry,.(spp,year), with, data.frame(ssb=mean(ssb/msy_ssb))))+
+  geom_line(aes(year,ssb))+    
+  geom_line(aes(year,ssb/msy_ssb,col=iter),data=subset(smry,iter%in%10:13))+   
+  facet_wrap(~spp,scale="free_y",ncol=2)+  
+  theme(legend.position="none")+
+  theme_bw()     
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Time series
+
+```{r, spectra}
+res=ddply(smry,.(spp,iter), with, FLife:::spectra(FLQuant(ssb/msy_ssb)))
+res=ddply(subset(res,f>0.01), .(spp,f),    with, data.frame(mx=mean(mx)))
+res=ddply(res, .(spp),                     with, data.frame(f=f,m=mx/max(mx)))
+ggplot(res)+
+  geom_errorbar(aes(f,ymin=0,ymax=m))+
+  facet_wrap(~spp,ncol=2,scale="free")+
+  xlab("Frequency")+ylab("")+
+  theme_bw()
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Spectra
+
+```{r, ar}
+res=ddply(smry,.(spp,iter), with, {
+  rtn=acf(ssb,plot=FALSE)
+  data.frame(acf=rtn$acf,lag=rtn$lag)})
+dat=ddply(res,.(spp,lag), with, data.frame(val=mean(acf)))
+ggplot(dat)+
+  geom_errorbar(aes(lag,ymin=0,ymax=val))+  
+  facet_wrap(~spp,ncol=2)+
+  scale_x_continuous(breaks=seq(-12,0))+
+  theme_bw()
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Autocorrelation
+
+```{r, rc}
+res=ddply(smry,.(spp,iter), with, {
+            rtn=ccf(rec,catch,plot=FALSE)
+            data.frame(acf=rtn$acf,lag=rtn$lag)})
+dat=ddply(res,.(spp,lag), with, data.frame(val=mean(acf)))
+ggplot(subset(dat,lag<0))+
+  geom_errorbar(aes(lag,ymin=0,ymax=val))+
+  facet_wrap(~spp,ncol=2)+
+  scale_x_continuous(breaks=seq(-12,0))+
+  theme_bw()
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Crosscorrelations between recruitment and catch
+
+```{r, fr}
+fl=ddply(smry,.(spp,iter), with, {
+  rtn=ccf(fbar,sln,plot=FALSE)
+  data.frame(acf=rtn$acf,lag=rtn$lag)})
+fl=ddply(fl,.(spp,lag), with, data.frame(val=mean(acf)))
+rl=ddply(smry,.(spp,iter), with, {
+  rtn=ccf(rec,sln,plot=FALSE)
+  data.frame(acf=rtn$acf,lag=rtn$lag)})
+rl=ddply(rl,.(spp,lag), with, data.frame(val=mean(acf)))
+
+dat=rbind(cbind("type"="rec",rl),cbind("type"="F",fl))
+ggplot(subset(dat,lag<0))+
+  geom_errorbar(aes(lag,ymin=0,ymax=val,col=type))+
+  facet_wrap(~spp,ncol=2)+
+  scale_x_continuous(breaks=seq(-12,0))+
+  theme_bw()
+```
+
+
+**Figure `r iFig=iFig+1; iFig`.** Crosscorrelations between recruitment and F and length
+
+
+
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLife:     `r packageVersion('FLife')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLAssess:  `r packageVersion('FLAssess')`
+* FLXSA:     `r packageVersion('FLXSA')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+## Session Info
+
+```{r}
+sessionInfo()
+```

@@ -141,11 +141,11 @@ lb=lbspr(lfd,prior)
 ```
 
 ```{r}
-save(lb,file="/home/laurence/Desktop/tmp/lb.RData")
+save(lb,file="/home/laurence/Desktop/tmp/lb.RData") 
 ```
 
 ```{r, turbot-spr}
-ggplot(melt(lb["SPR"]))+
+ggplot(melt(sweep(lb["SPR"],c(1,3),lb["SPR","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("SPR")+ylab("Year")+theme_bw()
@@ -153,7 +153,7 @@ ggplot(melt(lb["SPR"]))+
 **Figure `r iFig=iFig+1; iFig`** Estimates of SPR for turbot. 
 
 ```{r, turbot-fm}
-ggplot(melt(lb["FM"]))+
+ggplot(melt(sweep(lb["FM"],c(1,3),lb["FM","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("F")+ylab("Year")+theme_bw()
@@ -194,8 +194,9 @@ ggplot(melt(lfd[,seq(1,45,10),,,,1:4]))+
 lb=lbspr(lfd,prior)
 ```
 
+
 ```{r, brill-spr}
-ggplot(melt(lb["SPR"]))+
+ggplot(melt(sweep(lb["SPR"],c(1,3),lb["SPR","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("SPR")+ylab("Year")+theme_bw()
@@ -203,7 +204,7 @@ ggplot(melt(lb["SPR"]))+
 **Figure `r iFig=iFig+1; iFig`** Estimates of SPR for brill. 
 
 ```{r, brill-fm}
-ggplot(melt(lb["FM"]))+
+ggplot(melt(sweep(lb["FM"],c(1,3),lb["FM","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("F")+ylab("Year")+theme_bw()
@@ -245,14 +246,15 @@ lb=lbspr(lfd,prior)
 ```
 
 ```{r, ray-spr}
-ggplot(melt(lb["SPR"]))+
+ggplot(melt(sweep(lb["SPR"],c(1,3),lb["SPR","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   xlab("SPR")+ylab("Year")+theme_bw()
 ```
 **Figure `r iFig=iFig+1; iFig`** Estimates of SPR for ray. 
 
 ```{r, ray-fm}
-ggplot(melt(lb["FM"]))+
+ggplot(ddply(melt(sweep(lb["FM"],c(1,3),lb["FM","40"],"/")),.(iter), 
+             transform, val=value/mean(value)))+
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("F")+ylab("Year")+theme_bw()
@@ -294,14 +296,14 @@ lb=lbspr(lfd,prior)
 ```
 
 ```{r, sprat-spr}
-ggplot(melt(lb["SPR"]))+
+ggplot(melt(sweep(lb["SPR"],c(1,3),lb["SPR","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   xlab("SPR")+ylab("Year")+theme_bw()
 ```
 **Figure `r iFig=iFig+1; iFig`** Estimates of SPR for pollack. 
 
 ```{r, sprat-fm}
-ggplot(melt(lb["FM"]))+
+ggplot(melt(sweep(lb["FM"],c(1,3),lb["FM","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("F")+ylab("Year")+theme_bw()
@@ -343,14 +345,14 @@ lb=lbspr(lfd,prior)
 ```
 
 ```{r, pollack-spr}
-ggplot(melt(lb["SPR"]))+
+ggplot(melt(sweep(lb["SPR"],c(1,3),lb["SPR","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   xlab("SPR")+ylab("Year")+theme_bw()
 ```
 **Figure `r iFig=iFig+1; iFig`** Estimates of SPR for pollack. 
 
 ```{r, pollack-fm}
-ggplot(melt(lb["FM"]))+
+ggplot(melt(sweep(lb["FM"],c(1,3),lb["FM","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("F")+ylab("Year")+theme_bw()
@@ -392,7 +394,7 @@ lb=lbspr(lfd,prior)
 ```
 
 ```{r, razor-spr}
-ggplot(melt(lb["SPR"]))+
+ggplot(melt(sweep(lb["SPR"],c(1,3),lb["SPR","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   xlab("SPR")+ylab("Year")+theme_bw()
 ```
@@ -400,7 +402,7 @@ ggplot(melt(lb["SPR"]))+
 
 
 ```{r, razor-fm}
-ggplot(melt(lb["FM"]))+
+ggplot(melt(sweep(lb["FM"],c(1,3),lb["FM","40"],"/")))+
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("F")+ylab("Year")+theme_bw()
@@ -410,7 +412,7 @@ ggplot(melt(lb["FM"]))+
 
 ## lobster
 ```{r, lobster-om}
-load(file.path(dirDat,"lobster.RData"))
+#load(file.path(dirDat,"lobster.RData"))
 
 om=iter(om,1:500)
 lh=iter(lh,1:500)
@@ -443,14 +445,14 @@ lb=lbspr(lfd,prior)
 ```
 
 ```{r, lobster-spr}
-ggplot(melt(lb["SPR"]))+   
+ggplot(melt(sweep(lb["SPR"],c(1,3),lb["SPR","40"],"/")))+   
   geom_boxplot(aes(ac(year),value))+
   xlab("SPR")+ylab("Year")+theme_bw()  
 ```
 **Figure `r iFig=iFig+1; iFig`** Estimates of SPR for lobster. 
 
 ```{r, lobster-fm}
-ggplot(melt(lb["FM"]))+   
+ggplot(melt(sweep(lb["FM"],c(1,3),lb["FM","40"],"/")))+  
   geom_boxplot(aes(ac(year),value))+
   scale_x_discrete(breaks=seq(20,60,10))+
   xlab("F")+ylab("Year")+theme_bw()
