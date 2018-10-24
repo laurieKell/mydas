@@ -1,0 +1,17 @@
+/home/laurence/Desktop/sea++/mydas/project/mydas-project.Rproj
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+**/data
+**/cache
+**/docs
+**/inputs
+**/*.RData
+**/*.csv
+**/*.log
+**/*.aux
+**/*.toc
+**/*.backup
+**/*.gz
+
