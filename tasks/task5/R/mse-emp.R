@@ -9,6 +9,11 @@ library(FLasher)
 library(FLBRP)
 library(FLife)
 
+library(doParallel)
+library(foreach)
+
+registerDoParallel(2)
+
 library(rdrop2)
 
 library(devtools)
@@ -16,10 +21,13 @@ devtools::install_github("lauriekell/mydas", subdir="pkgs/mydas")
 
 library(mydas)
 
-source('~/Desktop/sea++/mydas/pkg/R/hcrSBTD.R')
-source('~/Desktop/sea++/mydas/pkg/R/mseSBTD.R')
-source('~/Desktop/flr/kobe/R/kobe-funcs.R')
-source("/home/laurence/Desktop/sea++/mydas/pkg/R/smryStat.R")
+setwd("/home/laurence/Desktop/sea++/mydas/pkg")
+source('R/hcrSBTD.R')
+source('R/mseSBTD.R')
+source('R/kobe-funcs.R')
+source("R/smryStat.R")
+source('R/hcrSBTP.R')
+source('R/mseSBTP.R')
 
 sessionInfo()
 
@@ -37,39 +45,39 @@ srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.2,b=0.0)
 ### OEM
 uDev =FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.3,b=0.0)
 
-## MSE for Derivative empirical MP
-set.seed(1234)
-k1=runif(nits, 0.5, 5.0)
-k2=runif(nits, 0.5, 5.0)
-controlD=rbind(FLPar(k1   =k1),
-               FLPar(k2   =k2),
-               FLPar(gamma=runif(nits, 1, 1)))
-save(controlD,file=file.path(dirRes,"controlD.RData"))
-
-## MSE for Proportion empirical MP
-set.seed(1234)
-controlP=rbind(FLPar(k1=runif(nits, 0.1,0.5)),
-               FLPar(k2=runif(nits, 0.1,0.5)))
-save(controlP,file=file.path(dirRes,"controlP.RData"))
-
 scen=expand.grid(spp=c("turbot","lobster","ray","pollack","razor","brill","sprat"),
                  stringsAsFactors=FALSE)
 
-##### P ##########################################################
-empD=NULL
-for (i in rev(seq(dim(scen)[1]))){
-  load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
-  om=iter(om,seq(nits))
-  eq=iter(eq,seq(nits))
-  lh=iter(lh,seq(nits))
+##### D ##########################################################
+
+set.seed(1234)
+k1=runif(nits, 0.0, 1.0)
+k2=runif(nits, 0.0, 1.0)
+controlD=rbind(FLPar(k1   =k1),
+               FLPar(k2   =k2),
+               FLPar(gamma=runif(nits, 1, 1)))
+
+empD<-foreach(i=(seq(dim(scen)[1])), 
+             .combine=list,
+             .multicombine=TRUE,
+             .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
+                         "FLasher","FLBRP","FLife")) %dopar%{
+#for (i in seq(dim(scen)[1])){
+
+                           
+  load(file.path("/home/laurence/Desktop/Dropbox/mydasOMs",paste(scen[i,"spp"],".RData",sep="")))
+  om=FLCore:::iter(om,seq(nits))
+  eq=FLCore:::iter(eq,seq(nits))
+  lh=FLCore:::iter(lh,seq(nits))
   
   res=mseSBTD(om,eq,
               control=controlD,
               srDev=srDev,uDev=uDev,
-              start  =mseStart[scen[i,"spp"]]+5,end=mseStart[scen[i,"spp"]]+45,nyrs=3)
-  empD=rbind(empD,cbind(spp=scen[i,"spp"],omSmry(res,eq,lh)))
+              start  =mseStart[scen[i,"spp"]]+5,end=mseStart[scen[i,"spp"]]+45,nyrs=5)
   
-  save(empD,controlD,file=file.path(dirRes,"empd-results.RData"))}
+  save(res,file=file.path(dirRes,paste("empd-",i,".RData",sep="")))
+  
+  cbind(spp=scen[i,"spp"],omSmry(res,eq,lh))}
 
 parD=NULL
 for (i in seq(dim(scen)[1])){
@@ -81,6 +89,7 @@ for (i in seq(dim(scen)[1])){
 empD$spp =ac(empD$spp)
 empD     =subset(empD,year>=mseStart[spp]&year<=mseStart[spp]+45)
 empD$year=empD$year-mseStart[empD$spp]
+
 empd_pm=ddply(empD,.(spp,iter), smryStat)
 
 empd_pm=merge(transform(empd_pm,iter=as.numeric(ac(iter)),spp=ac(spp)),
@@ -89,12 +98,20 @@ save(empD,empd_pm,controlD,file=file.path(dirRes,"empd-results.RData"))
 
 
 ##### P ##########################################################
-empP=NULL
-for (i in seq(dim(scen)[1])[(1:5)]){
+set.seed(1234)
+controlP=rbind(FLPar(k1=runif(nits, 0.0,2.0)),
+               FLPar(k2=runif(nits, 0.0,2.0)))
+
+empP<-foreach(i=(seq(dim(scen)[1])), 
+              .combine=rbind,
+              .multicombine=TRUE,
+              .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
+                          "FLasher","FLBRP","FLife")) %dopar%{
+  
   load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
-  om=iter(om,seq(nits))
-  eq=iter(eq,seq(nits))
-  lh=iter(lh,seq(nits))
+  om=FLCore:::iter(om,seq(nits))
+  eq=FLCore:::iter(eq,seq(nits))
+  lh=FLCore:::iter(lh,seq(nits))
 
   res =mseSBTP(om,eq,
                control =controlP,
@@ -102,9 +119,11 @@ for (i in seq(dim(scen)[1])[(1:5)]){
                srDev   =srDev,uDev=uDev,
                refU    =39:41,
                refCatch=23:25)
-  empP=rbind(empP,cbind(spp=scen[i,"spp"],omSmry(res,eq,lh)))
   
-  save(empP,file=file.path(dirRes,"empp-results.RData"))}
+  save(res,file=file.path(dirRes,paste("empp-",i,".RData",sep="")))
+  
+  cbind(spp=scen[i,"spp"],omSmry(res,eq,lh))
+  }
 
 parP=NULL
 for (i in seq(dim(scen)[1])){

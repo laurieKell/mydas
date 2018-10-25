@@ -15,39 +15,15 @@ dat=melt(dat,id=c("spp","objective","objectval"))
 colnames(dat)[4:5] = c("param","paramval")
 
 dat=subset(dat,objective!="kobe.year"&param!="gamma")
-ggplot(aes(objectval,paramval, col=spp),data=dat)+
+ggplot(aes(paramval,objectval, col=spp),data=dat)+
   geom_point(size=.05)+
   geom_smooth(se=FALSE,span=1)+
   #stat_poly_eq(formula = formula, 
   #             aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), parse = TRUE)+
-  facet_grid(param~objective,scale="free")+
+  facet_grid(objective~param,scale="free")+
   theme_bw()+
   theme(legend.position="bottom")+
-  xlab("Performance Measure")+ylab("Hyperparameter")
-
-
-### Derivative
-load("/home/laurence/Desktop/Dropbox/mydasOMs/empd-results.RData")
-
-empd_pm=transform(empd_pm,kobe.p=kobe.n/45,yieldAav=pmin(0.5,yieldAav))
-
-dat=melt(empd_pm[,c("safety","kobe.year","kobe.p","yield",
-                    "yieldAav","spp","k1","k2","gamma")], 
-         id=c("spp","k1","k2","gamma"))
-colnames(dat)[5:6] = c("objective","objectval")
-dat=melt(dat,id=c("spp","objective","objectval"))
-colnames(dat)[4:5] = c("param","paramval")
-
-dat=subset(dat,objective!="kobe.year"&param!="gamma")
-ggplot(aes(objectval,paramval, col=spp),data=dat)+
-  geom_point(size=.05)+
-  geom_smooth(se=FALSE,span=1)+
-  #stat_poly_eq(formula = formula, 
-  #             aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), parse = TRUE)+
-  facet_grid(param~objective,scale="free")+
-  theme_bw()+
-  theme(legend.position="bottom")+
-  xlab("Performance Measure")+ylab("Hyperparameter")
+  ylab("Performance Measure")+xlab("Hyperparameter")
 
 
 ### Proportional ###############################################################
@@ -63,15 +39,15 @@ dat=melt(dat,id=c("spp","objective","objectval"))
 colnames(dat)[4:5] = c("param","paramval")
 
 dat=subset(dat,objective!="kobe.year")
-ggplot(aes(objectval,paramval, col=spp),data=dat)+
+ggplot(aes(paramval,objectval, col=spp),data=dat)+
   geom_point(size=.05)+
   geom_smooth(se=FALSE,span=1)+
   #stat_poly_eq(formula = formula, 
   #             aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), parse = TRUE)+
-  facet_grid(param~objective,scale="free")+
+  facet_grid(objective~param,scale="free")+
   theme_bw()+
   theme(legend.position="bottom")+
-  xlab("Performance Measure")+ylab("Hyperparameter")
+  ylab("Performance Measure")+xlab("Hyperparameter")
 
 For empd, the trends are the same for the stocks, but values of safety vary
 
