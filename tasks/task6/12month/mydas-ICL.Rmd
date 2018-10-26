@@ -1,0 +1,248 @@
+---
+title: "mydas"
+subtitle: "Funded by the Irish Exchequer and EMFF 2014-2020"
+author: "Laurence Kell, Alex Tidd, Coilin Minto & Maite Pons"
+date: "October 5, 2018"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo      =FALSE)
+```
+
+```{r libraries}
+library(grid)
+library(png)
+```
+
+
+## Tasks
+
+**Develop MSY reference points** or proxies across the spectrum of data-limited stocks.
+
+<!-- Economic value; Importance; Sensitivity to the impacts of fishing; Available data. -->
+
+**Simulation Framework**, as a number of data-limited methods already exist implement a common framework to compare their performance
+
+**Diagnostics** to assess sensitivity to assumptions and bias. 
+
+**Management Strategy Evaluation** to ensure robustness to uncertainty 
+
+# Simulation Framework
+
+## Life Histories
+```{r fig.height=5.5}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/FLife/tex/figsfb-1.png"))
+```
+
+## Case Studies
+Turbot, Brill, Pollack, Ray, Sprat, Lobster, Razors
+ 
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-pairs-1.png"))
+```
+
+
+## Natural Mortality
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/FLife/tex/figsm-1.png"))
+```
+
+## Biology
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-vectors-1.png"))
+```
+
+## Equilibrium and Reference Points
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-eqRun-1.png"))
+```
+
+## Operating Model
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-ts-1.png"))
+```
+
+# Sensitvity Analysis
+
+## Elasticity
+Reference Points
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/R/tex/elas-lorenzen/elasRef-1.png"))
+```
+
+## Elasticity
+Reference Points
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/R/tex/elas-lorenzen/elasRef2-1.png"))
+```
+
+## Elasticity
+
+Population Growth Rate
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/R/tex/elas-lorenzen/elasR-1.png"))
+```
+
+## Elasticity
+
+Mean age at virgin and $F_{MSY}$, and $L_{opt}$
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/R/tex/elas-lorenzen/elasGt-1.png"))
+```
+
+## Elasticity
+
+Species
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/R/tex/elas-lorenzen/comp-1.png"))
+```
+
+# Length v Catch Methods
+
+## Scenarios
+Stock trends 
+
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/maite-l-scen.png"))
+```
+
+## Evaluation
+
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/maite-cl.png"))
+```
+
+# Length Based Methods
+
+## Observation Error Model
+Selection pattern
+
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/maite-l-sel.png"))
+```
+
+## Evaluation 
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/maite-l.png"))
+```
+
+# Turbot Example
+
+
+## Operating Model
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-ts-1.png"))
+```
+
+## Category 1: Age based
+
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/vpa-xsa-turbot-1.png"))
+```
+
+## Category 1: Biomass based
+
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/bd-turbot-1.png"))
+```
+
+## Category 3: Catch only
+
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/bdsra-turbot-plot-1.png"))
+```
+
+## LBSPR
+
+Fishing Mortality 
+
+```{r fig.height=4.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/lbspr-turbot-fm-1.png"))
+```
+
+
+## MLZ
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/mlz-turbot-z-1.png"))
+```
+
+# MSE
+
+## Performance Measures 
+### **Safety** 
++ Probability of avoiding limits
+
+### **Status** 
++ Probability of achieving targets, recovery and long-term
+
+### **Yield** 
++ MSY
+
+### **Variability** 
++ Annual variability in yield
+
+## Cat 1; Aged based ICES AR
+
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/mp-a.png"))
+```
+
+## Cat 1; Biomass based ICES AR
+
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/mp-b.png"))
+```
+
+## Cat 1;  Comparison
+
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/papers-2018/mp-c1.png"))
+```
+
+## Empirical HCRs
+Index Relative to Reference
+
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/mp-p.png"))
+```
+
+## Empirical HCRs
+Trend in Index 
+
+```{r fig.height=5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/mp-d.png"))
+```
+
+## Compare  Performance
+
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/papers-2018/mp-c.png"))
+```
+
+
+# Conclusions
+## Conclusions
+### **Risk**
+An uncertainty that matters, what matters are management objectives
+
+### **Management Procedures**
+Consider the data along with the assumptions, estimator and management and feedback between the various elements
+
+### **Value of infomation**
+Models are cheap, but data is expensive
+
+### **Diagnostics**
+Compare across species, stocks, fisheries and advice rules
+
+## R Packages
+
++ FLR
+    + FLife
+    + mydas
+    + mpb
++ R Packages
+    + LBSPR
+    + MLZ
+    + ...
+    

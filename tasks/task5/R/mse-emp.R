@@ -12,28 +12,15 @@ library(FLife)
 library(doParallel)
 library(foreach)
 
-registerDoParallel(2)
-
-library(rdrop2)
-
-library(devtools)
-devtools::install_github("lauriekell/mydas", subdir="pkgs/mydas")
+registerDoParallel(3)
 
 library(mydas)
 
-setwd("/home/laurence/Desktop/sea++/mydas/pkg")
-source('R/hcrSBTD.R')
-source('R/mseSBTD.R')
-source('R/kobe-funcs.R')
-source("R/smryStat.R")
-source('R/hcrSBTP.R')
-source('R/mseSBTP.R')
+#sessionInfo()
 
-sessionInfo()
-
-dirMy ="/home/laurence/Desktop/sims/wklife"
-dirDat="/home/laurence/Desktop/Dropbox/mydasOMs"
-dirRes=dirDat
+dirMy="/home/laurence/Desktop/Dropbox/mydasOMs"
+dirDat=file.path(dirMy, "data")
+dirRes=file.path(dirMy,"results")
 
 mseStart=c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,"sprat"=52,"razor"=54,"lobster"=57)
 
@@ -49,7 +36,6 @@ scen=expand.grid(spp=c("turbot","lobster","ray","pollack","razor","brill","sprat
                  stringsAsFactors=FALSE)
 
 ##### D ##########################################################
-
 set.seed(1234)
 k1=runif(nits, 0.0, 1.0)
 k2=runif(nits, 0.0, 1.0)
@@ -58,14 +44,13 @@ controlD=rbind(FLPar(k1   =k1),
                FLPar(gamma=runif(nits, 1, 1)))
 
 empD<-foreach(i=(seq(dim(scen)[1])), 
-             .combine=list,
+             .combine=cbind,
              .multicombine=TRUE,
              .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
                          "FLasher","FLBRP","FLife")) %dopar%{
 #for (i in seq(dim(scen)[1])){
-
                            
-  load(file.path("/home/laurence/Desktop/Dropbox/mydasOMs",paste(scen[i,"spp"],".RData",sep="")))
+  load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
   om=FLCore:::iter(om,seq(nits))
   eq=FLCore:::iter(eq,seq(nits))
   lh=FLCore:::iter(lh,seq(nits))
@@ -96,11 +81,10 @@ empd_pm=merge(transform(empd_pm,iter=as.numeric(ac(iter)),spp=ac(spp)),
               transform(parD,   iter=as.numeric(ac(iter)),spp=ac(spp)),by=c("spp","iter"))
 save(empD,empd_pm,controlD,file=file.path(dirRes,"empd-results.RData"))
 
-
 ##### P ##########################################################
 set.seed(1234)
-controlP=rbind(FLPar(k1=runif(nits, 0.0,2.0)),
-               FLPar(k2=runif(nits, 0.0,2.0)))
+controlP=rbind(FLPar(k1=runif(nits, 0.0,1.0)),
+               FLPar(k2=runif(nits, 0.0,1.0)))
 
 empP<-foreach(i=(seq(dim(scen)[1])), 
               .combine=rbind,
@@ -109,9 +93,9 @@ empP<-foreach(i=(seq(dim(scen)[1])),
                           "FLasher","FLBRP","FLife")) %dopar%{
   
   load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
-  om=FLCore:::iter(om,seq(nits))
-  eq=FLCore:::iter(eq,seq(nits))
-  lh=FLCore:::iter(lh,seq(nits))
+  #om=FLCore:::iter(om,seq(nits))
+  #eq=FLCore:::iter(eq,seq(nits))
+  #lh=FLCore:::iter(lh,seq(nits))
 
   res =mseSBTP(om,eq,
                control =controlP,
@@ -125,11 +109,18 @@ empP<-foreach(i=(seq(dim(scen)[1])),
   cbind(spp=scen[i,"spp"],omSmry(res,eq,lh))
   }
 
+empP=NULL
+for (i in 1:7){
+  load(paste("/home/laurence/Desktop/Dropbox/mydasOMs/data/",scen[i,"spp"],".RData",sep=""))
+  load(paste("/home/laurence/Desktop/Dropbox/mydasOMs/results/empp-",i,".RData",sep=""))
+  
+  empP=rbind(empP,cbind(spp=scen[i,"spp"],omSmry(res,eq,lh)))
+  }
+
 parP=NULL
 for (i in seq(dim(scen)[1])){
   #drop_download(path=paste(file.path("mydasOMs",scen[i,"spp"]),".RData",sep=""),overwrite=T)
-  load(file.path(dirRes,paste(scen[i,"spp"],".RData",sep="")))
-  parD=rbind(parD,cbind(spp=scen[i,"spp"],model.frame(prior),model.frame(controlD)[,-4]))
+  load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
   parP=rbind(parP,cbind(spp=scen[i,"spp"],model.frame(prior),model.frame(controlP)[,-3]))
   }
 
