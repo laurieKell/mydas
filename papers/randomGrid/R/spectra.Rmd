@@ -1,0 +1,294 @@
+---
+title: "Spectra"
+author: "L Kell & A Tidd"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =10, 
+               fig.height=10,
+               cache     =TRUE, 
+               fig.path  ="../tex/rg-",
+               cache.path="../cache/rg/")
+
+iFig=0
+iTab=0
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat="/home/laurence/Desktop/Dropbox/mydasOMs/data"
+dirRes="/home/laurence/Desktop/Dropbox/mydasOMs/results"
+```
+```{r, pkgs}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(reshape)
+library(GGally)
+
+library(FLCore)
+library(FLBRP)
+library(FLasher)
+library(ggplotFL)
+library(FLife)
+```
+
+```{r, lh}
+load(file.path(dirDat,"brill.RData"))
+oms=FLStocks("brill"=om)
+load(file.path(dirDat,"turbot.RData"))
+oms["turbot"]=om
+load(file.path(dirDat,"ray.RData"))
+oms["ray"]=om
+load(file.path(dirDat,"pollack.RData"))
+oms["pollack"]=om
+load(file.path(dirDat,"sprat.RData"))
+oms["sprat"]=om
+load(file.path(dirDat,"lobster.RData"))
+oms["lobster"]=om
+load(file.path(dirDat,"razor.RData"))
+oms["razor"]=om
+
+plot(oms)
+```
+
+**Figure `r iFig=iFig+1; iFig`** 
+
+```{r}
+dat=ldply(oms,function(x) adply(ssb(window(x,start=65)),6,function(x) acf(x,plot=FALSE,max.lag=15)$acf))
+#dat[,3:19]=scale(dat[,3:19])
+dat=dat[,-(19:20)]
+
+d<- dist(dat[,-(1:2)], method = "euclidean") # distance matrix
+fit <- hclust(d, method="ward")
+plot(fit) # display dendogram
+groups <- cutree(fit, k=5) # cut tree into 5 clusters
+# draw dendogram with red borders around the 5 clusters
+rect.hclust(fit, k=5, border="red") 
+
+dat=cbind(dat,group=groups)
+dat=dat[,c(1,2,19,3:18)]
+
+dt=melt(dat,id=c(".id","iter","group"))
+
+dt=transform(dt,var=as.numeric(substr(ac(variable),2,nchar(ac(variable)))))
+
+ggplot(dt)+
+  geom_boxplot(aes(as.factor(var),value))+
+  facet_grid(group~.)
+```
+
+```{r}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/empd-results.RData")
+
+ctrl=rbind(cbind(j=1,model.frame(controlD[[1]])),
+           cbind(j=2,model.frame(controlD[[2]])),
+           cbind(j=3,model.frame(controlD[[3]])),
+           cbind(j=4,model.frame(controlD[[4]])))
+ctrl$iter=as.numeric(as.character(ctrl$iter))
+emp=merge(empd_pm[,-(30:32)],ctrl,by=c("iter","j"))
+
+grp=dat[,c(".id","iter","group")]
+names(grp)[1]="spp"
+
+dt3=merge(emp,grp,by=c("spp","iter"))
+dt3=transform(dt3,k1.=cut(k1,breaks=seq(0,1,0.05)),
+                  k2.=cut(k2,breaks=seq(0,1,0.05)))
+
+minMax<-function(x,na.rm=TRUE) (x-min(x,na.rm=na.rm))/diff(range(x,na.rm=na.rm))
+
+dt4=ddply(dt3,.(group,k1.,k2.), with, data.frame(kobe  =mean(kobe.n),
+                                               safety=mean(safety),
+                                               yield =mean(yield),
+                                               aav   =(mean(yieldAav))))
+dt4=melt(dt4,id=c("group","k1.","k2."))
+dt4=ddply(dt4,.(variable), transform, value=minMax(value))
+
+mycol=rev(c("navy","blue","cyan","lightcyan","yellow","red","red4"))
+ggplot(dt4)+
+  geom_tile(aes(k1.,k2.,fill=value))+
+  scale_fill_gradientn(colours=mycol)+
+  facet_grid(group~variable)
+
+ggplot(dt4 , aes(x=k1., y=k2.)) +
+  geom_raster(aes(fill=kb), interpolate=TRUE) +
+  scale_fill_gradient2(high="navy", mid="white", low="red", 
+                       midpoint=0.5, limits=range(dt4$kb))
+
+dt5=ddply(dt3,.(spp,k1.,k2.), with, data.frame(kobe  =mean(kobe.n),
+                                               safety=mean(safety),
+                                               yield =mean(yield),
+                                               aav   =(mean(yieldAav))))
+dt5=melt(dt5,id=c("spp","k1.","k2."))
+dt5=ddply(dt5,.(variable), transform, value=minMax(value))
+
+ggplot(dt5)+
+  geom_tile(aes(k1.,k2.,fill=value))+
+  scale_fill_gradientn(colours=mycol)+
+  facet_grid(spp~variable)
+```
+
+
+## Equilibrium dynamics
+
+The parameters are then used by `lhEql` to simulate the equilibrium dynamics by combining the spawner/yield per recruit relationships with a stock recruiment relationship.
+
+```{r, eqRun}
+eq=lhEql(par,spwn=0)
+```
+
+
+```{r vectors}
+sel<-function(x) 
+  catch.sel(x)%/%fapex(catch.sel(x))
+
+dat=FLQuants(eq,"M"=m,"Selectivity"=sel,"Maturity"=mat,"Mass"=stock.wt)
+
+ggplot(subset(as.data.frame(dat),age<=10))+
+  geom_line(aes(age,data,col=dimnames(par)$iter[iter]))+
+  facet_wrap(~qname,scale="free")+
+  scale_x_continuous(limits=c(0,10))+
+  xlab("Age")+ylab("")+
+  theme(legend.position="bottom")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Vectors.
+
+
+```{r, eq}
+plot(eq,refpts=FALSE)  
+```
+
+**Figure `r iFig=iFig+1; iFig`** Equilibrum Curves.
+
+## Population dynamics
+
+```{r om}
+#http://www.fishbase.org/manual/Key%20Facts.htm
+
+gTime=aaply(par,2,function(x) round(FLife:::genTime(FLPar(x))))
+
+fbar=as.FLQuant(mdply(data.frame(iter=1:7), function(iter) 
+                   data.frame(year=1:105,
+                              data=c(rep(.1,19),seq(.1,2,length.out=30),
+                                                seq(2.0,1,length.out=gTime[iter])[-1],
+                                                rep(1,61))[1:105])))
+
+eq@fbar=fbar%*%refpts(eq)["msy","harvest"]
+
+om=as(eq,"FLStock")
+om=fwd(om,f=fbar(om)[,-1],sr=eq)
+lh=par
+save(lh,eq,om,file=file.path(dirDat,"om7.RData"),compress="xz")
+
+plot(om)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series.
+
+```{r ts}
+plot(FLQuants(om, 
+          "ssb" = function(x) ssb(x)%/%refpts( eq)["msy","ssb"], 
+          "f" =   function(x) fbar(x)%/%refpts(eq)["msy","harvest"], 
+          "rec" = function(x) rec(x)%/%refpts( eq)["msy","rec"], 
+          "catch"=function(x) landings(x)%/%refpts(eq)["msy","yield"])) + 
+  geom_hline(aes(yintercept=1),col="red") 
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series relative to MSY benchmarks.
+
+```{r}
+library(doParallel)
+library(foreach)
+
+registerDoParallel(2)
+
+library(mydas)
+
+mseStart=            c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,"sprat"=52,
+                       "razor"=54,"lobster"=57)
+scen=expand.grid(spp=c("brill",   "turbot",   "ray",   "pollack",   "sprat",   
+                       "razor",   "lobster"),
+                 stringsAsFactors=FALSE)
+
+### Stochasticity
+set.seed(12345)
+nits=500
+
+srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.2,b=0.0)
+uDev =FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.3,b=0.0)
+
+control=rbind(FLPar(k1   =runif(nits, 0.0, 1.0)),
+              FLPar(k2   =runif(nits, 0.0, 1.0)),
+              FLPar(gamma=runif(nits, 1, 1)))
+
+empD=NULL
+empD<-foreach(i=(seq(dim(scen)[1])), 
+             .combine=rbind,
+             .multicombine=TRUE,
+             .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
+                         "FLasher","FLBRP","FLife")) %dopar%{
+
+  om.=propagate(FLCore:::iter(om,i),nits)
+  eq.=propagate(FLCore:::iter(eq,i),nits)
+  lh.=propagate(FLCore:::iter(lh,i),nits)
+  
+  mse=mseSBTD(om.,eq.,
+              control=control,
+              srDev=srDev,uDev=uDev,
+              start  =mseStart[scen[i,"spp"]]+5,end=mseStart[scen[i,"spp"]]+45,nyrs=5)
+  res=cbind(spp=scen[i,"spp"],omSmry(mse,eq.,lh.))
+  
+  save(res,file=file.path(dirRes,paste("omd-2-",i,".RData",sep="")))
+  
+  res}
+
+empD.=empD
+empD$spp =ac(empD$spp)
+empD     =subset(empD,year>=mseStart[empD$spp]&year<=mseStart[empD$spp]+45)
+empD$year=empD$year-mseStart[empD$spp]
+
+empd_pm=ddply(empD,.(spp,iter), smryStat)
+
+save(empD,empd_pm,control,file=file.path(dirRes,"omd-results-2.RData"))
+```
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLasher:   `r packageVersion('FLasher')`
+* FLife:     `r packageVersion('FLife')`
+* ggplotFL:  `r packageVersion('ggplotFL')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+```
+

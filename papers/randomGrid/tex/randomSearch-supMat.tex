@@ -1,0 +1,72 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{url,  multirow}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{algorithm}
+\usepackage{graphicx} 
+
+\usepackage[authoryear,round]{natbib}
+
+\newcommand{\eps}{\epsilon}
+\newcommand{\veps}{\varepsilon}
+
+
+\title{\textbf{Random Search}}
+\author{}
+%\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage\clearpage
+
+
+\tableofcontents\newpage\
+
+\section{Introduction}
+There is a growing need for the development of innovative approaches so that management of all marine stocks not just those of high commercial value can be included into the Common Fisheries Policy (CFP) framework. Management objectives under the CFP are to recover stocks and to maintain stocks within safe biological limits, including by-catch species. These conservation measures can include biological target reference points e.g. and/or population size (stock biomass), yields (catches), long–term yields and fishing mortality against which the preservation of stocks within such limits are assessed. These are often referred to as management procedures or harvesting strategies which include the operational component harvest control rule (HCR) based on indicators (e.g. monitoring data or models) of stock status. To test the performance of candidate management strategies often requires evaluation of alternative hypothesis about the dynamics of the system e.g. population dynamics (e.g. life history dynamics) and the behaviour of the fishery (e.g range contraction and density dependence) etc..  Due to the nature of conflicting objectives, stakeholder interests and the uncertainty in the dynamics of the resource and/ or the plausibility of alternative hypotheses can lead to poor decision making and can be problematic when defining management policy.
+
+An intense area of work being researched over the last 2 decades is Management Strategy Evaluation (MSE), which focuses on the broader aspects of fishing (the Ecosystem) whereby different management options are tested against a range of objectives (see Kell et al., 2007).  The approach is not to come up with a definitive answer, but to lay-bare the trade offs associated with each management objective, along with identifying and incorporating uncertainties in the evaluation and communicating the results effectively to client groups and decision-makers. MSE is not intended to be complex but to provide a robust framework that account for conflicting poorly defined objectives and uncertainties that have been absent in conventional management (Kell et al., 2007).  
+To better understand the performance of a range of management procedures we aim to test generic empirical HCR (based on catch per unit effort – CPUE indices) that maximises yield without stock collapse for ICES data-limited fisheries. 
+
+Often empirical harvest control rules require extensive exhaustive parameter searches to tune hyper-parameters that aren’t directly learnt from estimators.  This requires a technique known as a grid search that extensively searches for all combinations of all parameters. In contrast and some what less time consuming, other efficient parameter search strategy’s can be considered given range of parameter space and a known distribution a sample can be obtained and is known as a random search.  
+
+To test case specific harvest strategies (via simulation) within the MSE, we will implement a management procedure based on a empirical model that adjusts yield depending on stock status for a given range set of hype-parameters for the harvest strategy and test their robustness to uncertainty.  This approach could also help identify similar conditions across species where particular advice rules are likely to work well, and where they perform poorly for a given a set of hyper-parameters. Assessment is made as to the performance of each HCR via a set of utilities: safety (a proportion B/BMSY >1), yield (a proportion- $yield/MSY$), kobe proportion (proportion of years that stay in the green zone of kobe plot ($B/B_{MSY} >1$), and Yield Annual Variation (yield changes by 10\% year on year).  
+
+\section{Material and Methods}
+\subsection{Materials}
+\subsection{Methods}
+\subsubsection{Operating Model}
+\subsubsection{Management Procedure}
+
+\subsubsection{Random Search}
+
+
+\section{Results}
+\section{Discussion}
+\section{Conclusions}
+
+
+\newpage
+\section{Supplementary Material}
+
+\subsection{Operating Model}
+
+\input{/home/laurence/Desktop/flr/equations/tex/om-datapoor.tex}
+
+
+\newpage\clearpage
+\subsection{Management Procedures}
+\input{/home/laurence/Desktop/flr/equations/tex/mp-sbtd.tex}
+\input{/home/laurence/Desktop/flr/equations/tex/mp-sbtd-table.tex}
+
+
+\newpage\clearpage\clearpage
+\bibliography{/home/laurence/Desktop/flr/equations/tex/refs.bib} 
+\bibliographystyle{abbrvnat} 
+
+\end{document}

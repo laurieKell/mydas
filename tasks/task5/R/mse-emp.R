@@ -22,63 +22,67 @@ dirMy="/home/laurence/Desktop/Dropbox/mydasOMs"
 dirDat=file.path(dirMy, "data")
 dirRes=file.path(dirMy,"results")
 
-mseStart=c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,"sprat"=52,"razor"=54,"lobster"=57)
-
-### Stochasticity
-nits=500
-set.seed(1234)
-srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.2,b=0.0)
-
-### OEM
-uDev =FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.3,b=0.0)
-
-scen=expand.grid(spp=c("turbot","lobster","ray","pollack","razor","brill","sprat"),
+mseStart=            c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,"sprat"=52,"razor"=54,"lobster"=57)
+scen=expand.grid(spp=c("brill",   "turbot",   "ray",   "pollack",   "sprat",   "razor",   "lobster"),
+                 j  =1:4, 
                  stringsAsFactors=FALSE)
 
-##### D ##########################################################
+### Stochasticity
 set.seed(1234)
+nits=500
+
+srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.2,b=0.0)
+uDev =FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),0.3,b=0.0)
+
+##### D ##########################################################
+
+controlD=list()
+for (j in 1:4){
 k1=runif(nits, 0.0, 1.0)
 k2=runif(nits, 0.0, 1.0)
-controlD=rbind(FLPar(k1   =k1),
+controlD[[j]]=rbind(FLPar(k1   =k1),
                FLPar(k2   =k2),
-               FLPar(gamma=runif(nits, 1, 1)))
+               FLPar(gamma=runif(nits, 1, 1)))}
 
+empD=NULL
 empD<-foreach(i=(seq(dim(scen)[1])), 
-             .combine=cbind,
+             .combine=rbind,
              .multicombine=TRUE,
              .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
                          "FLasher","FLBRP","FLife")) %dopar%{
-#for (i in seq(dim(scen)[1])){
-                           
+
   load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
   om=FLCore:::iter(om,seq(nits))
   eq=FLCore:::iter(eq,seq(nits))
   lh=FLCore:::iter(lh,seq(nits))
   
-  res=mseSBTD(om,eq,
-              control=controlD,
+  mse=mseSBTD(om,eq,
+              control=controlD[[scen[i,"j"]]],
               srDev=srDev,uDev=uDev,
               start  =mseStart[scen[i,"spp"]]+5,end=mseStart[scen[i,"spp"]]+45,nyrs=5)
+  res=cbind(spp=scen[i,"spp"],j=scen[i,"j"],omSmry(mse,eq,lh))
   
   save(res,file=file.path(dirRes,paste("empd-",i,".RData",sep="")))
   
-  cbind(spp=scen[i,"spp"],omSmry(res,eq,lh))}
+  res}
+
 
 parD=NULL
 for (i in seq(dim(scen)[1])){
   #drop_download(path=paste(file.path("mydasOMs",scen[i,"spp"]),".RData",sep=""),overwrite=T)
-  load(file.path(dirRes,paste(scen[i,"spp"],".RData",sep="")))
-  parD=rbind(parD,cbind(spp=scen[i,"spp"],model.frame(prior),model.frame(controlD)[,-4]))
+  load(file.path(dirDat,paste(scen[i,"spp"],".RData",sep="")))
+  parD=rbind(parD,cbind(spp=scen[i,"spp"],j=scen[i,"j"],model.frame(prior),model.frame(controlD[[scen[1,"j"]]])[,-4]))
   }
 
 empD$spp =ac(empD$spp)
 empD     =subset(empD,year>=mseStart[spp]&year<=mseStart[spp]+45)
 empD$year=empD$year-mseStart[empD$spp]
 
-empd_pm=ddply(empD,.(spp,iter), smryStat)
+empd_pm=ddply(empD,.(spp,iter,j), smryStat)
+empd_pm=merge(transform(empd_pm,iter=as.numeric(ac(iter)),spp=ac(spp),j=as.numeric(ac(j))),
+              transform(parD,   iter=as.numeric(ac(iter)),spp=ac(spp),j=as.numeric(ac(j))),
+              by=c("spp","iter","j"))
 
-empd_pm=merge(transform(empd_pm,iter=as.numeric(ac(iter)),spp=ac(spp)),
-              transform(parD,   iter=as.numeric(ac(iter)),spp=ac(spp)),by=c("spp","iter"))
 save(empD,empd_pm,controlD,file=file.path(dirRes,"empd-results.RData"))
 
 ##### P ##########################################################
