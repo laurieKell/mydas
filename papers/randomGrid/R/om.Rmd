@@ -56,7 +56,7 @@ srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),.3,b=0.0)
 
 ```{r, lh}
 load(file.path(dirDat,"brill.RData"))
-par=apply(lh,1,mean)
+par=model.frame(lh)
 nms=dimnames(par)$params
 par=FLPar(apply(lh,1,mean)[nms])
 load(file.path(dirDat,"turbot.RData"))
