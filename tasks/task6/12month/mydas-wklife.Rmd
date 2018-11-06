@@ -47,9 +47,9 @@ knitr::include_graphics('figs/turbot-pairs-1.png')
 
 
 ## Natural Mortality
-#```{r,echo=FALSE}
-#knitr::include_graphics('figs/figsm-1.png')
-#```
+```{r,echo=FALSE, out.width="60%"}
+knitr::include_graphics('figs/figsm-1.png')
+```
 
 ## Biology
 ```{r ,echo=FALSE, out.width="65%"}
@@ -106,9 +106,9 @@ knitr::include_graphics('figs/comp-1.png')
 ## Scenarios
 Stock trends 
 
-#```{r ,echo=FALSE, out.width="70%"}
-#knitr::include_graphics('figs/maite-l-scen.png')
-#```
+```{r ,echo=FALSE, out.width="70%"}
+knitr::include_graphics('figs/maite-l-scen.png')
+```
 
 ## Evaluation
 
