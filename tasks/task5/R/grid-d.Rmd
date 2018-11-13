@@ -107,7 +107,7 @@ plot(sprat)
 
 **Figure `r iFig=iFig+1; iFig`** Time series for sprat of empirical HCR ran with different values of K1 & K2
 
-```{r, ray, eval=FALSE}
+```{r, ray}
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-ray.RData")
 ray=FLStocks("k1=0; k2=0"=mse)
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-ray-1.RData")
@@ -118,7 +118,7 @@ load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-ray-3.RData")
 ray["k1=1.0; k2=0.5"]=mse
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-ray-4.RData")
 ray["k1=1.0; k2=1.0"]=mse
-ray=FLStocks(llply(ray,window,end=99))
+ray=FLStocks(llply(ray,window,start=60,end=104))
 plot(ray)
 ```
 
