@@ -128,8 +128,6 @@ eq=lhEql(lh,spwn=0)
 
 Life history parameters from Fish Base for the Von Bertalanffy growth model were $L_{\infty}$ `r tmp<-lh["linf"]` (`r signif(mean(lh["linf"],na.rm=TRUE),3)`), $k$  (`r signif(mean(lh["k"]),3)`), and $t_0$ (`r signif(mean(lh["t0"]),3)`), for the length/weight relationship $W=aL^b$ were $a$ (`r signif(mean(lh["a"],na.rm=TRUE),3)`) and $b$ (`r signif(mean(lh["b"],na.rm=TRUE),3)`),  and age at maturity  ($a_{50}$) was (`r signif(mean(lh["a50"],na.rm=TRUE),3)`).
 
-The values for the empirical Gislason natural mortality relationship $m_1$ and $m_2$ were (`r signif(mean(lh["m1"],na.rm=TRUE),4)`) and (`r signif(mean(lh["m2"],na.rm=TRUE),3)`) respectively.
-
 The fishery was assumed to only catch mature fish and so selection pattern is modelled by a double normal equivalent to the maturity ogive,  parameters were $a_1$, $s_l$ and $s_r$ were (`r signif(mean(lh["a1"],na.rm=TRUE),3)`, `r signif(mean(lh["sl"],na.rm=TRUE),3)`, `r signif(mean(lh["sr"],na.rm=TRUE),3)`) respectively.
 
 The stock recruitment relationship is assummed to be of a Beverton and Holt functional form with a steepness and virgin biomass of `r signif(mean(lh["s"],na.rm=TRUE),3)` and `r signif(mean(lh["v"],na.rm=TRUE),3)` units respectively.
@@ -178,18 +176,30 @@ plot(iter(eq,1),refpts=FALSE)
 ```{r om}
 #http://www.fishbase.org/manual/Key%20Facts.htm
 
-gTime=round(FLife:::genTime(FLPar(aaply(lh,1,mean))))
+#gTime=round(FLife:::genTime(FLPar(aaply(lh,1,mean))))
+
+genTime<-function(object,f=0){
+  
+     object@fbar=object@fbar[,1]%=%f
+     n=stock.n(object)[,1]
+     
+     apply(stock.wt(object)%*%n%*%ages(stock.wt(object)),6,sum)%/%
+     apply(stock.wt(object)%*%n,6,sum)}
+
+gTime=round(mean(genTime(eq)))
 
 eq@fbar=refpts(eq)["msy","harvest"]%*%FLQuant(c(rep(.1,19),
                                               seq(.1,2,length.out=30),
-                                              seq(2.0,0.7,length.out=gTime)[-1],
-                                              rep(.7,61)))[,1:105]
+                                              seq(2.0,1.0,length.out=gTime)[-1],
+                                              rep(1.0,61)))[,1:105]
 
 om=as(eq,"FLStock")
 om=fwd(om,fbar=fbar(om)[,-1],sr=eq,residuals=srDev)
 
 save(lh,eq,om,file=file.path(dirDat,"brill.RData"),compress="xz")
+```
 
+```{r om-fig}
 plot(om)
 ```
 
