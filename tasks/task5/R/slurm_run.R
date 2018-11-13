@@ -39,18 +39,32 @@ fn<-function(spp,control){
   
   load(file.path(dirDat,paste(iSpp,".RData",sep="")))
   
-  mse=mseSBTD(om,eq,
-              control=control[[iCtrl]],
-              srDev  =srDev,uDev=uDev,
-              start  =mseStart[iSpp]+1,end=mseStart[iSpp]+46)
+  #mse=mseSBTD(om,eq,
+  #            control=control[[iCtrl]],
+  #            srDev  =srDev,uDev=uDev,
+  #            start  =mseStart[iSpp]+1,end=mseStart[iSpp]+46)
+  #mse=mse[,ac(mseStart[iSpp]:min(mseStart[iSpp]+46+2),dims(mse)$maxyear)]
+
+  mse=fwd(om,catch=catch(om)[,ac(60:100)],sr=eq,residuals=srDev)
   
-  mse=mse[,ac(mseStart[iSpp]:min(mseStart[iSpp]+46+2),dims(mse)$maxyear)]
-  
-  #save(mse,file=file.path(dirRes,paste("gridD-",iSpp,"-",iCtrl,".RData",sep="")))
+  save(mse,file=file.path(dirRes,paste("gridD-",iSpp,"-",iCtrl,".RData",sep="")))
   
   mse}
 
-sopt=list(nodes=1, time="00:20:00","A gmlif003b","p DevQ")
+#!/bin/sh
+#
+#SBATCH --job-name=randomD
+#SBATCH --output=slurm_%a.out
+#SBATCH --nodes=1
+#SBATCH --time=00:20:00
+#SBATCH -A gmlif003b
+#SBATCH -p DevQ
+
+#module load r
+
+#RScript slurm_run.R
+
+sopt=list(nodes=1, time="00:20:00") #,"A gmlif003b","p DevQ")
 
 sjob<-slurm_apply(fn, scen, jobname='randomD',
                     nodes=1, cpus_per_node=40, submit=FALSE, slurm_options=sopt)

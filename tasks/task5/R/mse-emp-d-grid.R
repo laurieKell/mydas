@@ -57,7 +57,7 @@ fn<-function(iSpp,iCtrl){
   load(file.path(dirDat,paste(iSpp,".RData",sep="")))
 
   mse=mseSBTD(om,eq,
-            control=control[[iCtrl]],
+            control=control,
             srDev  =srDev,uDev=uDev,
             start  =mseStart[iSpp]+1,end=mseStart[iSpp]+46)
 

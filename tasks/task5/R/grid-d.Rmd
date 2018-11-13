@@ -75,7 +75,7 @@ plot(turbot)
 
 ```{r, pollack}
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-pollack.RData")
-pollack=FLStocks("k1=0; k2=0"=mse)
+pollack=FLStocks("k1=0; k2=0"=mse)  
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-pollack-1.RData")
 pollack["k1=0.5; k2=0.5"]=mse
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-pollack-2.RData")
@@ -84,11 +84,11 @@ load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-pollack-3.RData")
 pollack["k1=1.0; k2=0.5"]=mse
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-pollack-4.RData")
 pollack["k1=1.0; k2=1.0"]=mse
-pollack=FLStocks(llply(pollack,window,end=103))
+pollack=FLStocks(llply(pollack,window,start=56,end=103))
 plot(pollack)
 ```
 
-**Figure `r iFig=iFig+1; iFig`** Time series for polack of empirical HCR ran with different values of K1 & K2
+**Figure `r iFig=iFig+1; iFig`** Time series for pollack of empirical HCR ran with different values of K1 & K2
 
 ```{r, sprat}
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-sprat.RData")

@@ -38,7 +38,7 @@ save(srDev,file=file.path(dirRes,"srDev.RData"))
 save(uDev, file=file.path(dirRes,"uDev.RData"))
 
 ##### D ##########################################################
-#### Comstant catch with k1=k2=0
+#### Constant catch with k1=k2=0
 
 scen=expand.grid(spp    =c("brill",   "turbot",   "ray",   "pollack",   "sprat",   "razor",   "lobster"),
                  stringsAsFactors=FALSE)
@@ -48,7 +48,7 @@ control=rbind(FLPar(k1   =rep(0.0, nits)),
               FLPar(gamma=rep(1.0, nits)))
 
 constD=NULL
-constD<-foreach(i=3, #(seq(dim(scen)[1])), 
+constD<-foreach(i=(seq(dim(scen)[1])), 
                 .combine=rbind,
                 .multicombine=TRUE,
                 .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
@@ -59,9 +59,9 @@ constD<-foreach(i=3, #(seq(dim(scen)[1])),
         mse=mseSBTD(om,eq,
                     control=control,
                     srDev  =srDev,uDev=uDev,
-                    start  =mseStart[scen[i,"spp"]]+1,end=mseStart[scen[i,"spp"]]+46,nyrs=3)
+                    start  =mseStart[scen[i,"spp"]]+1,end=mseStart[scen[i,"spp"]]+46)
                               
-        mse=mse[,ac(mseStart[scen[i,"spp"]]:(min(mseStart[scen[i,"spp"]]+46+2,dims(mse)$maxyear)))]
+        #mse=mse[,ac(mseStart[scen[i,"spp"]]:(min(mseStart[scen[i,"spp"]]+46+2,dims(mse)$maxyear)))]
                               
         save(mse,file=file.path(dirRes,paste("constD-",scen[i,"spp"],".RData",sep="")))
         
