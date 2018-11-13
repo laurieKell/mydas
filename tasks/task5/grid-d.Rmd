@@ -19,8 +19,8 @@ opts_chunk$set(comment   =NA,
                fig.width =10, 
                fig.height=10,
                cache     =TRUE, 
-               fig.path  ="../tex/grid-",
-               cache.path="../cache/grid/")
+               fig.path  ="tex/grid-",
+               cache.path="cache/grid/")
 
 iFig=0
 iTab=0
@@ -40,7 +40,7 @@ library(ggplotFL)
 
 
 ```{r, brill}
-load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-brill.RData")
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-brill.RData")  
 brill=FLStocks("k1=0; k2=0"=mse)
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-brill-1.RData")
 brill["k1=0.5; k2=0.5"]=mse
@@ -57,7 +57,7 @@ plot(brill)
 **Figure `r iFig=iFig+1; iFig`** Time series for brill of empirical HCR ran with different values of K1 & K2
 
 ```{r, turbot}             
-load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-turbot.RData")
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-turbot.RData")  
 turbot=FLStocks("k1=0; k2=0"=mse)
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-turbot-1.RData")
 turbot["k1=0.5; k2=0.5"]=mse
