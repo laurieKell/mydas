@@ -1,9 +1,9 @@
-  ---
+---
 title: "Grid empd"
 subtitle: "Razors"
 author: "L Kell"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: html_document
+output: pdf_document
 ---
   
 ```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
