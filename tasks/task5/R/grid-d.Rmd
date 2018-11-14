@@ -1,0 +1,188 @@
+---
+title: "Grid empd"
+subtitle: "Razors"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+  
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =10, 
+               fig.height=10,
+               cache     =TRUE, 
+               fig.path  ="tex/grid-",
+               cache.path="cache/grid/")
+
+iFig=0
+iTab=0
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"  
+dirDat=file.path(dirMy,"data")
+```
+```{r, pkgs}
+library(ggplot2)
+library(plyr)
+
+library(FLCore)
+library(ggplotFL)
+```
+
+
+```{r, brill}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-brill.RData")  
+brill=FLStocks("k1=0; k2=0"=mse)
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-brill-1.RData")
+brill["k1=0.5; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-brill-2.RData")
+brill["k1=0.5; k2=1.0"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-brill-3.RData")
+brill["k1=1.0; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-brill-4.RData")
+brill["k1=1.0; k2=1.0"]=mse
+brill=FLStocks(llply(brill,window,end=101))
+plot(brill)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series for brill of empirical HCR ran with different values of K1 & K2
+
+```{r, turbot}             
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-turbot.RData")  
+turbot=FLStocks("k1=0; k2=0"=mse)
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-turbot-1.RData")
+turbot["k1=0.5; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-turbot-2.RData")
+turbot["k1=0.5; k2=1.0"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-turbot-3.RData")
+turbot["k1=1.0; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-turbot-4.RData")
+turbot["k1=1.0; k2=1.0"]=mse
+turbot=FLStocks(llply(turbot,window,end=101))
+plot(turbot)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series for turbot of empirical HCR ran with different values of K1 & K2
+
+```{r, pollack}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-pollack.RData")
+pollack=FLStocks("k1=0; k2=0"=mse)
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-pollack-1.RData")
+pollack["k1=0.5; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-pollack-2.RData")
+pollack["k1=0.5; k2=1.0"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-pollack-3.RData")
+pollack["k1=1.0; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-pollack-4.RData")
+pollack["k1=1.0; k2=1.0"]=mse
+pollack=FLStocks(llply(pollack,window,end=103))
+plot(pollack)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series for polack of empirical HCR ran with different values of K1 & K2
+
+```{r, sprat}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-sprat.RData")
+sprat=FLStocks("k1=0; k2=0"=mse)
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-sprat-1.RData")
+sprat["k1=0.5; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-sprat-2.RData")
+sprat["k1=0.5; k2=1.0"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-sprat-3.RData")
+sprat["k1=1.0; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-sprat-4.RData")
+sprat["k1=1.0; k2=1.0"]=mse
+sprat=FLStocks(llply(sprat,window,end=99))
+plot(sprat)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series for sprat of empirical HCR ran with different values of K1 & K2
+
+```{r, ray}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-ray.RData")
+ray=FLStocks("k1=0; k2=0"=mse)
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-ray-1.RData")
+ray["k1=0.5; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-ray-2.RData")
+ray["k1=0.5; k2=1.0"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-ray-3.RData")
+ray["k1=1.0; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-ray-4.RData")
+ray["k1=1.0; k2=1.0"]=mse
+ray=FLStocks(llply(ray,window,start=60,end=104))
+plot(ray)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series for ray of empirical HCR ran with different values of K1 & K2
+
+```{r, razor}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-razor.RData")
+razor=FLStocks("k1=0; k2=0"=mse)
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-razor-1.RData")
+razor["k1=0.5; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-razor-2.RData")
+razor["k1=0.5; k2=1.0"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-razor-3.RData")
+razor["k1=1.0; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-razor-4.RData")
+razor["k1=1.0; k2=1.0"]=mse
+razor=FLStocks(llply(razor,window,end=101))
+plot(razor)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series for razor of empirical HCR ran with different values of K1 & K2
+
+```{r, lobster}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-lobster.RData")
+lobster=FLStocks("k1=0; k2=0"=mse)
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-lobster-1.RData")
+lobster["k1=0.5; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-lobster-2.RData")
+lobster["k1=0.5; k2=1.0"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-lobster-3.RData")
+lobster["k1=1.0; k2=0.5"]=mse
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-lobster-4.RData")
+lobster["k1=1.0; k2=1.0"]=mse
+lobster=FLStocks(llply(lobster,window,end=104))
+plot(lobster)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series for lobster of empirical HCR ran with different values of K1 & K2
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLasher:   `r packageVersion('FLasher')`
+* FLife:     `r packageVersion('FLife')`
+* ggplotFL:  `r packageVersion('ggplotFL')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+```
+

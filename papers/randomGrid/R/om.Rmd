@@ -178,9 +178,9 @@ registerDoParallel(2)
 library(mydas)
 
 mseStart=            c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,"sprat"=52,
-                       "razor"=54,"lobster"=57)
+                       "razor"=54,"lobster"=57)[1:5]
 scen=expand.grid(spp=c("brill",   "turbot",   "ray",   "pollack",   "sprat",   
-                       "razor",   "lobster"),
+                       "razor",   "lobster")[1:5],
                  stringsAsFactors=FALSE)
 
 ### Stochasticity

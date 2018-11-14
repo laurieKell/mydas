@@ -14,6 +14,7 @@ dt2=ddply(dt1,.(k1,k2,spp),transform,
 
 geom_contour(color = "white", alpha = 0.5) +
   
+
 ggplot(dt2)+
   geom_tile(aes(k1,k2,fill=z))+
   scale_fill_gradientn(colours = mycol)+

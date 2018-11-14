@@ -56,12 +56,13 @@ srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),.3,b=0.0)
 ab=cbind(a=c(0.00126,0.000919,0.0017,0.0004,0.001086,0.000447),
          b=c(3.36,2.922,2.797,3.123,2.896,3.01))
          
-lh=read.csv("/home/laurence/Desktop/sea++/mydas/tasks/task4/inputs/lobsterGrw.csv")
+lh=read.csv("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/inputs/lobsterGrw.csv")
 lh=cbind(lh,rbind(ab,cbind(a   =rep(NA,dim(lh)[1]-dim(ab)[1]),
                            b   =rep(NA,dim(lh)[1]-dim(ab)[1]))))
+lh[,1]=lh[,1]/10
 
 lh=cbind(lh,cbind(a50=c( 6.0,rep(NA,dim(lh)[1]-1)),
-                  l50=c(77.5,rep(NA,dim(lh)[1]-1)),
+                  l50=c(77.5/10,rep(NA,dim(lh)[1]-1)),
                   t0 =c(-0.1,rep(NA,dim(lh)[1]-1))))
 ```
 
@@ -157,18 +158,30 @@ plot(iter(eq,1),refpts=FALSE)
 ```{r om}
 #http://www.fishbase.org/manual/Key%20Facts.htm
 
-gTime=round(FLife:::genTime(FLPar(aaply(lh,1,mean))))
+#gTime=4 #round(FLife:::genTime(FLPar(aaply(lh,1,mean))))
+
+genTime<-function(object,f=0){
+  
+     object@fbar=object@fbar[,1]%=%f
+     n=stock.n(object)[,1]
+     
+     apply(stock.wt(object)%*%n%*%ages(stock.wt(object)),6,sum)%/%
+     apply(stock.wt(object)%*%n,6,sum)}
+
+gTime=round(mean(genTime(eq)))
 
 eq@fbar=refpts(eq)["msy","harvest"]%*%FLQuant(c(rep(.1,19),
                                               seq(.1,2,length.out=30),
-                                              seq(2,.7,length.out=gTime)[-1],
-                                              rep(.7,61)))[,1:105]
+                                              seq(2,1.0,length.out=gTime)[-1],
+                                              rep(1.0,61)))[,1:105]
 
 om=as(eq,"FLStock")
 om=fwd(om,fbar=fbar(om)[,-1],sr=eq,residuals=srDev)
            
 save(lh,eq,om,file=file.path(dirDat,"lobster.RData"),compress="xz")
+```
 
+```{r om-fig}
 plot(om)
 ```
 
