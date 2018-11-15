@@ -181,6 +181,7 @@ load(file.path(dirDat,"sprat.RData"))
 smry=rbind(smry,cbind(spp="sprat",ldply(sprat,fn)))
 ```
 
+
 ```{r, smry-plot, fig.height=8,fig.width=12}
 smry=subset(smry,qname!="rec")
 smry$spp  =factor(smry$spp,  level=c("ray","pollack","turbot","brill","sprat"))
@@ -252,6 +253,25 @@ dt4=ddply(dt3,.(variable,spp), transform, value=minMax(value))
 
 dt4$spp  =factor(dt4$spp,     level=c("ray","pollack","turbot","brill","sprat"))
 dt4$qname=factor(dt4$variable,level=c("safety","kobe","yield","aav"))
+```
+
+```{r}
+library(RPostgreSQL)
+library(DBI)
+
+drv  =dbDriver("PostgreSQL")
+
+conLK=dbConnect(drv, 
+                host    ='wklife.csrzweaa3tbm.eu-west-2.rds.amazonaws.com',
+                dbname  ='wklife',
+                port    =5432,
+                user    ='mydas',
+                password='Yes_Meski')
+dbListTables(conLK)
+dbWriteTable(conLK, "randgridpm", value=pm, append=FALSE,overwrite=TRUE,row.names=FALSE)
+
+save(smry,file="/home/laurence/Desktop/Dropbox/pm.RData")
+save(smry,file="/home/laurence/Desktop/Dropbox/smry.RData")
 ```
 
 ```{r, grid}
