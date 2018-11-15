@@ -91,7 +91,7 @@ knitr::include_graphics('figs/elasR-1.png')
 ## Elasticity
 
 Mean age at virgin and $F_{MSY}$, and $L_{opt}$
-  ```{r ,echo=FALSE, out.width="70%"}
+```{r ,echo=FALSE, out.width="70%"}
 knitr::include_graphics('figs/elasGt-1.png')
 ```
 
