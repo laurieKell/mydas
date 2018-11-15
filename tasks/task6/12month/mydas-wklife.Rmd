@@ -1,7 +1,7 @@
 ---
 beamer_presentation: default
 author: "Laurence Kell, Alex Tidd, Coilin Minto & Maite Pons"
-date: "October 5, 2018"
+date: "November 20, 2018"
 output:
   ioslides_presentation: default
   beamer_presentation: default
@@ -32,9 +32,9 @@ library(png)
 **Management Strategy Evaluation** to ensure robustness to uncertainty 
 
 # Simulation Framework
-
-## Life Histories
-```{r,echo=FALSE, out.width="65%"}
+## Life Histories 
+####### [life history vignette](https://github.com/laurieKell/mydas/tree/master/vignettes/FLife-wklife)
+```{r,echo=FALSE, out.width="60%"}
 knitr::include_graphics("figs/figsfb-1.png")
 ```
 
@@ -62,7 +62,8 @@ knitr::include_graphics('figs/turbot-eqRun-1.png')
 ```
 
 ## Operating Model
-```{r,echo=FALSE, out.width="70%"}
+####### [Conditioning OM vignettes](https://github.com/laurieKell/mydas/tree/master/tasks/task4/R)
+```{r,echo=FALSE, out.width="60%"}
 knitr::include_graphics('figs/turbot-ts-1.png')
 ```
 
@@ -106,7 +107,7 @@ knitr::include_graphics('figs/comp-1.png')
 ## Scenarios
 Stock trends 
 
-```{r ,echo=FALSE, out.width="70%"}
+```{r ,echo=FALSE, out.width="50%"}
 knitr::include_graphics('figs/maite-l-scen.png')
 ```
 
@@ -134,24 +135,25 @@ knitr::include_graphics('figs//maite-l.png')
 
 
 ## Operating Model
+#######[Turbot OM vignettes](https://github.com/laurieKell/mydas/blob/master/tasks/task4/R/turbot.Rmd)
 ```{r,echo=FALSE,out.width="60%"}
 knitr::include_graphics('figs/turbot-ts-1.png')
 ```
 
 ## Category 1: Age based
-
+#######[Category 1 XSA assessment](https://github.com/laurieKell/mydas/blob/master/tasks/task5/R/mse-xsa.R) 
 ```{r ,echo=FALSE, out.width="50%"}
 knitr::include_graphics('figs/vpa-xsa-turbot-1.png')
 ```
 
 ## Category 1: Biomass based
-
+#######[Category 1 MPB assessment](https://github.com/laurieKell/mydas/blob/master/tasks/task5/R/mse-mpb.R) 
 ```{r ,echo=FALSE, out.width="60%"}
 knitr::include_graphics('figs/bd-turbot-1.png')
 ```
 
 ## Category 3: Catch only
-
+#######[Category 3 SRA assessment](https://github.com/laurieKell/mydas/blob/master/tasks/task5/R/mse-sra.R) 
 ```{r ,echo=FALSE, out.width="55%"}
 knitr::include_graphics('figs/bdsra-turbot-plot-1.png')
 ```
