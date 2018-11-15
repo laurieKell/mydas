@@ -12,7 +12,7 @@ library(FLife)
 library(doParallel)
 library(foreach)
 registerDoParallel(3)
-
+b
 library(devtools)
 install_github("lauriekell/mydas")
 library(mydas)
@@ -54,9 +54,9 @@ fn<-function(iSpp,iCtrl){
               srDev  =srDev,uDev=uDev,
               start  =mseStart[iSpp]+1,end=mseStart[iSpp]+46)
   
-  mse=mse[,ac(mseStart[iSpp]:min(mseStart[iSpp]+46+2),dims(mse)$maxyear)]
+  mse=window(mse,start=mseStart[iSpp])
   
-  save(mse,file=file.path(dirRes,paste("gridD-",iSpp,"-",iCtrl,".RData",sep="")))
+  save(mse,file=file.path(dirRes,paste("ranD-",iSpp,"-",iCtrl,".RData",sep="")))
 
   data.frame(spp=iSpp,control=iCtrl)}
 
@@ -66,4 +66,8 @@ ranD<-foreach(i=seq(dim(scen)[1]),
                .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
                            "FLasher","FLBRP","FLife")) %dopar%{
                              
-      with(scen[i,],fn(spp,comtrol))}
+      with(scen[i,],fn(spp,control))}
+
+scen=data.frame(spp    =c("brill","pollack","ray","sprat","sprat","turbot","turbot"),
+           control=c(11,     11,       10,    9,     12,     9,       12),
+           stringsAsFactors=FALSE)

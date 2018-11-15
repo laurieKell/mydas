@@ -1,4 +1,4 @@
-x`---
+---
 title: "FLife: Operating Model Conditioning"
 subtitle: "Lobster"
 author: "L Kell & A Tidd"
@@ -178,7 +178,7 @@ eq@fbar=refpts(eq)["msy","harvest"]%*%FLQuant(c(rep(.1,19),
 om=as(eq,"FLStock")
 om=fwd(om,fbar=fbar(om)[,-1],sr=eq,residuals=srDev)
            
-save(lh,eq,om,file=file.path(dirDat,"lobster.RData"),compress="xz")
+save(lh,eq,om,file=file.path(dirDat,"lobster.RData"),compress="xz")  
 ```
 
 ```{r om-fig}

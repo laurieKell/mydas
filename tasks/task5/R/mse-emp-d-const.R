@@ -19,8 +19,8 @@ library(mydas)
 
 #source('~/Desktop/sea++/mydas/pkg/R/omOut.R')
 #source('~/Desktop/sea++/mydas/pkg/R/smryStat.R')
-#source('~/Desktop/sea++/mydas/pkg/R/mseSBTD.R')
-#source('~/Desktop/sea++/mydas/pkg/R/hcrSBTD.R')
+source('~/Desktop/sea++/mydas/pkg/R/mseSBTD.R')
+source('~/Desktop/sea++/mydas/pkg/R/hcrSBTD.R')
 
 dirMy="/home/laurence/Desktop/Dropbox/mydasOMs"
 #dirMy="/ichec/home/users/laurie"
@@ -48,7 +48,7 @@ control=rbind(FLPar(k1   =rep(0.0, nits)),
               FLPar(gamma=rep(1.0, nits)))
 
 constD=NULL
-constD<-foreach(i=(seq(dim(scen)[1])), 
+constD<-foreach(i=(seq(dim(scen)[1]))[7], 
                 .combine=rbind,
                 .multicombine=TRUE,
                 .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
@@ -61,11 +61,8 @@ constD<-foreach(i=(seq(dim(scen)[1])),
                     srDev  =srDev,uDev=uDev,
                     start  =mseStart[scen[i,"spp"]]+1,end=mseStart[scen[i,"spp"]]+46)
                               
-        #mse=mse[,ac(mseStart[scen[i,"spp"]]:(min(mseStart[scen[i,"spp"]]+46+2,dims(mse)$maxyear)))]
+        mse=window(mse,end=mseStart[scen[i,"spp"]])
                               
         save(mse,file=file.path(dirRes,paste("constD-",scen[i,"spp"],".RData",sep="")))
         
-        
         cbind(spp=scen[i,"spp"],omSmry(mse,eq,lh))}
-
-save(constD,file=file.path(dirRes,"constD.RData"))

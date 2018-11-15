@@ -26,9 +26,10 @@ iFig=0
 iTab=0
 ```
 ```{r, dir}
-dirMy=dirname(dirname(FLife:::getScriptPath()))
-#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"  
+dirMy="/home/laurence/Desktop/Dropbox/mydasOMs"
+#dirMy="/ichec/home/users/laurie"
 dirDat=file.path(dirMy,"data")
+dirRes=file.path(dirMy,"results")
 ```
 ```{r, pkgs}
 library(ggplot2)
@@ -141,7 +142,7 @@ plot(razor)
 
 **Figure `r iFig=iFig+1; iFig`** Time series for razor of empirical HCR ran with different values of K1 & K2
 
-```{r, lobster}
+```{r, lobster, eval=FALSE}
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/constD-lobster.RData")
 lobster=FLStocks("k1=0; k2=0"=mse)
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/gridD-lobster-1.RData")
@@ -156,8 +157,148 @@ lobster=FLStocks(llply(lobster,window,end=104))
 plot(lobster)
 ```
 
-**Figure `r iFig=iFig+1; iFig`** Time series for lobster of empirical HCR ran with different values of K1 & K2
+```{r, smry}
+fn<-function(om){
+  as.data.frame(FLQuants(om, 
+          "ssb" = function(x) ssb(x)%/%refpts( eq)["msy","ssb"], 
+          "f" =   function(x) fbar(x)%/%refpts(eq)["msy","harvest"], 
+          "rec" = function(x) rec(x)%/%refpts( eq)["msy","rec"], 
+          "catch"=function(x) landings(x)%/%refpts(eq)["msy","yield"]))}
 
+load(file.path(dirDat,"brill.RData"))
+smry=cbind(spp="brill",ldply(brill,fn))
+
+load(file.path(dirDat,"turbot.RData"))
+smry=rbind(smry,cbind(spp="turbot",ldply(turbot,fn)))
+
+load(file.path(dirDat,"pollack.RData"))
+smry=rbind(smry,cbind(spp="pollack",ldply(pollack,fn)))
+
+load(file.path(dirDat,"ray.RData"))
+smry=rbind(smry,cbind(spp="ray",ldply(ray,fn)))
+
+load(file.path(dirDat,"sprat.RData"))
+smry=rbind(smry,cbind(spp="sprat",ldply(sprat,fn)))
+```
+
+```{r, smry-plot, fig.height=8,fig.width=12}
+smry=subset(smry,qname!="rec")
+smry$spp  =factor(smry$spp,  level=c("ray","pollack","turbot","brill","sprat"))
+smry$qname=factor(smry$qname,level=c("catch","ssb","f"))
+
+ggplot(ddply(smry,.(spp,year,qname,.id), with, quantile(data,na.rm=TRUE)))+
+  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=.id),alpha=0.2)+
+  geom_path(aes(year,`50%`,col=.id))+
+  facet_grid(qname~spp,scale="free")+
+  theme(legend.position="bottom")
+```
+
+```{r, smry-plot-2, fig.height=8,fig.width=12}
+ggplot(ddply(smry,.(spp,year,qname,.id), with, quantile(data,na.rm=TRUE)))+
+  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=.id),alpha=0.2)+
+# geom_path(aes(year,`50%`,col=.id))+
+  geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23",data=subset(smry,iter%in%c(12)))+
+  facet_grid(qname~spp,scale="free")+
+  theme(legend.position="bottom")
+```
+
+```{r}
+source('~/Desktop/sea++/mydas/pkg/R/smryStat.R')
+source('~/Desktop/sea++/mydas/pkg/R/omOut.R')
+```
+
+```{r}
+minMax<-function(x,na.rm=TRUE) (x-min(x,na.rm=na.rm))/diff(range(x,na.rm=na.rm))
+mseStart=c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,"sprat"=52,"razor"=54,"lobster"=57)
+
+
+library(FLife)
+library(reshape)
+
+process=function(spp,ctrl,start,
+                 dirDat="/home/laurence/Desktop/Dropbox/mydasOMs/data",
+                 dirRes="/home/laurence/Desktop/Dropbox/mydasOMs/results"){
+    
+  load(file.path(dirDat,paste(spp,".RData",sep="")))
+  load(file.path(dirDat,"dCtrl.RData"))
+  load(file.path(dirRes,paste("ranD-",spp,"-",ctrl,".RData",sep="")))
+  
+  res=transform(omSmry(mse,eq,lh),
+                iter=factor(iter,level=ac(sort(as.numeric(ac(unique(iter)))))))
+  ctl=transform(model.frame(control[[ctrl]]),
+                iter=factor(iter,level=ac(sort(as.numeric(ac(iter))))))
+  res=transform(res,year=year-start)
+  pm =ddply(res,.(iter), smryStat)
+  pm=merge(ctl,pm,by="iter")
+  pm}
+
+scen=expand.grid(spp    =c("brill",   "turbot",   "ray",   "pollack",   "sprat"),
+                 control=1:12,
+                 stringsAsFactors=FALSE)
+
+pm=mdply(scen,function(spp,control) process(spp,control,mseStart[spp]))
+save(pm,file="/home/laurence/Desktop/Dropbox/mydasOMs/results/pm.RData",compress="xz")
+
+dt=transform(pm,k1=cut(k1,breaks=seq(0,1,0.1)),
+                k2=cut(k2,breaks=seq(0,1,0.1)))
+
+dt2=ddply(dt,.(spp,k1,k2), with, 
+                   data.frame(kobe  =mean(kobe.n),
+                              safety=mean(safety),
+                              yield =mean(yield),
+                              aav   =(mean(1-yieldAav))))
+dt3=melt(dt2,id=c("k1","k2","spp"))
+dt4=ddply(dt3,.(variable,spp), transform, value=minMax(value))
+
+dt4$spp  =factor(dt4$spp,     level=c("ray","pollack","turbot","brill","sprat"))
+dt4$qname=factor(dt4$variable,level=c("safety","kobe","yield","aav"))
+```
+
+```{r, grid}
+library(dplyr)  
+
+mycol=rev(c("navy","blue","cyan","lightcyan","yellow","red","red4"))
+ggplot(dt4)+
+  geom_tile(aes(k1,k2,fill=value))+
+  scale_fill_gradientn(colours=mycol)+
+  facet_grid(spp~variable)
+
+dt2=ddply(dt,.(spp,k1,k2), transmute, 
+                   u1 =mean(kobe.n)/45,
+                   u2 =mean(yield),
+                   u3 =mean(safety),
+                   u4 =mean(kobe.n)+mean(yield)+mean(safety)+mean(1-yieldAav))
+
+dt2=transform(dt2,u2=u1*u2,u3=u1*u2*u3,u4=u1*u2*u3*u4)
+dt3=melt(dt2,id=c("k1","k2","spp"))
+dt4=ddply(dt3,.(variable,spp), transform, value=minMax(value))
+
+dt4$spp  =factor(dt4$spp,     level=c("ray","pollack","turbot","brill","sprat"))
+dt4$qname=factor(dt4$variable,level=c("safety","kobe","yield","aav"))
+```
+
+```{r, grid-2}
+ggplot(aes(as.numeric(k1),as.numeric(k2),z=value),data=dt4)+  
+  geom_tile(aes(k1,k2,fill=value))+
+  scale_fill_gradientn(colours=mycol)+
+  facet_grid(spp~variable)
+```
+
+```{r}
+library(akima)
+
+t=ddply(pm,.(spp), with, {
+  t=interp(k1,k2,z=yield,xo=seq(0,1,.05),yo=seq(0,1,.02),duplicate="mean")
+  cbind(expand.grid(x=t$x,y=t$y),z=c(t$z))})
+
+ggplot(aes(x,y,z=z),data=t)+
+  geom_tile(aes(x,y,fill=z))+
+  scale_fill_gradientn(colours=mycol)+
+#stat_contour(aes(colour= ..level..),breaks=seq(0,1,.1))+
+  facet_wrap(~spp,ncol=2)
+```
+
+geom_density2d()
 \newpage
 ## Software Versions
 
