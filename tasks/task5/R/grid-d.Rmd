@@ -238,7 +238,7 @@ scen=expand.grid(spp    =c("brill",   "turbot",   "ray",   "pollack",   "sprat")
                  stringsAsFactors=FALSE)
 
 pm=mdply(scen,function(spp,control) process(spp,control,mseStart[spp]))
-save(pm,file="/home/laurence/Desktop/Dropbox/mydasOMs/results/pm.RData",compress="xz")
+save(pm,file="/home/laurence/Desktop/Dropbox/mydasOMs/results/pm.RData",compress="xz") 
 
 dt=transform(pm,k1=cut(k1,breaks=seq(0,1,0.1)),
                 k2=cut(k2,breaks=seq(0,1,0.1)))

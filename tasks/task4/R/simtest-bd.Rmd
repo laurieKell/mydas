@@ -84,7 +84,7 @@ save(bd,hat,prior,file=file.path(dirDat,"brill-bd.RData"),compress="xz")
 ### Turbot
 
 ```{r, turbot}
-load(file.path(dirDat,"turbot.RData"))
+load(file.path(dirDat,"turbot.RData"))  
 
 om=window(om,start=20,end=55)
 bd=as(om,"biodyn")

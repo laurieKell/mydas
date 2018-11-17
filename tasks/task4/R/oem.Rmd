@@ -2,7 +2,7 @@
 title: "Cross test using Operating Model based on Life History"
 author: "L Kell"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: pdf_document
+output: html_document
 vignette: >
   %\VignetteIndexEntry{FLife}
   %\VignetteEngine{knitr::rmarkdown}
@@ -216,6 +216,16 @@ ggplot()+
 
 **Figure `r iFig=iFig+1; iFig`,** Survey indices of abundance.
 
+
+```{r, oem-f}
+theme_set(theme_bw())
+
+plot(FLQuants(om,fbar,mnLen))
+```
+
+**Figure `r iFig=iFig+1; iFig`,** Index of F.
+
+
 ```{r, oem-size}
 theme_set(theme_bw())
 
@@ -232,7 +242,7 @@ library(ggplotFL)
 library(FLife)
 
 
-load("/home/laurence/Desktop/sea++/mydas/tasks/task4/data/brill.RData")
+load("/home/laurence/Desktop/Dropbox/mydasOMs/data/brill.RData")
 
 om=iter(om,1)
 lh=iter(lh,1)
@@ -258,7 +268,9 @@ bin=0:ceiling(max(ln)*1.10)+0.5
 ggplot(subset(lfq,year%in%seq(1,100,10)))+
   geom_histogram(aes(length,weight=freq),binwidth=1)+
   facet_grid(year~.,scale="free")+
-  xlab("Length (cm)")+ylab("Frequency")
+  xlab("Length (cm)")+ylab("Frequency")+
+   theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
 ```
 
 

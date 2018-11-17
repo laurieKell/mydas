@@ -65,7 +65,7 @@ sra=fit(bd,dpl)
 
 
 ```{r, brill-plot}
-plot(as(list("SRA"=sra,"MP"=hat,"OM"=bd),"biodyns"))
+plot(as(list("SRA"=sra,"OM"=bd),"biodyns"))
 ```
 
 **Figure `r iFig=iFig+1; iFig`,** Brill stock Reduction Analysis
@@ -86,7 +86,8 @@ sra=fit(bd,dpl)
 
 
 ```{r, turbot-plot}
-plot(as(list("SRA"=sra,"MP"=hat,"OM"=bd),"biodyns"))
+plot(as(list("SRA"=sra,"OM"=bd),"biodyns"),probs=c(0.25,0.75))+
+  theme_bw()
 ```
 
 **Figure `r iFig=iFig+1; iFig`,** Turbot stock Reduction Analysis
