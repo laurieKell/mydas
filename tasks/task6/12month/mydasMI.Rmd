@@ -10,6 +10,19 @@ output: ioslides_presentation
 knitr::opts_chunk$set(echo      =FALSE)
 ```
 
+
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               cache     =TRUE)
+```
+
+
 ```{r libraries}
 library(grid)
 library(png)
@@ -20,23 +33,22 @@ library(png)
 
 **Develop and test** a range of assessment models and methods to establish **<span style="color:blue">$MSY$</span>** or proxy reference points across the spectrum of data-limited stocks 
 
-<!-- Economic value; Importance; Sensitivity to the impacts of fishing; Available data. -->
-
++ **<span style="color:brown">Case Studies</span>** based on Economic value; Importance; Sensitivity to the impacts of fishing; Available data.
 
 + A number of data-limited methods already exist, therefore implement a **<span style="color:green">Common Framework</span>** to compare performance.
 
-+ Develop **<span style="color:red">Diagnostics</span>** to assess sensitivity to assumptions and bias 
++ Evaluate **<span style="color:red">Sensitivity</span>**  to assumptions
 
-+ Use **<span style="color:purple">Management Strategy Evaluation</span>** to ensure robustness to uncertainty 
++ **<span style="color:purple">Management Strategy Evaluation</span>** to ensure robustness to uncertainty 
 
 
 ## MSY
 
 An objective of the Common Fisheries Programme is to achieve  **<span style="color:blue">$MSY$</span>** for
-*<span style="color:green">“all harvested species"</span>*
+**<span style="color:green">all harvested species</span>**
 
 
-There is also the fast approaching 2020 deadline for achieving Good Environmental Status to ensure
+2020 deadline for achieving Good Environmental Status 
 
 + *<span style="color:black">“Stocks should be exploited sustainably consistent with high long-term yields."</span>* 
 + *<span style="color:black">"Populations of all commercially exploited fish and shellfish are within safe biological limits, exhibiting a population age and size distribution that is indicative of a healthy stock.”</span>*
@@ -65,18 +77,19 @@ ggplot(aes(x,y),data=dat)+
 <!-- \tab $C_{y+1}=C_{y-1}\frac{\Sigma^{y-1}_{i=y-3} I_{i}/2}{\Sigma^{y-3}_{i=y-5} I_{i}/3}$ -->
 
 
-## Common Fisheries Policy
-
-Under the CFP management plans should be delivered through a *<span style="color:purple">results-based approach</span>* that allows tailor-made measures to be proposed in close consultation with fishers and Member States at a regional level.
+## Limitations
 
 The  *<span style="color:purple">2 over 3</span>* rule, however, has no reference points to ensure that
 
 + *<span style="color:green">targets</span>*  are met
 +  *<span style="color:red">limits</span>* are avoided with high probability
 
+Under the CFP management plans should be delivered through a *<span style="color:purple">results-based approach</span>* that allows tailor-made measures to be proposed in close consultation with fishers and Member States at a regional level.
+
+
 ## Alternatives
 
-**WKLIFE** therefore has proposed and is testing alternative rules that use **<span style="color:blue">$MSY$</span>** proxy reference points e.g. 
+**WKLIFE** is therefore testing alternative rules that use **<span style="color:blue">$MSY$</span>** proxy reference points of the form 
  
 $C_{y+1}=C_{current}rfb$
  
@@ -86,7 +99,32 @@ Where
 + $f$ is current exploitation rate relative to a *<span style="color:green">proxy</span>* for $F_{MSY}$ 
 + $b$ specifies a *<span style="color:red">threshold</span>* which if the index falls below the catch is reduced.
 
-## *<span style="color:purple">$r$</span>* Trend or Difference
+## *<span style="color:purple">$r$</span>fb* Index of Abundance
+
+### Difference 
+
+<div class="columns-2">
+
+```{r,fig.height=3,fig.width=3}
+library(ggplot2)
+
+set.seed(123)
+dat=data.frame(y=rlnorm(5)*cumsum(seq(0,.5,length.out=5)),x=1:5)
+dt2=data.frame(y=mean(dat$y[1:3]),x=1:3)
+dt3=data.frame(y=mean(dat$y[4:5]),x=4:5)
+ggplot(aes(x,y),data=dat)+
+  geom_line(aes(x,y),data=dt2,col="red", lwd=2)+
+  geom_line(aes(x,y),data=dt3,col="red", lwd=2)+
+  geom_point()+
+  xlab("Year")+ylab("Index")+
+  theme_bw() 
+```
+
+</div>
+
+## *<span style="color:purple">$r$</span>fb* Index of Abundance
+
+### Difference or Trend
 
 <div class="columns-2">
 
@@ -132,21 +170,24 @@ $C_{y+1}=C_{y-1}({1+k_2b})$
 </div>
 
 
-##  *<span style="color:green">$f$</span>* $F_{MSY}$ Proxies
+##  *r<span style="color:green">$f$</span>b*  Length as proxy for $F/F_{MSY}$
 
-+ Length as a proxy for F
 
-```{r fig.height=5.5,echo=FALSE}
+```{r fig.height=5,echo=FALSE}
 grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/FLife-OM-oem-f-1.png"))
 ```
 
-### Upper Bound  
+##  *rf<span style="color:green">$b$</span>* Bound on Catch 
 
 <div class="columns-2">
 
-+ $b= min\lbrace{ 1,\frac{I_{current}}{I_{trigger}}\rbrace}$
+$b= min\lbrace{ 1,\frac{I_{current}}{I_{trigger}}\rbrace}$
+
+Where 
+
 + $I_{trigger}$ = $wI_{lim}$ ($w > 1$).
-+   Needs values of $w$ and $I_{lim}$
+
+Needs values of $w$ and $I_{lim}$
 
 ```{r,fig.height=3,fig.width=4}
 library(ggplot2)
@@ -158,87 +199,47 @@ dt2=data.frame(y=pmin(1,rnd),x=rnd)
 ggplot(aes(x,y),data=dat)+
   geom_line(col="blue")+
   geom_point(aes(x,y),data=dt2,col="red")+
-  xlab("Index")+ylab("Multiplier")
+  xlab("Index")+ylab("Multiplier")+
+  scale_y_continuous(limits=c(0,1.5))+
+  theme_bw()
 ```
 
 </div>
 
-# Observation Error Model
-
-## Index of Abundance
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/FLife-OM-oem-srvy-1.png"))
-```
-
-##  Length Frequency  
-
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/FLife-OM-lfq-1.png"))
-```
-
-# Length Based Methods
-
-##  $F_{MSY}$ Proxies
-
-Based on Beverton and Holt  $L_{F} = \frac{L\infty +\frac{F+M}{K}L_c}{1+\frac{F+M}{K}}$
-
-+ $L_{current}/L_{F=M}$ 
-+ $M/(Z_{current}-M)$
-+ $F_{0.1}/(Z_{current}-M)$
-+ $LBSPR$ Length-based spawning potential ratio (Hordyk et al. 2015a) 
-+ $Lime$ (Rudd and Thorson, 2018) mixed effects non-equilibrium
-+ ...
-
-
-## Length Based Methods
-### Selection Pattern
-
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/maite-l-sel.png"))
-```
-
-## Evaluation
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/maite-l.png"))
-```
-
 # Management Strategy Evaluation
 ## Management Strategy Evaluation
- 
-Construct an **<span style="color:blue">Operating Model</span>** (OM) to simulate stocks with different life and exploitation histories 
 
-Generate different types of datasets using an **<span style="color:green">Observation Error Model</span>**  (OEM). 
+Evaluate alternatives by constructing an **<span style="color:blue">Operating Model</span>** to simulate stocks with different life and exploitation histories 
 
-Test Alternative  *<span style="color:red">Management Procedures</span>*
+Generate different types of datasets using an **<span style="color:green">Observation Error Model</span>** 
+
+Then test Alternative  **<span style="color:red">Management Procedures</span>**
 
 +  Assessment Methods 
 +  Reference Points and 
 +  Advice Rules
 
-## Operating Model
-Life History Relationships
+# Operating Model
 
-```{r fig.height=5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/FLife/tex/figsfb-1.png"))
-```
+<!-- ## Operating Model -->
+<!-- Life History Relationships -->
+
+<!-- ```{r fig.height=5,echo=FALSE} -->
+<!-- grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/FLife/tex/figsfb-1.png")) -->
+<!-- ``` -->
  
-## Natural Mortality
-
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/FLife/tex/figsm-1.png"))
-```
-
 ## Case Studies
 
 Turbot, Brill, Pollack, Ray, Sprat, Lobster, Razors
 
-```{r fig.height=4,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-pairs-1.png"))
-```
-
-## Life History Relationships
 ```{r fig.height=5.5,echo=FALSE}
 grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/fig1.png"))
+```
+
+## Natural Mortality
+
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/FLife/tex/figsm-1.png"))
 ```
 
 ## Biology 
@@ -246,14 +247,37 @@ grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGri
 grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-vectors-1.png"))
 ```
 
-## Equilibrium and Reference Points
+## Expected Dynamics
 ```{r fig.height=5.5,echo=FALSE}
 grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-eqRun-1.png"))
 ```
 
-## Reference Points 
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/fig2.png"))
+
+## Natural Mortality and Recruitment
+```{r, fig.height=4, fig.width=6,echo=FALSE,warning=FALSE,message=FALSE}
+library(plyr)
+library(FLCore)
+library(FLBRP)  
+
+load("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/data/eqs.RData")
+dat=ldply(eqs, function(x) 
+  model.frame(FLQuants(iter(x,3),ssb=ssb,yield=catch)))
+
+ggplot(aes(ssb,yield,col=.id),data=dat)+
+  geom_line()+
+  guides(col=guide_legend(title=""))+
+  xlab("Yield")+ylab("SSB")+
+  theme_bw()
+```
+
+<!-- ## Production Functions -->
+<!-- ```{r} -->
+<!-- grid.raster(readPNG("/home/laurence/Desktop/flr/FLife/tex/FLife/fig4-1.png")) -->
+<!-- ``` -->
+
+## Stock Recruitment
+```{r, fig.height=5}
+grid.raster(readPNG("/home/laurence/Desktop/mse/meetings/kickoff/themes/computational/ecology/curySRR.png"))
 ```
 
 ## Operating Model
@@ -261,43 +285,79 @@ grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGri
 grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-ts-1.png"))
 ```
 
-## Estimate of **F** using LBSPR 
+## Indices of Abundance
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/FLife-OM-oem-srvy-1.png"))
+```
+
+
+##  Length Frequency Data  
+
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/FLife-OM-lfq-1.png"))
+```
+
+## Reference Points and Proxies
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/fig2.png"))
+```
+
+# Methods
+
+## Length Based Methods
+###  $F_{MSY}$ Proxies
+
+Based on Beverton and Holt  $L_{F} = \frac{L\infty +\frac{F+M}{K}L_c}{1+\frac{F+M}{K}}$
+
++ $L_{current}/L_{F=M}$ 
++ $M/(Z_{current}-M)$
++ $F_{0.1}/(Z_{current}-M)$
++ $LBSPR$ Length-based spawning potential ratio (Hordyk et al. 2015) 
++ $Lime$ (Rudd and Thorson, 2018) mixed effects non-equilibrium
++ ...
+
+
+## $F$ from LBSPR 
 ```{r fig.height=5.5,echo=FALSE}
 grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/lbspr-turbot-fm-1.png"))
 ```
 
-# Length v Catch Methods
+## Selection Pattern
 
-## Scenarios
-Stock trends
-
-```{r ,echo=FALSE, out.width="50%"}
-knitr::include_graphics('figs/maite-l-scen.png')
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/maite-l-sel.png"))
 ```
 
-## Evaluation
-
-```{r ,echo=FALSE, out.width="70%"}
-knitr::include_graphics('figs/maite-cl.png')
+## Simulation Testing 
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/maite-l.png"))
 ```
 
-## Biomass Dynamic; Cat. 1  
-```{r fig.height=4.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/bd-turbot-1.png"))
-```
+<!-- ## Catch v Length -->
+
+<!-- Stock trends -->
+
+<!-- ```{r ,echo=FALSE, out.width="50%"} -->
+<!-- knitr::include_graphics('figs/maite-l-scen.png') -->
+<!-- ``` -->
+
+<!-- ## Catch v Length -->
+
+<!-- ```{r ,echo=FALSE, out.width="70%"} -->
+<!-- knitr::include_graphics('figs/maite-cl.png') -->
+<!-- ``` -->
 
 ## Catch Only 
 ```{r fig.height=4.5,echo=FALSE}
 grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/bdsra-turbot-plot-1.png"))
 ```
 
-## Performance Measures
+## Biomass Dynamic Category 1  
+```{r fig.height=4.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/bd-turbot-1.png"))
+```
 
-Under the MSFD, GES Descriptor 3 requires that stocks should be 
-
-+ Exploited sustainably consistent with high long-term yields
-+ Have full reproductive capacity in order to maintain stock biomass
-+ Proportion of older and larger fish/shellfish should be maintained (or increased) being an indicator of a healthy stock
+# Example MSE 
 
 ## Empirical HCR
 
@@ -324,8 +384,6 @@ dat=data.frame(y=rlnorm(5)*cumsum(seq(0,.5,length.out=5)),x=1:5)
 dt2=data.frame(y=mean(dat$y[1:3]),x=1:3)
 dt3=data.frame(y=mean(dat$y[4:5]),x=4:5)
 ggplot(aes(x,y),data=dat)+
-  geom_line(aes(x,y),data=dt2,col="red", lwd=2)+
-  geom_line(aes(x,y),data=dt3,col="red", lwd=2)+
   geom_point()+geom_smooth(method="lm",se=FALSE)+
   xlab("Year")+ylab("Index")+
   annotate("text", x = 2.2, y = 1.20, label = lm_eqn(lm(x ~ y, dat)), 
@@ -343,19 +401,35 @@ $C_{y+1}=C_{y-1}({1+k_2b})$
      
 </div>
 
+Risks of an increase are different from a decrease, therefore 
+
++ **K1** decreases catch if index declines
+
++ **K2** increases catch if index goes up
+
+## Performance Measures
+
+Under the MSFD, GES Descriptor 3 requires that stocks should be 
+
++ Exploited sustainably consistent with high long-term yields
++ Have full reproductive capacity in order to maintain stock biomass
++ Proportion of older and larger fish/shellfish should be maintained (or increased) being an indicator of a healthy stock
+
+
 ## Performance Measures
 
 ### **Safety**
 + Probability of avoiding limits <span style="color:red">>$B_{lim}$</span>
 
 ### **Status**
-+ Probability of achieving targets, recovery and long-term <span style="color:green">>$B_{MSY}$ & >$F_{MSY}$</span>
++ Probability of achieving targets <span style="color:green">>$B_{MSY}$ & >$F_{MSY}$</span>
 
 ### **Yield**
 + **<span style="color:blue">$Yield:MSY$</span>**
 
 ### **Variability**
-+ Inter-Annual variability
++ Inter-Annual
+
 
 ## Performance Measures
 
@@ -381,20 +455,127 @@ grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGri
 <!-- grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/rg-smry-plot-2-1.png")) -->
 <!-- ``` -->
 
+```{r}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/pm.RData")
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/smry.RData")
+```
+
+
+<!-- ## Pollack -->
+<!-- ```{r, fig.height=5,fig.width=8} -->
+<!-- dat=ddply(subset(smry,spp=="pollack"),.(year,qname,.id), with, quantile(data,na.rm=TRUE)) -->
+<!-- dat$Gain=factor(dat$.id,level=unique(smry$.id)[c(1,2,5,3,4)]) -->
+<!-- smry$Gain=factor(smry$.id,level=unique(smry$.id)[c(1,2,5,3,4)]) -->
+
+<!-- ggplot(dat)+ -->
+<!--   geom_hline(aes(yintercept=1),col="red")+ -->
+<!--   geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+ -->
+<!--   geom_path(aes(year,`50%`,col=Gain))+ -->
+<!--   geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23" -->
+<!--             ,data=subset(smry,iter%in%c(12)&spp=="pollack"))+ -->
+<!--   facet_grid(qname~Gain,scale="free")+ -->
+<!--   theme_bw()+ -->
+<!--   theme(legend.position="bottom")+ylab("")+xlab("Year") -->
+<!-- ``` -->
+
+## Turbot
+```{r, fig.height=5,fig.width=8}
+dat=ddply(subset(smry,spp=="turbot"),.(year,qname,.id), with, quantile(data,na.rm=TRUE))
+dat$Gain=factor(dat$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+smry$Gain=factor(smry$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+
+ggplot(dat)+
+  geom_hline(aes(yintercept=1),col="red")+
+  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+
+  geom_path(aes(year,`50%`,col=Gain))+
+  geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23"
+            ,data=subset(smry,iter%in%c(12)&spp=="turbot"))+
+  facet_grid(qname~Gain,scale="free")+
+  theme_bw()+
+  theme(legend.position="bottom")+ylab("")+xlab("Year")
+```
+
+## Ray
+```{r, fig.height=5,fig.width=8}
+dat=ddply(subset(smry,spp=="ray"),.(year,qname,.id), with, quantile(data,na.rm=TRUE))
+dat$Gain=factor(dat$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+smry$Gain=factor(smry$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+
+ggplot(dat)+
+  geom_hline(aes(yintercept=1),col="red")+
+  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+
+  geom_path(aes(year,`50%`,col=Gain))+
+  geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23"
+            ,data=subset(smry,iter%in%c(12)&spp=="ray"))+
+  facet_grid(qname~Gain,scale="free")+
+  theme_bw()+
+  theme(legend.position="bottom")+ylab("")+xlab("Year")
+```
+
+<!-- ## Brill -->
+<!-- ```{r, fig.height=5,fig.width=8} -->
+<!-- dat=ddply(subset(smry,spp=="brill"),.(year,qname,.id), with, quantile(data,na.rm=TRUE)) -->
+<!-- dat$Gain=factor(dat$.id,level=unique(smry$.id)[c(1,2,5,3,4)]) -->
+<!-- smry$Gain=factor(smry$.id,level=unique(smry$.id)[c(1,2,5,3,4)]) -->
+
+<!-- ggplot(dat)+ -->
+<!--   geom_hline(aes(yintercept=1),col="red")+ -->
+<!--   geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+ -->
+<!--   geom_path(aes(year,`50%`,col=Gain))+ -->
+<!--   geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23" -->
+<!--             ,data=subset(smry,iter%in%c(12)&spp=="brill"))+ -->
+<!--   facet_grid(qname~Gain,scale="free")+ -->
+<!--   theme_bw()+ -->
+<!--   theme(legend.position="bottom")+ylab("")+xlab("Year") -->
+<!-- ``` -->
+
+## Sprat
+```{r, fig.height=5,fig.width=8}
+dat=ddply(subset(smry,spp=="sprat"),.(year,qname,.id), with, quantile(data,na.rm=TRUE))
+dat$Gain=factor(dat$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+smry$Gain=factor(smry$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+
+ggplot(dat)+
+  geom_hline(aes(yintercept=1),col="red")+
+  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+
+  geom_path(aes(year,`50%`,col=Gain))+
+  geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23"
+            ,data=subset(smry,iter%in%c(12)&spp=="sprat"))+
+  facet_grid(qname~Gain,scale="free")+
+  theme_bw()+
+  theme(legend.position="bottom")+ylab("")+xlab("Year")
+```
+
+# Next Steps
+## Next Steps
+
+### **Case studies**
++ Summarise current infomation
++ Propose future data collection options
+
+### Evaluate **single rules**
++ Length
++ Abundance Indices
++ Catch
+
+### Evaluate **combined rules** of the form $C_{t+1}=C_{t-1}rfb$
+
+### Compare to **Category 1** rules
 
 # Conclusions
 ## Conclusions
-### **Risk**
-An uncertainty that matters, what matters are management objectives
-
 ### **Management Procedures**
 Consider the data along with the assumptions, estimator and management and feedback between the various elements
+
+### **Diagnostics**
+Compare across species, stocks, fisheries and advice rules
 
 ### **Value of infomation**
 Models are cheap, but data is expensive
 
-### **Diagnostics**
-Compare across species, stocks, fisheries and advice rules
+### **Risk**
+An uncertainty that matters, what matters are management objectives
+
 
 ## R Packages
 

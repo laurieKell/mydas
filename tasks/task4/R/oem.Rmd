@@ -220,7 +220,7 @@ ggplot()+
 ```{r, oem-f}
 theme_set(theme_bw())
 
-plot(FLQuants(om,fbar,mnLen))
+plot(FLQuants(om,"F"=fbar,"Mean Size"=mnLen))
 ```
 
 **Figure `r iFig=iFig+1; iFig`,** Index of F.

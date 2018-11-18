@@ -1,4 +1,4 @@
-  ---
+---
 title: "FLife: Operating Model Conditioning"
 subtitle: "Razors"
 author: "L Kell & A Tidd"
@@ -26,9 +26,8 @@ iFig=0
 iTab=0
 ```
 ```{r, dir}
-dirMy=dirname(dirname(FLife:::getScriptPath()))
-#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"  
-dirDat=file.path(dirMy,"data")
+dirMy =dirname(dirname(FLife:::getScriptPath()))
+dirDat="/home/laurence/Desktop/Dropbox/mydasOMs/data"  
 
 nits=500
 ```
@@ -68,7 +67,7 @@ lhist=c(t0  =5/365,
      
 lh=read.csv("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/inputs/razorGrowth.csv")[,1:3]
 lh[,1]=lh[,1]/10
-
+lh=cbind(lh,l50=c(lhist["l50"],rep(NA,dim(lh)[1]-1)))
 lh=cbind(lh,rbind(ab[,c("a","b")],
                   cbind(a   =rep(NA,dim(lh)[1]-dim(ab)[1]),
                         b   =rep(NA,dim(lh)[1]-dim(ab)[1]))))
@@ -127,14 +126,21 @@ sim<-function(x,niters=500,se=0.3){
 
 # create FLPar
 lh=FLife:::mf2FLPar(lh)
-lh[lh$t0>=0,"t0"]=NA
+lh["t0",lh$t0>=0]=NA
+```
 
+```{r}
 lh=sim(lh,    niters=nits)
+```
 
+```{r}
 lh["t0"][]   =pmin(-0.1,c(lh["t0"]))
 
 lh=lhPar(lh,s=0.8, sl=1)
-eq=lhEql(lh,spwn=0)
+```
+
+```{r}
+eq=lhEql(lh,spwn=0)   
 ```
 
 ```{r vectors}
@@ -158,7 +164,7 @@ ggplot(res)+
 **Figure `r iFig=iFig+1; iFig`** Vectors.
 
 
-```{r eq, fig.height=6,fig.width=8}
+```{r eq, fig.height=8,fig.width=8}
 plot(iter(eq,1),refpts=FALSE)
 ```
 

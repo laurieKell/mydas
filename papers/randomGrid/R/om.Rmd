@@ -30,8 +30,6 @@ dirMy=dirname(dirname(FLife:::getScriptPath()))
 #dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
 dirDat="/home/laurence/Desktop/Dropbox/mydasOMs/data"
 dirRes="/home/laurence/Desktop/Dropbox/mydasOMs/results"
-
-nits=1000
 ```
 ```{r, pkgs}
 library(ggplot2)
@@ -57,20 +55,20 @@ srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),.3,b=0.0)
 ```{r, lh}
 load(file.path(dirDat,"brill.RData"))
 par=model.frame(lh)
-nms=dimnames(par)$params
-par=FLPar(apply(lh,1,mean)[nms])
+par=FLPar(apply(lh,1,mean))
 load(file.path(dirDat,"turbot.RData"))
-par=cbind(par,FLPar(apply(lh,1,mean)[nms]))
+par=cbind(par,FLPar(apply(lh,1,mean)))
 load(file.path(dirDat,"ray.RData"))
-par=cbind(par,FLPar(apply(lh,1,mean)[nms]))
+par=cbind(par,FLPar(apply(lh,1,mean)))
 load(file.path(dirDat,"pollack.RData"))
-par=cbind(par,FLPar(apply(lh,1,mean)[nms]))
+par=cbind(par,FLPar(apply(lh,1,mean)))
 load(file.path(dirDat,"sprat.RData"))
-par=cbind(par,FLPar(apply(lh,1,mean)[nms]))
+par=cbind(par,FLPar(apply(lh,1,mean)))
 load(file.path(dirDat,"lobster.RData"))
-par=cbind(par,FLPar(apply(lh,1,mean)[nms]))
+par=cbind(par,FLPar(apply(lh,1,mean)))
 load(file.path(dirDat,"razor.RData"))
-par=cbind(par,FLPar(apply(lh,1,mean)[nms]))
+par=cbind(par,FLPar(apply(lh,1,mean)))
+
 dimnames(par)$iter=c("brill","turbot","ray","pollack","sprat","lobster","razor")
 
 my_smooth <- function(data,mapping,...){
@@ -105,10 +103,30 @@ p
 
 The parameters are then used by `lhEql` to simulate the equilibrium dynamics by combining the spawner/yield per recruit relationships with a stock recruiment relationship.
 
-```{r, eqRun}
+```{r, eqRun2}
 eq=lhEql(par,spwn=0)
 ```
 
+```{r, eqRun3}
+mFn=function(wt,params){
+    res=wt%^%params["m2"] 
+    res=params["m1"]%*%res
+    res} 
+
+eqs=list("Gislason-BevHolt"=lhEql(par,spwn=0),
+         "Lorenzen-BevHolt"=lhEql(rbind(par,propagate(FLPar(m1=3,m2=-0.288),7)),spwn=0,m=mFn),
+         "Gislason-Ricker" =lhEql(par,spwn=0,sr="ricker"),
+         "Lorenzen-Ricker" =lhEql(rbind(par,propagate(FLPar(m1=3,m2=-0.288),7)),spwn=0,m=mFn,sr="ricker"))
+
+save(eqs,file="/home/laurence/Desktop/sea++/mydas/project/tasks/task4/data/eqs.RData") 
+
+dat=ldply(eqs, function(x){ 
+  model.frame(FLQuants(iter(x,3),ssb=ssb,yield=catch))})
+
+ggplot(aes(ssb,yield,col=.id),data=dat)+
+  geom_line()+
+  guide_legend(title="")
+```
 
 ```{r vectors}
 sel<-function(x) 
@@ -169,7 +187,7 @@ plot(FLQuants(om,
 
 **Figure `r iFig=iFig+1; iFig`** Time series relative to MSY benchmarks.
 
-```{r}
+```{r, eval=FALSE}
 library(doParallel)
 library(foreach)
 

@@ -50,8 +50,7 @@ theme_set(theme_bw(base_size=20))
 ```
 
 ```{r}
-source('~/Desktop/sea++/mydas/R/fbSmry.R')
-
+source('/home/laurence/Desktop/sea++/mydas/project/R/fbSmry.R')
 
 my_smooth <- function(data,mapping,...){
   ggplot(data=data,mapping=mapping)+
@@ -65,14 +64,16 @@ my_density <- function(data,mapping,...){
 ```
 
 ```{r om-data}
+source('/home/laurence/Desktop/sea++/mydas/project/R/fbSmry.R')
+
 load(url("https://github.com//fishnets//fishnets//blob//master//data//fishbase-web//fishbase-web.RData?raw=True"))
 
-spp=read.csv("/home/laurence/Desktop/sea++/mydas/R/shiny/data/Fishdata.csv")[,c("Environment","Binomial")]
+spp=read.csv("/home/laurence/Desktop/sea++/mydas/project/R/shiny/data/Fishdata.csv")
 spp=spp[!duplicated(spp[,"Binomial"]),]
 
 spp=subset(spp,spp$Environment%in%names(table(spp$Environment)[c(3,4,6,7,8)]))$Binomial
 
-grps=ac(unique(read.csv("/home/laurence/Desktop/sea++/mydas/R/shiny/data/Fishdata.csv")[,5]))
+grps=ac(unique(read.csv("/home/laurence/Desktop/sea++/mydas/project/R/shiny/data/Fishdata.csv")[,5]))
 grps=subset(fb,species%in%spp)
 grps=fbSmry(grps)
 
@@ -92,7 +93,7 @@ dat=transform(dat,winf=log(a*linf^b),
                   k   =log(k),
                   l50 =log(l50))
 
-gis=read.csv("/home/laurence/Desktop/sea++/mydas/papers/FLife/inputs/gislason-et-al-2010.csv",sep="\t")
+gis=read.csv("/home/laurence/Desktop/sea++/mydas/project/papers/FLife/inputs/gislason-et-al-2010.csv",sep="\t")
 ```
 
 ```{r fb}
@@ -111,8 +112,9 @@ ggpairs(dat[,c(2,3,4,12,8,11)],mapping = ggplot2::aes(col=habit),
 
 **Figure `r iFig=iFig+1; iFig`** Life history relationships from Fishbase.
 
-```{r m}
-ggpairs(log(gis[,c(2,5:8)]), 
+```{r m, fig.height=6,fig.width=6}
+names(gis)[5:6]=c("Temperature","Length")
+ggpairs(log(gis[,c(2,6,7:8,5)]),   
         upper=list(continuous=wrap("cor",size=4, hjust=0.5)),
         lower = list(continuous = wrap(my_smooth)),
         diag=list(continuous=wrap(my_density,alpha=0.5)),
