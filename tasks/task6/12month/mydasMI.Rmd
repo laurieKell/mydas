@@ -33,32 +33,32 @@ library(png)
 
 **Develop and test** a range of assessment models and methods to establish **<span style="color:blue">$MSY$</span>** or proxy reference points across the spectrum of data-limited stocks 
 
-+ **<span style="color:brown">Case Studies</span>** based on Economic value; Importance; Sensitivity to the impacts of fishing; Available data.
++ Choose **<span style="color:brown">Case Studies</span>** based on Economic value; Importance; Sensitivity to the impacts of fishing; Available data.
 
-+ A number of data-limited methods already exist, therefore implement a **<span style="color:green">Common Framework</span>** to compare performance.
++ A large   number of data-limited methods already exist, therefore implement a **<span style="color:green">Common Framework</span>** to compare performance.
 
 + Evaluate **<span style="color:red">Sensitivity</span>**  to assumptions
 
-+ **<span style="color:purple">Management Strategy Evaluation</span>** to ensure robustness to uncertainty 
++ Conduct **<span style="color:purple">Management Strategy Evaluation</span>** to ensure robustness to uncertainty 
 
 
 ## MSY
 
-An objective of the Common Fisheries Programme is to achieve  **<span style="color:blue">$MSY$</span>** for
-**<span style="color:green">all harvested species</span>**
-
+A Common Fisheries Programme objective is to achieve  **<span style="color:blue">$MSY$</span>** for
+*<span style="color:purple ">all harvested species</span>*
 
 2020 deadline for achieving Good Environmental Status 
 
-+ *<span style="color:black">“Stocks should be exploited sustainably consistent with high long-term yields."</span>* 
-+ *<span style="color:black">"Populations of all commercially exploited fish and shellfish are within safe biological limits, exhibiting a population age and size distribution that is indicative of a healthy stock.”</span>*
 
-# Data Poor Advice
-## Data Poor Advice
++ *“Stocks should be exploited sustainably consistent with <span style="color:green">high long-term yields."* 
++ *"Populations of all commercially exploited fish and shellfish are within <span style="color:red">safe biological limits</span>,exhibiting a population age and size distribution that is indicative of a healthy stock.”*
 
-Simple catch rules have been developed to stabilise data limited stocks at current levels 
+# Data Limited Advice
+## Data Limited Advice
 
-The *<span style="color:purple">"2 over 3"</span>* catch rule adjusts catches based on changes in an index of abundance ($I$)
+*<span style="color:purple">"2 over 3"</span>*  catch rule to stabilise data limited stocks at current levels 
+
+Adjust catches based on changes in an index of abundance ($I$)
 
 ```{r,fig.height=2.5,fig.width=4}
 library(ggplot2)
@@ -76,32 +76,37 @@ ggplot(aes(x,y),data=dat)+
 
 <!-- \tab $C_{y+1}=C_{y-1}\frac{\Sigma^{y-1}_{i=y-3} I_{i}/2}{\Sigma^{y-3}_{i=y-5} I_{i}/3}$ -->
 
+Index goes up catch goes up, Index goes down catch goes down
 
-## Limitations
+## Data Limited Advice
+### **Limitations**
 
-The  *<span style="color:purple">2 over 3</span>* rule, however, has no reference points to ensure that
+*<span style="color:purple">2 over 3</span>* rule, however, has no reference points to ensure that
 
-+ *<span style="color:green">targets</span>*  are met
-+  *<span style="color:red">limits</span>* are avoided with high probability
++ *<span style="color:green">Targets</span>*  are met
++  *<span style="color:red">Limits</span>* are avoided with high probability
+
+
+### **Opportunities**
 
 Under the CFP management plans should be delivered through a *<span style="color:purple">results-based approach</span>* that allows tailor-made measures to be proposed in close consultation with fishers and Member States at a regional level.
 
 
 ## Alternatives
 
-**WKLIFE** is therefore testing alternative rules that use **<span style="color:blue">$MSY$</span>** proxy reference points of the form 
+**WKLIFE** is testing rules that use **<span style="color:blue">$MSY$</span>** proxy reference points of the form 
  
 $C_{y+1}=C_{current}rfb$
  
 Where 
 
 + $r$ is a rule based on an *<span style="color:purple">index of abundance</span>*
-+ $f$ is current exploitation rate relative to a *<span style="color:green">proxy</span>* for $F_{MSY}$ 
++ $f$ is current exploitation rate relative to a *<span style="color:green">$F_{MSY}$ proxy</span>*
 + $b$ specifies a *<span style="color:red">threshold</span>* which if the index falls below the catch is reduced.
 
 ## *<span style="color:purple">$r$</span>fb* Index of Abundance
 
-### Difference 
+### *<span style="color:purple">"2 over 3"</span>*  
 
 <div class="columns-2">
 
@@ -124,7 +129,7 @@ ggplot(aes(x,y),data=dat)+
 
 ## *<span style="color:purple">$r$</span>fb* Index of Abundance
 
-### Difference or Trend
+### *<span style="color:purple">"2 over 3"</span>*  or Trend
 
 <div class="columns-2">
 
@@ -252,8 +257,20 @@ grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/
 grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-eqRun-1.png"))
 ```
 
+## Operating Model
+```{r fig.height=5.5,echo=FALSE}
+library(grid)
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-ts-1.png"))
+```
 
-## Natural Mortality and Recruitment
+## Reference Points and Proxies
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/fig2.png"))
+```
+
+# Uncertainty
+
+## Natural Mortality & Stock Recruitment 
 ```{r, fig.height=4, fig.width=6,echo=FALSE,warning=FALSE,message=FALSE}
 library(plyr)
 library(FLCore)
@@ -275,14 +292,9 @@ ggplot(aes(ssb,yield,col=.id),data=dat)+
 <!-- grid.raster(readPNG("/home/laurence/Desktop/flr/FLife/tex/FLife/fig4-1.png")) -->
 <!-- ``` -->
 
-## Stock Recruitment
+## Stock and Recruitment
 ```{r, fig.height=5}
 grid.raster(readPNG("/home/laurence/Desktop/mse/meetings/kickoff/themes/computational/ecology/curySRR.png"))
-```
-
-## Operating Model
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/om/turbot-ts-1.png"))
 ```
 
 ## Indices of Abundance
@@ -294,18 +306,14 @@ grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/
 ##  Length Frequency Data  
 
 ```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/FLife-OM-lfq-1.png"))
-```
-
-## Reference Points and Proxies
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/fig2.png"))
+library("grid")
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/lbspr-brill-oemplot-1.png"))
 ```
 
 # Methods
 
 ## Length Based Methods
-###  $F_{MSY}$ Proxies
+### F and $F_{MSY}$ Proxies
 
 Based on Beverton and Holt  $L_{F} = \frac{L\infty +\frac{F+M}{K}L_c}{1+\frac{F+M}{K}}$
 
@@ -315,12 +323,6 @@ Based on Beverton and Holt  $L_{F} = \frac{L\infty +\frac{F+M}{K}L_c}{1+\frac{F+
 + $LBSPR$ Length-based spawning potential ratio (Hordyk et al. 2015) 
 + $Lime$ (Rudd and Thorson, 2018) mixed effects non-equilibrium
 + ...
-
-
-## $F$ from LBSPR 
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/lbspr-turbot-fm-1.png"))
-```
 
 ## Selection Pattern
 
@@ -346,6 +348,12 @@ grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/meetings/wklifeiiiv/mait
 <!-- ```{r ,echo=FALSE, out.width="70%"} -->
 <!-- knitr::include_graphics('figs/maite-cl.png') -->
 <!-- ``` -->
+
+
+## $F$ from LBSPR 
+```{r fig.height=5.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/tex/simtest/lbspr-turbot-fm-1.png"))
+```
 
 ## Catch Only 
 ```{r fig.height=4.5,echo=FALSE}
@@ -407,53 +415,6 @@ Risks of an increase are different from a decrease, therefore
 
 + **K2** increases catch if index goes up
 
-## Performance Measures
-
-Under the MSFD, GES Descriptor 3 requires that stocks should be 
-
-+ Exploited sustainably consistent with high long-term yields
-+ Have full reproductive capacity in order to maintain stock biomass
-+ Proportion of older and larger fish/shellfish should be maintained (or increased) being an indicator of a healthy stock
-
-
-## Performance Measures
-
-### **Safety**
-+ Probability of avoiding limits <span style="color:red">>$B_{lim}$</span>
-
-### **Status**
-+ Probability of achieving targets <span style="color:green">>$B_{MSY}$ & >$F_{MSY}$</span>
-
-### **Yield**
-+ **<span style="color:blue">$Yield:MSY$</span>**
-
-### **Variability**
-+ Inter-Annual
-
-
-## Performance Measures
-
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/rg-pmeasures-1.png"))
-```
-
-## Utility Functions
-
-```{r fig.height=5.5,echo=FALSE}
-grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/rg-utilplot-1.png"))
-```
-
-<!-- ## Time Series I -->
-
-<!-- ```{r fig.height=5.5,echo=FALSE} -->
-<!-- grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/rg-smry-plot-1.png")) -->
-<!-- ``` -->
-
-<!-- ## Time Series II -->
-
-<!-- ```{r fig.height=5.5,echo=FALSE} -->
-<!-- grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/rg-smry-plot-2-1.png")) -->
-<!-- ``` -->
 
 ```{r}
 load("/home/laurence/Desktop/Dropbox/mydasOMs/results/pm.RData")
@@ -512,6 +473,61 @@ ggplot(dat)+
   theme(legend.position="bottom")+ylab("")+xlab("Year")
 ```
 
+## Ray Trend Over 10 Years
+```{r, fig.height=5,fig.width=8}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/results/smry2.RData")  
+smry2=subset(smry2,qname!="rec")
+smry2$qname=factor(smry2$qname,level=c("catch","ssb","f"))
+
+dat=ddply(subset(smry2,spp=="ray"),.(year,qname,.id), with, quantile(data,na.rm=TRUE))
+dat$Gain=factor(dat$.id,level=unique(smry2$.id)[c(1,2,5,3,4)])
+smry2$Gain=factor(smry2$.id,level=unique(smry2$.id)[c(1,2,5,3,4)])
+
+ggplot(dat)+
+  geom_hline(aes(yintercept=1),col="red")+
+  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+
+  geom_path(aes(year,`50%`,col=Gain))+
+  geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23"
+            ,data=subset(smry2,iter%in%c(12)&spp=="ray"))+
+  facet_grid(qname~Gain,scale="free")+
+  theme_bw()+
+  theme(legend.position="bottom")+ylab("")+xlab("Year")
+```
+
+## Sprat
+```{r, fig.height=5,fig.width=8}
+dat=ddply(subset(smry,spp=="sprat"),.(year,qname,.id), with, quantile(data,na.rm=TRUE))
+dat$Gain=factor(dat$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+smry$Gain=factor(smry$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+
+ggplot(dat)+
+  geom_hline(aes(yintercept=1),col="red")+
+  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+
+  geom_path(aes(year,`50%`,col=Gain))+
+  geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23"
+            ,data=subset(smry,iter%in%c(21)&spp=="sprat"))+
+  facet_grid(qname~Gain,scale="free")+
+  theme_bw()+
+  theme(legend.position="bottom")+ylab("")+xlab("Year")
+```
+
+## Sprat Juvenile Index
+```{r, fig.height=5,fig.width=8}
+dat=ddply(subset(smry2,spp=="sprat"&year<=45),.(year,qname,.id), with, quantile(data,na.rm=TRUE))  
+dat$Gain=factor(dat$.id,level=unique(smry2$.id)[c(1,2,5,3,4)]) 
+smry2$Gain=factor(smry2$.id,level=unique(smry2$.id)[c(1,2,5,3,4)])
+
+ggplot(dat)+
+  geom_hline(aes(yintercept=1),col="red")+
+  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+
+  geom_path(aes(year,`50%`,col=Gain))+
+  geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23"
+            ,data=subset(smry2,iter%in%c(12)&spp=="sprat"))+
+  facet_grid(qname~Gain,scale="free")+
+  theme_bw()+
+  theme(legend.position="bottom")+ylab("")+xlab("Year")
+```
+
 <!-- ## Brill -->
 <!-- ```{r, fig.height=5,fig.width=8} -->
 <!-- dat=ddply(subset(smry,spp=="brill"),.(year,qname,.id), with, quantile(data,na.rm=TRUE)) -->
@@ -529,41 +545,68 @@ ggplot(dat)+
 <!--   theme(legend.position="bottom")+ylab("")+xlab("Year") -->
 <!-- ``` -->
 
-## Sprat
-```{r, fig.height=5,fig.width=8}
-dat=ddply(subset(smry,spp=="sprat"),.(year,qname,.id), with, quantile(data,na.rm=TRUE))
-dat$Gain=factor(dat$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
-smry$Gain=factor(smry$.id,level=unique(smry$.id)[c(1,2,5,3,4)])
+## Marine Strategy Framework Directive
 
-ggplot(dat)+
-  geom_hline(aes(yintercept=1),col="red")+
-  geom_ribbon(aes(year,ymin=`25%`,ymax=`75%`,fill=Gain),alpha=0.2)+
-  geom_path(aes(year,`50%`,col=Gain))+
-  geom_path(aes(year,data,col=.id,group=paste(iter,.id,spp,qname)),linetype="23"
-            ,data=subset(smry,iter%in%c(12)&spp=="sprat"))+
-  facet_grid(qname~Gain,scale="free")+
-  theme_bw()+
-  theme(legend.position="bottom")+ylab("")+xlab("Year")
+GES Descriptor 3 requires that stocks should be 
+
++ Exploited sustainably consistent with high long-term yields
++ Have full reproductive capacity in order to maintain stock biomass
++ Proportion of older and larger fish/shellfish should be maintained (or increased) being an indicator of a healthy stock
+
+## Performance Measures
+
+### **Safety**
++ Probability of avoiding limits <span style="color:red">>$B_{lim}$</span>
+
+### **Status**
++ Probability of achieving targets <span style="color:green">>$B_{MSY}$ & >$F_{MSY}$</span>
+
+### **Yield**
++ **<span style="color:blue">$Yield:MSY$</span>**
+
+### **Variability**
++ Inter-Annual
+
+
+## Performance Measures
+
+```{r fig.height=4,fig.width=4,echo=FALSE}
+library(grid)
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/rg-pmeasures-1.png"))
 ```
+
++ **K1** decreases catch if index goes down
++ **K2** increases catch if index goes up
+
+## Utility Functions
+
+```{r fig.height=4,fig.width=4, echo=FALSE}
+library(grid)  
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/project/papers/randomGrid/tex/rg-utilplot-1.png"))
+```
+
++ **K1** decreases catch if index goes down
++ **K2** increases catch if index goes up
+
 
 # Next Steps
 ## Next Steps
 
 ### **Case studies**
-+ Summarise current infomation
-+ Propose future data collection options
++ Summarise current knowledge and infomation
++ Evaluate alternative management plans and data collection options
 
-### Evaluate **single rules**
+### Evaluate **Methods**
 + Length
 + Abundance Indices
 + Catch
 
-### Evaluate **combined rules** of the form $C_{t+1}=C_{t-1}rfb$
+### Evaluate **Combined Rules** of the form $C_{t+1}=C_{t-1}rfb$
 
 ### Compare to **Category 1** rules
 
-# Conclusions
-## Conclusions
+# Summary
+## Summary
 ### **Management Procedures**
 Consider the data along with the assumptions, estimator and management and feedback between the various elements
 
