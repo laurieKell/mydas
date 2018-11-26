@@ -1,0 +1,404 @@
+\documentclass[]{article}
+\makeatletter\if@twocolumn\PassOptionsToPackage{switch}{lineno}\else\fi\makeatother
+
+      \makeatletter
+\usepackage{wrapfig}
+\newcounter{aubio}
+
+\long\def\bioItem{%
+\@ifnextchar[{\@bioItem}{\@@bioItem}}
+
+\long\def\@bioItem[#1]#2#3{
+ \stepcounter{aubio}
+ \expandafter\gdef\csname authorImage\theaubio\endcsname{#1}
+ \expandafter\gdef\csname authorName\theaubio\endcsname{#2}
+ \expandafter\gdef\csname authorDetails\theaubio\endcsname{#3}
+}
+
+\long\def\@@bioItem#1#2{
+ \stepcounter{aubio}
+ \expandafter\gdef\csname authorName\theaubio\endcsname{#1}
+ \expandafter\gdef\csname authorDetails\theaubio\endcsname{#2}
+}
+
+\newcommand{\checkheight}[1]{%
+  \par \penalty-100\begingroup%
+  \setbox8=\hbox{#1}%
+  \setlength{\dimen@}{\ht8}%
+  \dimen@ii\pagegoal \advance\dimen@ii-\pagetotal
+  \ifdim \dimen@>\dimen@ii
+    \break
+  \fi\endgroup}
+
+\def\printBio{%
+  \@tempcnta=0
+   \loop
+     \advance \@tempcnta by 1
+     \def\aubioCnt{\the\@tempcnta}
+     \setlength{\intextsep}{0pt}%
+     \setlength{\columnsep}{10pt}%
+     \expandafter\ifx\csname authorImage\aubioCnt\endcsname\relax%
+      \else%
+       \checkheight{\includegraphics[height=1.25in,width=1in,keepaspectratio]{\csname authorImage\aubioCnt\endcsname}}
+        \begin{wrapfigure}{l}{25mm}
+         \includegraphics[height=1.25in,width=1in,keepaspectratio]{\csname authorImage\aubioCnt\endcsname}%height=145pt
+        \end{wrapfigure}\par
+      \fi
+     \noindent\textbf{\csname authorName\aubioCnt\endcsname}\csname authorDetails\aubioCnt\endcsname \par\bigskip
+      \ifnum\@tempcnta < \theaubio
+   \repeat
+   }
+\makeatother
+
+      
+%Publisher Template: Wiley
+%Template Provided By: Typeset
+
+\usepackage{amsfonts,amssymb,amsbsy,latexsym,amsmath,tabulary,graphicx,times,caption,fancyhdr}
+\usepackage[utf8]{inputenc}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Following additional macros are required to function some 
+% functions which are not available in the class used.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{url,multirow,morefloats,floatflt,cancel,tfrupee}
+\makeatletter
+
+
+\AtBeginDocument{\@ifpackageloaded{textcomp}{}{\usepackage{textcomp}}}
+\makeatother
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{pifont}
+\usepackage[nointegrals]{wasysym}
+\urlstyle{rm}
+\makeatletter
+
+%%%For Table column width calculation.
+\def\mcWidth#1{\csname TY@F#1\endcsname+\tabcolsep}
+
+%%Hacking center and right align for table
+\def\cAlignHack{\rightskip\@flushglue\leftskip\@flushglue\parindent\z@\parfillskip\z@skip}
+\def\rAlignHack{\rightskip\z@skip\leftskip\@flushglue \parindent\z@\parfillskip\z@skip}
+
+
+%\if@twocolumn\usepackage{dblfloatfix}\fi
+\usepackage{ifxetex}
+\ifxetex\else\if@twocolumn\usepackage{dblfloatfix}\fi\fi
+
+\AtBeginDocument{
+\expandafter\ifx\csname eqalign\endcsname\relax
+\def\eqalign#1{\null\vcenter{\def\\{\cr}\openup\jot\m@th
+  \ialign{\strut$\displaystyle{##}$\hfil&$\displaystyle{{}##}$\hfil
+      \crcr#1\crcr}}\,}
+\fi
+}
+
+%For fixing hardfail when unicode letters appear inside table with endfloat
+\AtBeginDocument{%
+  \@ifpackageloaded{endfloat}%
+   {\renewcommand\efloat@iwrite[1]{\immediate\expandafter\protected@write\csname efloat@post#1\endcsname{}}}{\newif\ifefloat@tables}%
+}%
+
+\def\BreakURLText#1{\@tfor\brk@tempa:=#1\do{\brk@tempa\hskip0pt}}
+\let\lt=<
+\let\gt=>
+\def\processVert{\ifmmode|\else\textbar\fi}
+\let\processvert\processVert
+
+\@ifundefined{subparagraph}{
+\def\subparagraph{\@startsection{paragraph}{5}{2\parindent}{0ex plus 0.1ex minus 0.1ex}%
+{0ex}{\normalfont\small\itshape}}%
+}{}
+
+% These are now gobbled, so won't appear in the PDF.
+\newcommand\role[1]{\unskip}
+\newcommand\aucollab[1]{\unskip}
+  
+\@ifundefined{tsGraphicsScaleX}{\gdef\tsGraphicsScaleX{1}}{}
+\@ifundefined{tsGraphicsScaleY}{\gdef\tsGraphicsScaleY{.9}}{}
+% To automatically resize figures to fit inside the text area
+\def\checkGraphicsWidth{\ifdim\Gin@nat@width>\linewidth
+	\tsGraphicsScaleX\linewidth\else\Gin@nat@width\fi}
+
+\def\checkGraphicsHeight{\ifdim\Gin@nat@height>.9\textheight
+	\tsGraphicsScaleY\textheight\else\Gin@nat@height\fi}
+
+\def\fixFloatSize#1{}%\@ifundefined{processdelayedfloats}{\setbox0=\hbox{\includegraphics{#1}}\ifnum\wd0<\columnwidth\relax\renewenvironment{figure*}{\begin{figure}}{\end{figure}}\fi}{}}
+\let\ts@includegraphics\includegraphics
+
+\def\inlinegraphic[#1]#2{{\edef\@tempa{#1}\edef\baseline@shift{\ifx\@tempa\@empty0\else#1\fi}\edef\tempZ{\the\numexpr(\numexpr(\baseline@shift*\f@size/100))}\protect\raisebox{\tempZ pt}{\ts@includegraphics{#2}}}}
+
+%\renewcommand{\includegraphics}[1]{\ts@includegraphics[width=\checkGraphicsWidth]{#1}}
+\AtBeginDocument{\def\includegraphics{\@ifnextchar[{\ts@includegraphics}{\ts@includegraphics[width=\checkGraphicsWidth,height=\checkGraphicsHeight,keepaspectratio]}}}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\def\URL#1#2{\@ifundefined{href}{#2}{\href{#1}{#2}}}
+
+%%For url break
+\def\UrlOrds{\do\*\do\-\do\~\do\'\do\"\do\-}%
+\g@addto@macro{\UrlBreaks}{\UrlOrds}
+
+\@ifundefined{quoteAttrib}
+	{\long\def\quoteAttrib#1{\par\raggedleft\itshape#1\unskip}}
+	{}
+
+\@ifundefined{titlequoteAttrib}
+	{\long\def\titlequoteAttrib#1{\list{}{\topsep-3pt\leftmargin.5in\rightmargin0pt}%
+  \item\relax---\upshape#1\endlist}}{}
+
+\renewenvironment{quote}
+	{\list{}{\leftmargin.5in\rightmargin\leftmargin}%
+  \item\relax}
+  {\endlist}
+
+\newenvironment{title-quote}
+	{\list{}{\fontsize{10pt}{12pt}\selectfont\leftmargin.5in\itshape\rightmargin\leftmargin}%
+  \item\relax}
+  {\endlist}
+
+
+\makeatother
+\def\floatpagefraction{0.8} 
+\def\dblfloatpagefraction{0.8}
+\def\style#1#2{#2}
+\def\xxxguillemotleft{\fontencoding{T1}\selectfont\guillemotleft}
+\def\xxxguillemotright{\fontencoding{T1}\selectfont\guillemotright}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\makeatletter
+\def\floatpagefraction{0.8}
+\def\wileyIndent{1pt}
+\usepackage[paperheight=10in,paperwidth=6.5in,margin=2cm,headsep=.5cm,top=2.5cm]{geometry}
+
+\renewenvironment{abstract}
+{\vspace*{-1pc}\trivlist\item[]\leftskip\wileyIndent\hrulefill\par\vskip4pt\noindent\textbf{\abstractname}\mbox{\null}\\}{\par\noindent\hrulefill\endtrivlist}
+
+\usepackage[perpage]{footmisc}
+
+\def\author#1{\gdef\@author{\hskip-\dimexpr(\tabcolsep)\hskip\wileyIndent\parbox{\dimexpr\textwidth-\wileyIndent}{\centering\bfseries#1}}}
+
+\def\title#1{\gdef\@title{\centering\bfseries\ifx\@articleType\@empty\else\@articleType\\\fi#1}}
+
+\let\@articleType\@empty \def\articletype#1{\gdef\@articleType{{\normalfont\itshape#1}}}
+
+\fancypagestyle{headings}{\fancyhf{}\fancyhead[C]{\RunningHead}\fancyhead[R]{\thepage}}\pagestyle{headings}
+
+\linespread{1.13} 
+
+ \def\audegree#1{}
+
+\captionsetup[scheme]{labelfont=sc,skip=1.4pt,aboveskip=1pc}
+\captionsetup[plate]{labelfont=sc,skip=1.4pt,aboveskip=1pc}
+\captionsetup[graph]{labelfont=sc,skip=1.4pt,aboveskip=1pc}
+\captionsetup[chart]{labelfont=sc,skip=1.4pt,aboveskip=1pc}
+\captionsetup[diagram]{labelfont=sc,skip=1.4pt,aboveskip=1pc}
+\captionsetup[figure]{labelfont=sc,skip=1.4pt,aboveskip=1pc}
+\captionsetup[table]{labelfont=sc,skip=1.4pt,labelsep=newline}
+
+\date{}
+
+\emergencystretch 25pt
+
+
+\makeatother
+
+\usepackage[T1]{fontenc}
+\makeatother
+\usepackage[authoryear,round]{natbib}
+
+
+
+\begin{document}
+
+
+\title{MyDas Generic Paper}
+\author{~}
+
+\def\RunningHead{}\def\RunningAuthor{}
+
+\maketitle 
+
+    
+\section{Introduction}
+Evaluation of data limited advice rules.
+
+Run the main effects then catagorise the performance of the Management Procedures, 
+
+Thanks for the meeting last week, I found it very productive and I hope everyone else did.
+
+We will now work on finalising everything and planning the workshop in March.
+
+Workshop
+
+I think we should try and use a "flipped classroom" approach. Where we prepare all the material online, the workshop participants then can look at these material, collaborate in online discussions, and carry out any required research at home. Then in the workshop we work together on the case studies in an informal way. This will require us to make sure that the wiki, packages, vignettes etc are all useful!
+
+Papers
+
+I will draft outlines for next week.
+
+A main issue is agreeing on the OM and the Observation Error Model scenarios. With even a relatively few OM, OEM and MP scenarios the number of simulations can become pretty huge. For example If we have n factors with m levels each then running a full factorial design would require m^n trials to be run. If instead for the OEM we choose a base case then just look at main effects the number of simulations is just n*m-(n-1).
+From the limited number of simulations run we can then try and develop hypotheses about the "best" advice rule to use based on things we can measure such as Linf, k, l50 and variability in the observed time series. W can then test these using the trials we did not run in the original simulations. For example would the same advice rule work for stocks which were highly variable but for different reasons, i.e. high M verses high recruitment variability regardless of the value of k?
+ 
+I therefore propose we agree the OM and OEM scenarios and then  come up with a generic HCR and set of reference points to test. 
+
+For the OMs this is what I propose
+
+scens=list(spp    =c("turbot","brill","ray","pollack","sprat","lobster","razor")[1:5],
+           srr    =c("bevholt","ricker"),
+           h      =c(0.7,0.9),
+           mq     =c("50th","25th","75th"),
+           sel    =c("mature","dome","flat"),
+           rDev   =c(0.3,0.6),
+           ar     =c(0.0,0.6),
+           idx    =c("mature","juvenile","biomass"),
+           uDev   =c(0.2,0.3),
+           lDev   =c(0.2,0.3),
+           initial=c("depleted","recovery")
+           )
+
+    mq is natural mortality estimated from the Gislason data but using quantile regression, to better reflect variability in M
+    initial, is the original depletion level, i.e. either at the highest depeletion level or after the reduction in fishing after the stock has started to recover. 
+    the u, and l devs are for the data for use in the MP, i.e. index of abundance and length. I have kept them high as we are looking at data poor stock.
+
+For the MPs we have two types of rule,
+
+    Trends, we can look at using 5, 10 years of data to estimate the trend for different quantities, e.g. index, length, estimate of F. And we can do this for different selection patterns
+    Relative, in this case we look at the difference between the current index, length, or estimate of F relative to a reference point (i.e. MSY proxy) or period. In the later case it might be reasonable to recover length data from an historical period when stocks were lightly expoited and then estimate a mean size of target F. It would be harder to estimate a proxy or reference for biomass, but there maybe options we could look at.
+
+ We can look at the rules separately and combined. If we have three types of data, two types of rules and two types of reference points then we have 12 possible combinations. The problem then is simply to find appropriate weightings.
+
+Hope this all makes sense 
+
+
+
+On 23/11/18 13:30, Yves Reecht wrote:
+>
+> Hi All,
+>
+> Following on my remark during the meeting on last Wed, I would like to clarify my thinking about the HCR used for the MSE (and which is the same used in WKLIFE, I think):
+>
+> with (if I got it right) based on a trend in the index (e.g. "2 over 3" rule), a proxy of and a precautionary approach term given by , with and .
+>
+> The drawback I see: does allow catch for an index value below , which seems conceptually wrong as this is supposed to be a proxy for an unsafe biological limit under which not exploitation should occur (with analogy to ). It might increase the risk of crashing a stock, especially in the case were the starting point is already below or close to unsafe limits (depleted stock).
+>
+> Including the limit index threshold with a linear decrease in b between and , the factor b would then be calculated as:
+>
+> …which is pretty easy to implement!
+>
+>  
+>
+> Any comment on that? Do you think it is worth testing it in the MSE framework?
+>
+>
+
+
+
+\textbf{Figure \ref{fig:m}}
+
+\textbf{Table \ref{tab:om}}
+\textbf{Table \ref{tab:oem}}
+\textbf{Table \ref{tab:mp1}}
+\textbf{Table \ref{tab:mp2}}
+
+
+\begin{description}
+ \item[Scenarios]
+ \begin{description}
+  \item[OMs] 
+  \item[O] 
+ \end{description}
+ \item[Scenarios] 
+\end{description}
+
+\begin{itemize}
+  \item \relax Scenarios, run the main effects only, then catagorise the Operating Models with respect to their production functions, e.g. $M_{MSY}/B_{MSY}$ and $B_{MSY}/B_{F=0}$
+  \item \relax 
+\end{itemize}
+  
+
+\bibliographystyle{oryx-apa}
+
+\bibliography{\jobname}
+
+\section*{Figures}
+
+
+\begin{figure*}[ht]
+\begin{center}
+\centerline{\includegraphics[width=.7\textwidth]{/home/laurence/Desktop/sea++/mydas/ICHEC/tex/om/first-m-1.pdf}}
+\end{center}
+\caption{}
+\label{fig:m}
+\end{figure*}
+
+
+\section*{Tables}
+    
+\begin{table}
+\begin{center}
+\begin{tabular}{|ccccc|}
+\hline
+{\tiny Factor} & {\tiny Levels} & {\tiny $\Sigma N$} & {\tiny $\Pi N$} & {\tiny Values} \\
+\hline\hline
+{\tiny Species} 			& {\tiny 5}   & {\tiny 5}  	& {\tiny 5} & {\tiny  \textbf{Turbot}; Brill; Pollack; Sprat; Ray}      \\
+{\tiny Stock-Recruitment} 		& {\tiny 2}   & {\tiny 10}  	& {\tiny 6} & {\tiny  \textbf{Beverton \& Holt}; Ricker}		\\
+{\tiny Steepness} 			& {\tiny 2}   & {\tiny 20} 	& {\tiny 7} & {\tiny  \textbf{0.7}; 0.9}     	           		\\
+{\tiny Natural Mortality}		& {\tiny 3}   & {\tiny 60} 	& {\tiny 9} & {\tiny  \textbf{50th}; 25th; 75th} 			\\
+{\tiny Selection Pattern}		& {\tiny 3}   & {\tiny 180} 	& {\tiny 11}& {\tiny  \textbf{Mature}; Dome; Flat}			\\
+{\tiny Recruiment Deviates}		& {\tiny 2}   & {\tiny 360} 	& {\tiny 12}& {\tiny  \textbf{0.3};0.6}					\\
+{\tiny Recruiment Autocorrelation}	& {\tiny 2}   & {\tiny 720} 	& {\tiny 13}& {\tiny  \textbf{0.0}; 0.6}				\\
+\hline
+\end{tabular}
+\end{center}
+\caption{OM Scenarios}
+\label{tab:om}
+\end{table}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|ccccc|}
+\hline
+{\tiny Factor} & {\tiny Levels} & {\tiny $\Sigma N$} & {\tiny $\Pi N$} & {\tiny Values} \\
+\hline\hline
+{\tiny Index} 				& {\tiny 3}   & {\tiny 3}  	& {\tiny 3} & {\tiny  \textbf{Mature}; Biomass; Juvenile}      		\\
+{\tiny CV} 				& {\tiny 2}   & {\tiny 6}  	& {\tiny 4} & {\tiny  \textbf{0.2}; 0.3}				\\
+{\tiny Type} 				& {\tiny 3}   & {\tiny 12} 	& {\tiny 6} & {\tiny  \textbf{Biomass}; Length; F}            		\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Observation Error Model Scenarios}
+\label{tab:oem}
+\end{table}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|cccc|}
+\hline
+{\tiny Factor} & {\tiny Levels} & {\tiny $\Sigma N$} & {\tiny Values} \\
+\hline\hline
+{\tiny K1} 				& {\tiny 2}   & {\tiny 2}  & {\tiny  \textbf{0.5}; 1.0}      		\\
+{\tiny K2} 				& {\tiny 2}   & {\tiny 4}  & {\tiny  \textbf{0.5}; 1.0}      		\\
+\hline
+\end{tabular}
+\end{center}
+\caption{MP Trend}
+\label{tab:mp1}
+\end{table}
+
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|cccc|}
+\hline
+{\tiny Factor} & {\tiny Levels} & {\tiny $\Sigma N$} & {\tiny Values} \\
+\hline\hline
+{\tiny Quantity}& {\tiny 3}   & {\tiny 12} & {\tiny  \textbf{Biomass}; F; length}      	 \\
+{\tiny Index} 	& {\tiny 3}   & {\tiny 3}  & {\tiny  \textbf{Mature}; Biomass; Juvenile} \\
+\hline
+\end{tabular}
+\end{center}
+\caption{MP Trend}
+\label{tab:mp2}
+\end{table}
+\end{document}
