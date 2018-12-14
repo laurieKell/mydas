@@ -1,7 +1,6 @@
 ---
-title: "title: Commercial catch and survey data for use in MSY proxies estimation"
-subtitle: "Razors"
-author: "L Kell"
+title: "Dataset for use in data poor methods"
+author: "Alex Tidd"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: pdf_document
 ---
@@ -10,8 +9,8 @@ output: pdf_document
 ```{r knitr_init, echo=FALSE, results="hide"}
 library(knitr)
 ## Global options
-opts_chunk$set(cache     =!TRUE,
-               echo      =TRUE,
+opts_chunk$set(cache     =TRUE,
+               echo      =!TRUE,
                eval      =TRUE,
                prompt    =FALSE,
                comment   =NA,
@@ -21,21 +20,36 @@ opts_chunk$set(cache     =!TRUE,
                tidy.opts=list(width.cutoff=80),
                fig.height=10,
                fig.width =10,
-               fig.path  ="tex/task_5_plan",
-               cache.path="cache/task_5_plan/")
+               fig.path  ="../tex/task5_plan",
+               cache.path="../cache/task5_plan/")
 
 iFig=0
 ```
 
 ## MYDAS
   
-Task 5 of the MYDAS project <https://github.com/laurieKell/mydas> potentially requires commercial/Survey inputs to estimate the current status of the case-study stocks. 
-The available data sources within the EU are either country specific, or from collective sources such as DATRAS <http://www.ices.dk/marine-data/data-portals/Pages/DATRAS.aspx> 
-for survey data and the STECF <https://stecf.jrc.ec.europa.eu/data-dissemination> for commercial data. As part of tasks 1-2 these data have already been acquired and subset on a stock basis for the MYDAS
-stocks of interest. Also included are estimates obtained from life-history experiments.
+Task 5 of the MYDAS project <https://github.com/laurieKell/mydas> requires a review of data avialble on length composition, mean size, catch and indices of abudance (commercial or survey).
+
+Data are available from the MI  or from collective sources such as DATRAS <http://www.ices.dk/marine-data/data-portals/Pages/DATRAS.aspx> 
+for survey data and the STECF <https://stecf.jrc.ec.europa.eu/data-dissemination> for commercial data. 
+
+## Work plan
+
++	Condition the operating model using life histories (from table above) from brill, turbot, skate and Pollack as per the Mydas project (see the quick start). Will have to use MI estimates for sprat.  Use estimates of length (brill, sprat, skate). Obtain length frequencies for turbot and pollack from MI.
+
++	With further investigation look at predicted abundance estimates for brill, sprat (although on high side) and skate (abundance was for all species of skates and rays, will have to make consistent with commercial species... maybe use thornback only). Pollack and turbot catches are greater than abundance so cannot use these.
+
++	With such good time series of survey length data for brill, sprat and skate it would good to sim test the mean size by using the mlz package <https://cran.r-project.org/web/packages/MLZ/vignettes/MLZ.html#introduction>. This would give an estimate of Z (assuming constant M) and thus look at changes in F. 
+
++	It may also be worth pursuing the LBSR for length-based composition for the above  (and compare) with life-history parameters M/K ratio and Linf to estimate F/M and F/FMSY.  With SPR being the biological reference point. <https://cran.r-project.org/web/packages/LBSPR/vignettes/LBSPR.html>
+
++	For turbot and pollack it maybe beneficially to use and empirical approach  (as survey info pretty poor) based on the commercial cpue (biomass index from MI lengths or estimated by weights) such as the ICES 2/3 rule (as per Simon Fischer).  
+
+For the observation model commercial cpues could be used.
+
+Further: Need to discuss with MI what data we can get for Lobsters and Razors in terms of lengths.  We have 1 set of priors from Iyves.
 
 
-First load the required libraries
 ```{r, pkgs, message=FALSE}
 library(plyr)
 library(dplyr)
@@ -45,13 +59,10 @@ library(RPostgreSQL)
 library(reshape)
 ```
 
-
-
 ```{r notation, echo=FALSE}
 options(scipen=999)
 ```
 
-## Database connection
 ```{r, connection}
 drv  = dbDriver("PostgreSQL")
 
@@ -79,6 +90,10 @@ lenn=bio%>%
   summarise(mnlen= weighted.mean(fishlength_cm,number), totnum=sum(number))
 ```
 
+```{r}
+save(bio,file="/home/laurence/Desktop/tmp/bio.RData")
+```
+
 ```{r, pollack, echo=FALSE}
 ggplot(subset(bio, speciesgp =='POL'), aes(fishlength_cm, number)) +
   geom_bar(stat="identity", fill="blue")+theme_bw()+
@@ -103,6 +118,27 @@ ggplot(subset(bio, speciesgp =='BLL'), aes(fishlength_cm, number)) +
 
 **Figure `r iFig=iFig+1; iFig`** Plot of numbers at length for brill with weighted mean length represented by dashed red line.
 
+
+```{r, brill-ls, fig.height=3,fig.width=8}
+bio$yr=bio$year-1989
+mnl=ddply(bio,.(speciesgp,yr), with, data.frame(meanLn=sum(fishlength_cm*number)/sum(number)))
+
+ggplot(subset(bio, speciesgp =='BLL'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity", fill="blue")+
+  geom_vline(aes(xintercept=meanLn),data=subset(mnl,speciesgp=="BLL"),col="red")+
+  geom_vline(aes(xintercept=41.78016),col="cyan")+
+  geom_vline(aes(xintercept=25),col="black")+
+  geom_vline(aes(xintercept=26.75958),col="green")+
+  theme_bw()+
+  facet_grid(.~yr,scale="free_y")+
+  coord_flip()+
+  scale_y_continuous(breaks=NULL)+
+  ylab("Frequency")+xlab("Length (cm)")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Plot of numbers at length for brill with weighted mean length represented by dashed red line.
+
+
 ```{r, skate,  echo=FALSE}
 ggplot(subset(bio, speciesgp =='SKA'), aes(fishlength_cm, number)) +
   geom_bar(stat="identity", fill="blue")+theme_bw()+facet_wrap(~year, scale ="free")+expand_limits(x=0,   y=0)+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold")) + geom_vline(data = subset(lenn,speciesgp =='SKA'), aes(xintercept = mnlen, colour = "red"), linetype = "dashed",size=1)+theme(legend.position="none")
@@ -119,7 +155,8 @@ ggplot(subset(bio, speciesgp =='SPR'), aes(fishlength_cm, number)) +
 
 ```{r, mnseries, echo=FALSE}
 ggplot(lenn, aes(year, mnlen, colour=speciesgp)) + geom_line(size=1)+expand_limits( y=0)+theme_bw()+
-  theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),        panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))
+  theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),        panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+
+  facet_grid(speciesgp~.,scale="free_y")
 ```
 
 **Figure `r iFig=iFig+1; iFig`** Time series of weighted mean length.
@@ -151,7 +188,7 @@ cpuemn= ddply(subset(cpue_surv,year>1992) , .(year, speciesgp), summarise, mncpu
 ggplot(subset(cpue_surv, year >1992), aes(as.factor(year), cpue))+
   geom_boxplot(fill="#56B4E9",alpha=0.8, outlier.shape = NA,  outlier.fill="red",outlier.size=3)+ 
   geom_line(data=cpuemn, aes(as.factor(year), mncpue, colour="red", group=1))+
-  theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(legend.position="none",axis.text.x=element_text(size=7,angle = -90, hjust = 0))+facet_wrap(~speciesgp, scale="free_y")+
+  theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(legend.position="none",axis.text.x=element_text(size=7,angle = -90, hjust = 0))+facet_grid(speciesgp~., scale="free_y")+
   expand_limits(y=0)+
   ylab("log(catch (kg) per hour)")+xlab("year")
 ```  
@@ -170,7 +207,7 @@ cpuemnn= ddply(subset(cpue_survn, year>1992), .(year, speciesgp), summarise, mnc
 ggplot(subset(cpue_survn, year>1992), aes(as.factor(year), cpue))+
   geom_boxplot(fill="#56B4E9",alpha=0.8, outlier.shape = NA,  outlier.fill="red",outlier.size=3)+ 
   geom_line(data=cpuemnn, aes(as.factor(year), mncpue, colour="red", group=1))+
-  theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(legend.position="none",axis.text.x=element_text(size=7,angle = -90, hjust = 0))+facet_wrap(~speciesgp, scale="free_y")+
+  theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(legend.position="none",axis.text.x=element_text(size=7,angle = -90, hjust = 0))+facet_grid(speciesgp~., scale="free_y")+
   expand_limits(y=0)+
   ylab("log(catch (No) per hour)")+xlab("year")
 ```
@@ -194,7 +231,7 @@ ct_ef1 = ct_ef %>% group_by(year, speciesgp)%>%
 ```
 ```{r,cpuecomwt, echo=FALSE}
 ggplot(ct_ef1, aes(factor(year), cpue))+stat_boxplot(geom ='errorbar')+
-geom_boxplot(fill="#56B4E9")+facet_wrap(~speciesgp, scale="free_y")+ expand_limits(y=0)+
+geom_boxplot(fill="#56B4E9")+facet_grid(speciesgp~., scale="free_y")+ expand_limits(y=0)+
   ylab("log(catch (kg) per day)")+xlab("year") +theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(axis.text.x=element_text(size=7,angle = -90, hjust = 0))
 ```
 
@@ -204,7 +241,7 @@ geom_boxplot(fill="#56B4E9")+facet_wrap(~speciesgp, scale="free_y")+ expand_limi
 commctch=ddply(ct_ef, .(year, speciesgp), summarise, tottonnes=sum(totctch))
 
 ggplot(commctch, aes(as.factor(year),tottonnes/1000))+geom_bar(stat="identity", fill="blue")+
-  facet_wrap(~speciesgp, scale="free_y")+theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(axis.text.x=element_text(size=7,angle = -90, hjust = 0))
+  facet_grid(speciesgp~., scale="free_y")+theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(axis.text.x=element_text(size=7,angle = -90, hjust = 0))
 ```
 
 **Figure `r iFig=iFig+1; iFig`** Time series of total catch in tonnes.
@@ -235,9 +272,11 @@ nstations3 = nstations2 %>% group_by(year, speciesgp) %>% summarise(totabun= sum
 
 ```
 ```{r, abunplot, echo=FALSE}
+library(gam)
+
 ggplot(subset(nstations3, year >2000), aes(year,totabun))+geom_line()+geom_point()+expand_limits(y=0)+theme_bw()+ylab("Abundance in tonnes")+
-  stat_summary(fun.data=mean_cl_normal) + facet_wrap(~speciesgp, scale="free_y")+
-  geom_smooth(method='lm',formula=y~x, colour="red") +theme(axis.text.x=element_text(size=7,angle = -90, hjust = 0))
+  stat_summary(fun.data=mean_cl_normal) + facet_grid(speciesgp~., scale="free_y")+
+  geom_smooth(formula=y~x, colour="red") +theme(axis.text.x=element_text(size=7,angle = -90, hjust = 0))
 ```
 
 ## Life history parameters from the literature 
@@ -259,20 +298,6 @@ kable(lh, caption="life history paramters")
 
 •	There are enough life history parameters from the literature to condition an operating model for all case-study species apart from sprat.
 
-## The plan - simulation test the below
-•	Condition the operating model using life histories (from table above) from brill, turbot, skate and Pollack as per the Mydas project (see the quick start). Will have to use MI estimates for sprat.  Use estimates of length (brill, sprat, skate). Obtain length frequencies for turbot and pollack from MI.
-
-•	With further investigation look at predicted abundance estimates for brill, sprat (although on high side) and skate (abundance was for all species of skates and rays, will have to make consistent with commercial species... maybe use thornback only). Pollack and turbot catches are greater than abundance so cannot use these.
-
-•	With such good time series of survey length data for brill, sprat and skate it would good to sim test the mean size by using the mlz package <https://cran.r-project.org/web/packages/MLZ/vignettes/MLZ.html#introduction>. This would give an estimate of Z (assuming constant M) and thus look at changes in F. 
-
-•	It may also be worth pursuing the LBSR for length-based composition for the above  (and compare) with life-history parameters M/K ratio and Linf to estimate F/M and F/FMSY.  With SPR being the biological reference point. <https://cran.r-project.org/web/packages/LBSPR/vignettes/LBSPR.html>
-
-•	For turbot and pollack it maybe beneficially to use and empirical approach  (as survey info pretty poor) based on the commercial cpue (biomass index from MI lengths or estimated by weights) such as the ICES 2/3 rule (as per Simon Fischer).  
-
-For the observation model commercial cpues could be used.
-
-Further: Need to discuss with MI what data we can get for Lobsters and Razors in terms of lengths.  We have 1 set of priors from Iyves.
 
 
 \newpage
