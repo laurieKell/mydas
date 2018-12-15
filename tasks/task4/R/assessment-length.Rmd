@@ -1,0 +1,223 @@
+---
+title: "Stock Assessment"
+subtitle: "LBSPR, length based assessment"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{FLife}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+github_document:
+    mathjax: TRUE
+tags: FLife
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               fig.height=6,
+               fig.width =8,
+               fig.path  ="../tex/simtest/lbspr-",
+               cache.path="../cache/simtest/lbspr/")
+
+options(digits=3)
+
+iFig=0
+```
+```{r pkgs}
+library(plyr)
+library(reshape)
+library(ggplot2)
+library(dplyr)
+
+library(FLCore)
+library(ggplotFL)
+library(FLBRP)
+library(FLife)
+library(mydas)
+
+library(LBSPR)
+
+library(RPostgreSQL)
+library(DBI)
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+```
+```{r, sa}
+library(LBSPR)
+source('~/Desktop/sea++/mydas/pkg/R/lbspr.R')
+```
+
+```{r}
+library(MLZ)
+source("/home/laurence/Desktop/sea++/mydas/pkg/R/mlz.R")
+```
+
+```{r, connection}
+drv=dbDriver("PostgreSQL")
+con=dbConnect(drv, host = 'postgresql-seascope.csffkpr9jjjn.eu-west-2.rds.amazonaws.com',
+              dbname = 'mydasDev',
+              port = 5432,
+              user = 'MydasApplication',
+              password = 'gmit2017!')
+```
+
+```{r, data}
+bio=dbGetQuery(con, paste0("SELECT year, speciesgp, fishlength_cm,  SUM(number*(60/hauldur_min)) 
+                            AS number
+                            FROM data_surveybio
+                            WHERE speciesgp in ('TUR','BLL','POL','SKA','SPR')
+                            GROUP BY year, speciesgp, fishlength_cm;"))
+
+mnl=ddply(bio,.(speciesgp,year), with, data.frame(data=sum(fishlength_cm*number)/sum(number)))
+```
+
+```{r}
+ggplot(subset(mnl,speciesgp%in%c("BLL","TUR")))+
+  geom_line(aes(year,data))+
+  facet_grid(speciesgp~.,scale="free")+
+  theme_bw()
+```
+
+## Brill
+```{r, brill, fig.height=4}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/data/brill.RData")
+```
+### MLZ  
+```{r, brill-mlz}
+library(MLZ)
+source("/home/laurence/Desktop/sea++/mydas/pkg/R/mlz.R")
+
+mlz(as.FLQuant(subset(mnl,speciesgp=="BLL")[,2:3]),FLPar(aaply(prior,1,mean)))
+```
+
+### LBSPR
+```{r, brill-lbspr}
+lfd  =transmute(subset(bio, speciesgp=='BLL'),len=fishlength_cm,n=number,year=year)
+len  =as.matrix(cast(lfd,len~year,value="n"))
+attributes(len)$class="matrix"
+len[is.na(len)]=0
+
+params   =apply(prior,1,mean)
+bll.lbspr=as.data.frame(lbsprFn(len,params))  
+```
+
+```{r, brill-lncomp, fig.height=4}
+sl=melt(cbind(year=min(subset(bio, speciesgp=='BLL')$year)-1+seq(dim(bll.lbspr)[1]),bll.lbspr[,1:2]),id="year")
+dat=data.frame(Quantity=c("Linf","L50","Lopt"),
+           Value   =c(mean(lh["linf"]),mean(lh["l50"]),mean(prior["lopt"])))
+
+ggplot(subset(bio, speciesgp=='BLL'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity", fill="blue")+
+  geom_vline(aes(xintercept=Value,col=Quantity),data=dat)+
+  geom_vline(aes(xintercept=value,col=variable),data=sl)+
+  theme_bw()+
+  facet_grid(.~year,scale="free_y")+ 
+  coord_flip()+
+  scale_y_continuous(breaks=NULL)+
+  ylab("Frequency")+xlab("Length (cm)")+
+  theme(legend.position="bottom",strip.text.x=element_text(angle=90))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Length distributions. 
+
+```{r, fig.height=4}
+ggplot(melt(cbind(year=min(subset(bio, speciesgp=='BLL')$year)-1+seq(dim(bll.lbspr)[1]),bll.lbspr[,3:4]),id="year"))+
+  geom_line(aes(year,value))+
+  facet_grid(variable~.,scale="free")+
+  theme_bw()+xlab("Year")+ylab("F/M")
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR and FM. 
+
+
+## Turbot
+```{r, fig.height=4}
+load("/home/laurence/Desktop/Dropbox/mydasOMs/data/turbot.RData")
+
+dat=data.frame(Quantity=c("Linf","L50","Lopt"),
+           Value   =c(mean(lh["linf"]),mean(lh["l50"]),mean(prior["lopt"])))
+```
+
+### MLZ
+```{r, turbot-mlz}
+mlz(as.FLQuant(subset(mnl,speciesgp=="TUR")[,2:3]),FLPar(aaply(prior,1,mean)))
+```
+
+### LBSPR
+```{r}
+lfd  =transmute(subset(bio, speciesgp=='TUR'),len=fishlength_cm,n=number,year=year)
+len  =as.matrix(cast(lfd,len~year,value="n"))
+attributes(len)$class="matrix"
+len[is.na(len)]=0
+
+params=apply(prior,1,mean)
+
+tur.lbspr=as.data.frame(lbsprFn(len,params))
+```
+
+```{r, fig.height=4}
+sl=melt(cbind(year=min(subset(bio, speciesgp=='TUR')$year)-1+seq(dim(tur.lbspr)[1]),tur.lbspr[,1:2]),id="year")
+
+ggplot(subset(bio, speciesgp=='TUR'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity", fill="blue")+
+  geom_vline(aes(xintercept=Value,col=Quantity),data=dat)+
+  geom_vline(aes(xintercept=value,col=variable),data=sl)+
+  theme_bw()+
+  facet_grid(.~year,scale="free_y")+
+  coord_flip()+
+  scale_y_continuous(breaks=NULL)+
+  ylab("Frequency")+xlab("Length (cm)")+
+  theme(legend.position="bottom")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Plot of numbers at length.
+
+```{r, fig.height=4}
+ggplot(melt(cbind(year=min(subset(bio, speciesgp=='BLL')$year)-1+seq(dim(tur.lbspr)[1])
+                  ,tur.lbspr[,3:4]),id="year"))+
+  geom_line(aes(year,value))+
+  facet_grid(variable~.,scale="free")+
+  theme_bw()+xlab("Year")+ylab("F/M")
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of FM and SPR. 
+
+
+
+\newpage
+## Session Info
+
+```{r}
+sessionInfo()
+```
+
+## Software Versions
+
+* `r version$version.string`
+* FLCore: `r packageVersion('FLCore')`
+* FLife:  `r packageVersion('FLife')`
+* FLBRP:  `r packageVersion('FLBRP')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
