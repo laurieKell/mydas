@@ -37,13 +37,23 @@ for survey data and the STECF <https://stecf.jrc.ec.europa.eu/data-dissemination
 
 +	Condition the operating model using life histories (from table above) from brill, turbot, skate and Pollack as per the Mydas project (see the quick start). Will have to use MI estimates for sprat.  Use estimates of length (brill, sprat, skate). Obtain length frequencies for turbot and pollack from MI.
 
+The life histories were reviewed by Hans, using data from the MI databases.
+
 +	With further investigation look at predicted abundance estimates for brill, sprat (although on high side) and skate (abundance was for all species of skates and rays, will have to make consistent with commercial species... maybe use thornback only). Pollack and turbot catches are greater than abundance so cannot use these.
+
+If the absolute abundance estimates are wrong relative indices can be used, as normal practice.  
 
 +	With such good time series of survey length data for brill, sprat and skate it would good to sim test the mean size by using the mlz package <https://cran.r-project.org/web/packages/MLZ/vignettes/MLZ.html#introduction>. This would give an estimate of Z (assuming constant M) and thus look at changes in F. 
 
+MLZ uses mean size, it is unlikely to provide good estimates of Z for sppart due to high M and high recruitment variability, the mean size is therefore determined by recruitment not F.
+
 +	It may also be worth pursuing the LBSR for length-based composition for the above  (and compare) with life-history parameters M/K ratio and Linf to estimate F/M and F/FMSY.  With SPR being the biological reference point. <https://cran.r-project.org/web/packages/LBSPR/vignettes/LBSPR.html>
 
+LBSPR is better at estimating F.
+
 +	For turbot and pollack it maybe beneficially to use and empirical approach  (as survey info pretty poor) based on the commercial cpue (biomass index from MI lengths or estimated by weights) such as the ICES 2/3 rule (as per Simon Fischer).  
+
+The surveys could be used in the 
 
 For the observation model commercial cpues could be used.
 
