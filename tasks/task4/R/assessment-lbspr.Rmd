@@ -57,18 +57,22 @@ dirMy=dirname(dirname(FLife:::getScriptPath()))
 dirDat=file.path(dirMy,"data")
 ```
 ```{r, sa}
+library(LBSPR)
 source('~/Desktop/sea++/mydas/pkg/R/lbspr.R')
 ```
 
+```{r}
+library(MLZ)
+source("/home/laurence/Desktop/sea++/mydas/pkg/R/mlz.R")
+```
 
 ```{r, connection}
-drv  =dbDriver("PostgreSQL")
-
-con  =dbConnect(drv, host = 'postgresql-seascope.csffkpr9jjjn.eu-west-2.rds.amazonaws.com',
-                dbname = 'mydasDev',
-                port = 5432,
-                user = 'MydasApplication',
-                password = 'gmit2017!')  
+drv=dbDriver("PostgreSQL")
+con=dbConnect(drv, host = 'postgresql-seascope.csffkpr9jjjn.eu-west-2.rds.amazonaws.com',
+              dbname = 'mydasDev',
+              port = 5432,
+              user = 'MydasApplication',
+              password = 'gmit2017!')
 ```
 
 ```{r, data}
@@ -78,14 +82,29 @@ bio=dbGetQuery(con, paste0("SELECT year, speciesgp, fishlength_cm,  SUM(number*(
                             WHERE speciesgp in ('TUR','BLL','POL','SKA','SPR')
                             GROUP BY year, speciesgp, fishlength_cm;"))
 
-mnl=ddply(bio,.(speciesgp,year), with, data.frame(meanLn=sum(fishlength_cm*number)/sum(number)))
+mnl=ddply(bio,.(speciesgp,year), with, data.frame(data=sum(fishlength_cm*number)/sum(number)))
+```
+
+```{r}
+ggplot(subset(mnl,speciesgp%in%c("BLL","TUR")))+
+  geom_line(aes(year,data))+
+  facet_grid(speciesgp~.,scale="free")+
+  theme_bw()
 ```
 
 ## Brill
 ```{r, brill, fig.height=4}
 load("/home/laurence/Desktop/Dropbox/mydasOMs/data/brill.RData")
 ```
-  
+### MLZ  
+```{r, brill-mlz}
+library(MLZ)
+source("/home/laurence/Desktop/sea++/mydas/pkg/R/mlz.R")
+
+mlz(as.FLQuant(subset(mnl,speciesgp=="BLL")[,2:3]),FLPar(aaply(prior,1,mean)))
+```
+
+### LBSPR
 ```{r, brill-lbspr}
 lfd  =transmute(subset(bio, speciesgp=='BLL'),len=fishlength_cm,n=number,year=year)
 len  =as.matrix(cast(lfd,len~year,value="n"))
@@ -132,7 +151,12 @@ dat=data.frame(Quantity=c("Linf","L50","Lopt"),
            Value   =c(mean(lh["linf"]),mean(lh["l50"]),mean(prior["lopt"])))
 ```
 
+### MLZ
+```{r, turbot-mlz}
+mlz(as.FLQuant(subset(mnl,speciesgp=="TUR")[,2:3]),FLPar(aaply(prior,1,mean)))
+```
 
+### LBSPR
 ```{r}
 lfd  =transmute(subset(bio, speciesgp=='TUR'),len=fishlength_cm,n=number,year=year)
 len  =as.matrix(cast(lfd,len~year,value="n"))
