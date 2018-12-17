@@ -1,7 +1,7 @@
 ---
 title: "MyDas"
 subtitle: "Skate Life History Relationships"
-author: "Laurie Kell & Alex Tidd"
+author: "Laurie Kell"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: pdf_document
 ---

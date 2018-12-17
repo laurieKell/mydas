@@ -1,5 +1,9 @@
-backUp
-tex
-cache
-docs
+**/backUp
+**/tex
+**/cache
+*.doc
+*.docx
+**/docs
+**/inputs
+**/data
 
