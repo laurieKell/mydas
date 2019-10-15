@@ -72,7 +72,7 @@ ranD<-foreach(i=seq(dim(scen[1:3,])[1]),
                       start  =mseStart[iSpp]+1,end=mseStart[iSpp]+46,
                       nyrs   =nyr)
                               
-          save(mse,file=file.path(dirRes,paste("pareto-ranD-",
+          save(mse,controls[[iCtrl]],file=file.path(dirRes,paste("pareto-ranD-",
                           iSpp,"-",iCtrl,"-",cv,"-",nyr,".RData",sep="")))
                               
           data.frame(spp=iSpp,control=iCtrl,cv=cv,nyr=nyr)}

@@ -275,3 +275,127 @@ ggplot(subset(lfq,year%in%seq(1,100,10)))+
 
 
 **Figure `r iFig=iFig+1; iFig`,** Length frequencies.
+
+
+```{r}
+Mean length data
+The annual mean length of the catch, when allowing for observation error, is given by:
+m
+L ˆ y
+P ˆ y , a L a
+(S.16)
+a a min
+where
+L a is the length of fish of age a as per the von Bertalanffy growth curve given by equation
+(S.15), and
+5P ˆ y , a
+P y , a e
+y , a
+2
+l /(2 P y , a )
+is the mo
+
+
+P ˆ y , a
+P y , a e
+y , a
+2
+l /(2 P y , a )
+is the model-generated proportion of fish caught of age a in year y
+m
+P ˆ y , a
+which is renormalized such that
+1 .
+a a min
+In the above formulation P y , a denotes the proportion of fish of age a caught in year y of the
+simulation, given by:
+P y , a
+C y , a
+m
+C y , a '
+a ' a min
+where C y , a is the total number of fish caught of age a in year y , given by equations (S.4), and
+y , a
+N (0,
+2
+l
+/ P y , a ) reflects the variability for which the variance is assumed to be greater for
+those ages where sample sizes are smaller, where
+with the mean length data. A value of
+l
+l
+is the coefficient of variation (CV) associated
+0.25 is assumed which is consistent with fisheries such as
+that for South African hake. This “Punt-Kennedy” distribution form assumption for composition data
+is advocated by Maunder (2011) in his comparative review of a number of such approaches.
+
+```
+
+
+```{r}
+This MP is similar to the Tier 4 control rule for Australian fisheries, which is based on a target CPUE
+level as tested in Wayte (2009); here, however, the mean length of the catch is used in the absence of
+a CPUE index. A target mean length, L t arg et , is chosen with the intention to achieve some associated
+target level of abundance:
+TAC y
+*
+TAC w (1 w )
+1
+L recent
+L 0
+y
+t arg et
+L
+0
+L
+recent
+if L y
+L 0 (S.23)
+L 0 (S.24)
+and
+TAC y
+wTAC
+1
+L recent
+y
+*
+2
+0
+L
+recent
+if L y
+where
+w 0.5 is the TAC smoothing parameter,
+recent
+TAC * is a preselected target catch (when L
+L t arg et ),
+1 n 1
+L y ' is the historic average mean length,
+10 y ' n 10
+ave
+L
+L recent
+y
+1
+5 y '
+L t arg et
+(1
+y
+L y ' is the average mean length over the most recent 5 years,
+y 4
+) L ave is the target length,
+is the proportional difference between the target length and the average historic length
+(values for of 0.05, 0.1 and 0.15 are considered),
+L 0
+0.9 L ave is the limit mean length below which future catches are reduced quadratically
+rather than linearly with L and are set to zero if w 0 , and
+n is the current year.
+For this target-based rule, additional TAC smoothing may be required to constrain the next year’s
+TAC, TAC y 1 , to increase or decrease by at most 15% from that of the previous year, i.e. let:
+TAC y
+1
+( TAC y
+1
+TAC y ) / TAC y
+```
+

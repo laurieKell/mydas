@@ -85,6 +85,13 @@ bio=dbGetQuery(con, paste0("SELECT year, speciesgp, fishlength_cm,  SUM(number*(
 mnl=ddply(bio,.(speciesgp,year), with, data.frame(data=sum(fishlength_cm*number)/sum(number)))
 ```
 
+```{r,eval=FALSE}
+dbs   =mlply(sort(tables)[c(8:26,34)],function(table) 
+  dbGetQuery(con,paste("SELECT * FROM", table,sep=" ")))
+
+save(dbs,file="/home/laurence/Desktop/sea++/mydas/project/data/aws.RData",compress="xz")
+```
+
 ## Brill
 
 ```{r, fig.height=4}

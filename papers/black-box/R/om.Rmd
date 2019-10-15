@@ -226,6 +226,9 @@ eqBigeye=lhEql(lhBigeye)
 ```
 
 ```{r vectorSprat}
+sel<-function(x) 
+  catch.sel(x)%/%fapex(catch.sel(x))
+
 dat=FLQuants(eqSprat,"M"=m,"Selectivity"=sel,"Maturity"=mat,"Mass"=stock.wt)
 
 res=ldply(dat,function(x) cast(as.data.frame(quantile(x,probs=c(0.025,0.25,0.5,0.75,0.975),na.rm=TRUE)),
@@ -261,9 +264,6 @@ ggplot(res)+
 **Figure `r iFig=iFig+1; iFig`** Vectors for Plaice.
 
 ```{r vectorRay}
-sel<-function(x) 
-  catch.sel(x)%/%fapex(catch.sel(x))
-
 dat=FLQuants(eqRay,"M"=m,"Selectivity"=sel,"Maturity"=mat,"Mass"=stock.wt)
 
 res=ldply(dat,function(x) cast(as.data.frame(quantile(x,probs=c(0.025,0.25,0.5,0.75,0.975))),
@@ -283,7 +283,8 @@ ggplot(res)+
 ```{r vectorBigye}
 dat=FLQuants(eqBigeye,"M"=m,"Selectivity"=sel,"Maturity"=mat,"Mass"=stock.wt)
 
-res=ldply(dat,function(x) cast(as.data.frame(quantile(x,probs=c(0.025,0.25,0.5,0.75,0.975))),
+res=ldply(dat,function(x)
+    cast(as.data.frame(quantile(x,probs=c(0.025,0.25,0.5,0.75,0.975),na.rm=T)),
                                age~iter,value="data"))
 
 ggplot(res)+
