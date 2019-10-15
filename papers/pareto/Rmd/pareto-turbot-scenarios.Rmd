@@ -1,0 +1,288 @@
+---
+title: "Pareto Multi-objective Trade-offs"
+subtitle: "Turbot VoI"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =10, 
+               fig.height=10,
+               cache     =TRUE, 
+               fig.path  ="../tex/scenarios-",
+               cache.path="cache/scenarios/")
+
+iFig=0
+iTab=0
+```
+```{r, dir}  
+dirOM ="/home/laurence/Desktop/sea++/mydas/project/tasks/task4/data"
+dirRes="/home/laurence/Desktop/sea++/mydas/project/papers/pareto/data"
+```
+
+```{r, pkgs}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(reshape)
+
+library(FLCore)
+library(FLBRP)
+library(FLasher)
+library(ggplotFL)
+library(FLife)
+library(randtests)
+
+library(mydas)
+```
+```{r}
+library(doParallel)
+library(foreach)
+
+cl=makeCluster(3)
+registerDoParallel(cl)
+```
+
+```{r, OMscen}
+nits=500
+
+scen=expand.grid(nyr    =c(3,5,7)[2],
+                 cv     =c(0.1,0.2,0.3)[2],
+                 spp    ="turbot",
+                 ctrl   =1:9,
+                 stringsAsFactors=FALSE)
+
+mseStart=c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,
+           "sprat"=52,"razor"=54, "lobster"=57)
+
+### Random variaton for control
+controls=list()
+set.seed(123456)
+for (j in 1:12){
+    controls[[j]]=rbind(FLPar(k1   =runif(nits, 0.0, 1.5)),
+                        FLPar(k2   =runif(nits, 0.0, 1.5)),
+                        FLPar(gamma=rep(1, nits)))}
+controls=FLPars(controls)
+
+set.seed(1233)
+srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),.3,b=0.0)
+```
+
+```{r, pm, eval=FALSE}
+## Get summary stats
+source('~/Desktop/sea++/mydas/pkg/R/smryStat.R')
+source('~/Desktop/sea++/mydas/pkg/R/omOut.R')
+
+```{r, figScatter1}
+load(file.path(dirRes,"scenarios-turbot-pareto.RData"))
+load(file.path(dirRes,"scenarios-turbot-pm.RData"))
+```
+
+```{r}
+ggplot(pm)+
+    geom_point(aes(safety,yield,col=yieldAav),size=1)+
+    geom_point(aes(safety,yield),data=pareto,fill="red",col="darkred",shape=23)+
+    theme_bw()+theme(legend.position="bottom")+
+    xlab("Safety")+ylab(expression(Yield:MSY))+
+    guides(col=guide_legend(title="AAV in Yield",size=2))+facet_grid(nyr~cv)
+```
+**Figure `r iFig=iFig+1; iFig`.** 
+
+```{r}
+ggplot(pm)+
+    geom_point(aes(kobe,yield,col=yieldAav),size=1)+
+    geom_point(aes(kobe,yield),data=pareto,fill="red",col="darkred",shape=23)+
+    theme_bw()+theme(legend.position="bottom")+
+    xlab("Kobe")+ylab(expression(Yield:MSY))+
+    guides(col=guide_legend(title="AAV in Yield",size=2))+facet_grid(nyr~cv)
+```
+**Figure `r iFig=iFig+1; iFig`.** 
+
+```{r}
+ggplot(pm)+
+    geom_point(aes(blim,yield,col=yieldAav),size=1)+
+    geom_point(aes(blim,yield),data=pareto,fill="red",col="darkred",shape=23)+
+    theme_bw()+theme(legend.position="bottom")+
+    xlab(expression(B[lim]))+ylab(expression(Yield:MSY))+
+    guides(col=guide_legend(title="AAV in Yield",size=2))+
+    facet_grid(nyr~cv)
+```
+**Figure `r iFig=iFig+1; iFig`.** 
+
+
+```{r}
+ks=ddply(subset(pareto,blim>0.2&blim<0.2001),.(nyr,cv), with,
+     data.frame(k1=mean(k1),k2=mean(k2),
+                safety=mean(safety),kobe=mean(kobe),blim=mean(blim),
+                yield=mean(yield),yieldAav=mean(yieldAav)))
+round(ks,3)
+save(ks,file=file.path(dirRes,"ks.RData"))
+```
+
+
+
+```{r, figBlim, fig.height=6}
+ggplot(melt(pareto[,c("k1","k2","nyr","cv","safety")],id=c("nyr","cv","safety")))+
+  geom_point(aes(value,safety,col=variable))+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("Safety")+xlab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_colour_manual(values=c("red","black"))+    
+  facet_grid(nyr~cv)
+```
+
+**Figure `r iFig=iFig+1; iFig`.** 
+
+```{r, figKobe, fig.height=6}
+ggplot(melt(pareto[,c("k1","k2","nyr","cv","kobe")],id=c("nyr","cv","kobe")))+
+  geom_point(aes(value,kobe,col=variable))+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("Kobe")+xlab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_colour_manual(values=c("red","black"))+    
+  facet_grid(nyr~cv)
+```
+
+**Figure `r iFig=iFig+1; iFig`.** 
+
+```{r, figYield, fig.height=6}
+ggplot(melt(pareto[,c("k1","k2","nyr","cv","yield")],id=c("nyr","cv","yield")))+
+  geom_point(aes(value,yield,col=variable))+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab(expression(Yield:MSY))+xlab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_colour_manual(values=c("red","black"))+    
+  facet_grid(nyr~cv)
+```
+
+**Figure `r iFig=iFig+1; iFig`.** 
+
+```{r, figYieldAav, fig.height=6}
+ggplot(melt(pareto[,c("k1","k2","nyr","cv","yieldAav")],id=c("nyr","cv","yieldAav")))+
+  geom_point(aes(value,1-yieldAav,col=variable))+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("AAV in Yield")+xlab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_colour_manual(values=c("red","black"))+    
+  facet_grid(nyr~cv)
+```
+
+**Figure `r iFig=iFig+1; iFig`.** 
+
+
+```{r, mse, eval=FALSE}
+## Run MSE
+load(file.path(dirRes,"ks.RData"))
+
+set.seed(1233)
+srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),.3,b=0.0)
+              
+scenD<-foreach(i=seq(dim(ks)[1]), 
+              .combine=rbind,
+              .multicombine=TRUE,
+              .export=c("dirRes","dirOM","ks","srDev","mseStart"),
+              .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
+                          "FLasher","FLBRP","FLife","mydas")) %dopar%{
+    
+      fn<-function(cv,nyr,k1,k2){
+          source('~/Desktop/sea++/mydas/pkg/R/mseSBTD.R')
+          spp="turbot"
+          load(file.path(dirRes,paste("base-",spp,".RData",sep="")))
+                      
+          set.seed(1235)
+          uDev =FLife:::rlnoise(500,FLQuant(0,dimnames=list(year=1:105)),cv,b=0.0)
+
+          ctrl=propagate(rbind(FLPar(k1   =k1),
+                               FLPar(k2   =k2),
+                               FLPar(gamma=1)),nits)
+          
+          mse=mseSBTD(om,eq,
+                      control=ctrl,
+                      srDev  =srDev,uDev=uDev,
+                      start  =mseStart[spp]+1,end=mseStart[spp]+46,
+                      nyrs   =nyr)
+                              
+          save(mse,file=file.path(dirRes,paste("ranD-final-",
+                                spp,"-",cv,"-",nyr,".RData",sep="")))
+           
+          cbind(nyr=nyr,cv=cv)}
+    
+  with(ks[i,], fn(cv,nyr,k1,k2))}
+```
+
+```{r, mse2}
+sm<-foreach(i=seq(dim(ks)[1]), 
+              .combine=rbind,
+              .multicombine=TRUE,
+              .export=c("dirRes","dirOM","ks","srDev","mseStart"),
+              .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
+                          "FLasher","FLBRP","FLife","randtests")) %dopar%{
+    
+     source('~/Desktop/sea++/mydas/pkg/R/smryStat.R')
+     source('~/Desktop/sea++/mydas/pkg/R/omOut.R')
+                     
+     fn<-function(cv,nyr){
+          spp="turbot"
+          load(file.path(dirRes,paste("base-",spp,".RData",sep="")))
+                      
+          load(file.path(dirRes,paste("ranD-final-",
+                          spp,"-",cv,"-",nyr,".RData",sep="")))
+          mse=window(mse,start=mseStart[spp]+1,end=mseStart[spp]+40)
+          res=transform(omSmry(mse,eq,lh),
+                 iter=factor(iter,level=ac(sort(as.numeric(ac(unique(iter)))))))
+          res=transform(res,year=year-mseStart[spp])
+          pm =ddply(res,.(iter), smryStat)
+                    
+          pm}
+    
+  with(ks[i,], cbind(cv=cv,nyr=nyr,fn(cv,nyr)))}
+
+save(sm,file=file.path(dirRes,"sm.RData"))
+```
+
+```{r}
+ggplot(melt(sm[,c("safety","blim","kobe.n","yield","yieldAav","cv","nyr")],
+            id=c("cv","nyr")))+
+  geom_boxplot(aes(x=as.character(cv),y=value))+
+  theme_bw()+
+  facet_grid(variable~nyr,scale="free")
+```
+
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLasher:   `r packageVersion('FLasher')`
+* FLife:     `r packageVersion('FLife')`
+* ggplotFL:  `r packageVersion('ggplotFL')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+```

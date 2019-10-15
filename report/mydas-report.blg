@@ -1,0 +1,75 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: mydas-report.aux
+The style file: abbrvnat.bst
+Database file #1: /home/laurence/Desktop/refs.bib.bib
+Repeated entry---line 4134 of file /home/laurence/Desktop/refs.bib.bib
+ : @article{tidd2012dynamic
+ :                         ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 12349 of file /home/laurence/Desktop/refs.bib.bib
+ : @article{carruthers2016performance
+ :                                   ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 12370 of file /home/laurence/Desktop/refs.bib.bib
+ : @article{kell2015spawning
+ :                          ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 12702 of file /home/laurence/Desktop/refs.bib.bib
+ : @article{thorson2015introduction
+ :                                 ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 12721 of file /home/laurence/Desktop/refs.bib.bib
+ : @article{fredou2016life
+ :                        ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 13633 of file /home/laurence/Desktop/refs.bib.bib
+ : @article{nielsen2014estimation
+ :                               ,
+I'm skipping whatever remains of this entry
+Warning--I didn't find a database entry for "Thorson:2013:sscom"
+Warning--I didn't find a database entry for "Rosenberg:2014:circular"
+Warning--I didn't find a database entry for "Anderson:2017:super"
+Warning--I didn't find a database entry for "Rosenberg:2017:status"
+You've used 44 entries,
+            2773 wiz_defined-function locations,
+            846 strings with 15354 characters,
+and the built_in function-call counts, 27849 in all, are:
+= -- 2300
+> -- 2442
+< -- 13
++ -- 822
+- -- 774
+* -- 2655
+:= -- 4461
+add.period$ -- 135
+call.type$ -- 44
+change.case$ -- 381
+chr.to.int$ -- 40
+cite$ -- 88
+duplicate$ -- 949
+empty$ -- 1715
+format.name$ -- 830
+if$ -- 5613
+int.to.chr$ -- 5
+int.to.str$ -- 1
+missing$ -- 45
+newline$ -- 231
+num.names$ -- 176
+pop$ -- 697
+preamble$ -- 1
+purify$ -- 338
+quote$ -- 0
+skip$ -- 828
+stack$ -- 0
+substring$ -- 912
+swap$ -- 87
+text.length$ -- 5
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 479
+warning$ -- 0
+while$ -- 200
+width$ -- 0
+write$ -- 582
+(There were 6 error messages)

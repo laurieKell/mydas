@@ -1,0 +1,299 @@
+---
+title: "Proxy $MSY$ Reference Points for data poor stocks"
+subtitle: "Power of length based indicators to detect overfishing."
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+# Introduction
+
+To provide advice on the status of data poor stocks ICES uses $MSY$ proxy reference points as part of a Precautionary Approach.
+
+Data poor stocks include those for which only trends such as lpue,  cpue,  and  mean  length  in  the  catch  are available (**Category 3**), and stocks for which only reliable catch data are available (**Category 4**).
+
+Methods currently approved by ICES for calculation of $MSY$ reference points for these stocks are 
+
++ Length based indicators 
++ Z derived from mean length 
++ Length based spawner per recruit; and
++ Surplus Production models
+
+Many approaches have emerged over the last few decades, for example Where length data are available methods include Length Based Spawning Potential Ratio (LBSPR), Length-Based Integrated Mixed Effects (LIME), and Length-Based Bayesian (LBB). While where only catch data are available methods include Catch-Maximum Sustainable Yield (Catch-MSY), State-Space Catch-Only Model (SSCOM), Depletion Based Stock Reduhction Analysis (DBSRA), and Simple Stock Synthesis (SSS) an extension of Catch-MSY (CMSY).
+
+Empirical indicators and reference points can also be used to monitor stocks and these include
+
++ $L_{max5\%}$ mean length of largest 5\%
++ $L_{95\%}$ $95^{th}$ percentile
++ $P_{mega}$ Proportion of individuals above $L_{opt} + 10\%$
++ $L_{25\%}$ $25^{th}$ percentile of length distribution
++ $L_{c}$ Length at $50\%$ of modal abundance
++ $L_{mean}$ Mean length of individuals $> L_c$
++ $L_{max_{y}}$ Length class with maximum biomass in catch
++ $L_{mean}$ Meanlength of individuals $> L$
+
+where potential  **reference points** include
+
++ $L_{opt} = L_{\infty}\frac{3}{3+\frac{M}{K}}$, assuming $M/K = 1.5$ gives $\frac{2}{3}L_{\infty}$
++ $L_{F=M} =  0,75l_c+0.25l_{\infty}$
+
+# Methods
+
+## Simulation
+
+Run scenarios with an increasing trend in F that leads to overfishing, then implement a recovery plan that brings fishing to the $F_{MSY}$ level then screen potential empirical MPs by
+
+   - Generating length, catch and CPUE indicators using an OEM 
+   - Compare indicators to OM using Reciever Operating Characteristics (ROCs) 
+
+## Receiver Operating Characteristics
+
+Sort the observed outcomes by their predicted scores with the highest scores first, then calculate cumulative True Positive Rate (TPR) and True Negative Rate (TNR) for the ordered observed outcomes
+
+<!-- + **Methods** Run scenarios with an increasing trend in F that leads to overfishing, then implement a recovery plan that brings fishing to the $F_{MSY}$ level then screen potential empirical MPs by -->
+<!--   - Generating length, catch and CPUE indicators using an OEM -->
+<!--   - Fit indices using LBSPR, SRA and a biomass dynamic model -->
+<!--   - Compare indicators to OM, both trends and status relative to reference points using Reciever Operating Characteristics (ROCs) -->
+
+<!-- + **Analysis**  Compare indicators to OM -->
+<!--   - Compare ability to estimate stock status relative to reference points using Reciever Operating Characteristics (ROCs) -->
+<!--   - Calculate MSY reference points and proxies -->
+<!--   - Generate indicators relative to reference points -->
+<!--   - Evaluate the power of the various indicators to detect stock status using Reciever Operating Characteristics -->
+
+<!-- + Receiver Operating Characteristics for parameter tuning -->
+<!--   - Chose best HCR parameters -->
+<!--   - Run MSE -->
+
+
+<!-- ## Prediction Skill -->
+
+<!-- + Screen model based MPs -->
+<!--   - Perform 1,2,3, step ahead projections using LBSPR, SRA and a biomass dynamic model -->
+<!--   - Use MASE to identify assessment models with prediction skill -->
+
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =6, 
+               fig.height=6,
+               cache     =TRUE, 
+               fig.path  ="tex/indicators-",
+               cache.path="cache/indicators/")
+
+iFig=0
+iTab=0
+```
+
+\newpage
+```{r, pkgs} 
+library(FLCore)
+library(FLBRP)
+library(FLasher)
+library(FLife)
+library(mydas)
+library(ggplotFL)
+
+library(plyr)
+library(dplyr)
+library(reshape)
+library(popbio)
+library(spatstat)
+```
+
+```{r, params}
+
+par=lhPar(FLPar(c(linf= 59.1,  k=0.28, t0=-0.4,
+           a=0.01111,b=3.15,a50=4.0, l50=43.25),units="NA"))
+par["m1"]=.03
+eq=lhEql(par)
+fbar(eq)=refpts(eq)["msy","harvest"]%*%FLQuant(c(rep(0.1,60),
+                                                 seq(0.1,2,length.out=40)[-40],
+                                                 seq(2,1,length.out=11),rep(1,20)))
+
+set.seed(234)
+srDev=rlnoise(100,fbar(eq)%=%0,0.3,0)
+
+om=as(eq,"FLStock")
+om=window(fwd(propagate(om,dim(srDev)[6]),fbar=fbar(eq)[,-1],sr=eq,residuals=srDev),
+          start=41)
+```
+
+```{r, ts}
+plot(FLQuants(om, 
+          "f" =   function(x) fbar(x)%/%refpts(eq)["msy","harvest"], 
+          "ssb" = function(x) ssb(x)%/%refpts( eq)["msy","ssb"], 
+          "catch"=function(x) landings(x)%/%refpts(eq)["msy","yield"],
+          "rec" = function(x) rec(x)%/%refpts( eq)["msy","rec"])) + 
+  geom_hline(aes(yintercept=1),col="red",linetype=2)+
+  theme_bw() 
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series relative to MSY benchmarks.
+
+
+\newpage
+## Mean length indicators
+```{r, indicators}
+ind=mydas:::omSmry(om,par)
+```
+
+
+```{r, refpts}
+refs=mydas:::popdyn(par,eq)
+```
+
+```{r, echo=FALSE}
+quad=data.frame(x=c(40,80, 80, 40,  80,90,90,80, 90,105,105,90, 105,110,110,105, 110,130,130,110), 
+                y=rep(c(-Inf,-Inf,Inf,Inf),5),
+                f=c(rep("green",4),rep("amber",4),rep("red",4),rep("amber2",4),rep("green2",4)))
+```
+
+\newpage
+## Length Frequencies
+```{r}
+source('~/Desktop/sea++/mydas/pkg/R/oemLn.R')
+
+## Matrix with P(len) by age for each set of params
+agLs=alk(par,cv=0.1)
+
+## Simulate length frequencies by year
+lfd=lenSample(catch.n(om),iter(agLs,i),nsample=100)
+lfd=subset(as.data.frame(lfd),data>0)
+```
+
+```{r}
+library(spatstat)
+
+rln=ddply(subset(lfd,year%in%c(60,100,120)), .(year),  
+          with,mydas:::lenInd(len,data,lopt=c(refs["lopt"]))[-5])
+```
+
+```{r, echo=FALSE}
+ggplot(subset(lfd,year%in%c(60,100,120)&iter==1))+    
+  geom_histogram(aes(len,weight=data),binwidth=1)+
+  geom_vline(aes(xintercept=value,col=variable),data=melt(rln,id="year"))+
+  facet_grid(year~.)+
+  xlab("Length (cm)")+ylab("")+
+  scale_color_manual("Indicator",values=rainbow(4))
+
+save(lfd,file="/home/laurence/tmp/t.RloadData")   
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Simulated length frequencies distributions with indicators.
+
+```{r}   
+save(lfd,refs,eq,par,file="/home/laurence/tmp/t.RData")    
+```
+
+```{r}
+source('~/Desktop/sea++/mydas/pkg/R/oemLn.R')
+inds=ddply(lfd, .(year,iter), with, lenInd(len,data,lopt=c(refs["lopt"])))
+
+rf=FLQuants(  
+  f    =window(fbar(eq)/c(refs["fmsy"]),start=41),
+  lbar =as.FLQuant(transmute(inds,year=year,iter=iter,data=lbar))/c(par["l50"]),
+  lfm  =as.FLQuant(transmute(inds,year=year,iter=iter,data=lfm)),
+  pmega=as.FLQuant(transmute(inds,year=year,iter=iter,data=pmega)),
+  l95  =as.FLQuant(transmute(inds,year=year,iter=iter,data=l95/c(par["linf"]))),
+  l25  =as.FLQuant(transmute(inds,year=year,iter=iter,data=l25/c(par["linf"]))))
+```
+
+```{r, echo=FALSE}
+p=plot(rf)+       
+  facet_grid(qname~.,scale="free")+
+  geom_polygon(aes(x,y,fill=f),data=quad,alpha=0.2)+
+  geom_vline(aes(xintercept=x),data=data.frame(y="2FMSY",x=c( 90,105)),col="red")+
+  geom_vline(aes(xintercept=x),data=data.frame(y="2FMSY",x=c( 80,110)),col="orange")+
+  scale_fill_manual(values=c("orange","orange","green","green","red","blue"))
+
+p5=p$layers[[5]]
+p$layers[[5]]=p$layers[[1]]
+p$layers[[1]]=p5
+p
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Time series of indicators compared to $F:F_{MSY}$, vertical lines indicate 1 (green), 1.5 (orange) and 2 (red) times $F_{MSY}$.
+
+\newpage
+## Receiver Operating Characteristics
+
+### Detection of overfishing
+
+```{r, fig.height=4, fig.width=4}
+simple_roc <- function(labels, scores){
+  labels <- labels[order(scores, decreasing=TRUE)]
+  data.frame(TPR=cumsum(labels)/sum(labels), 
+             FPR=cumsum(!labels)/sum(!labels),
+             labels,
+             scores=sort(scores))}
+ ```
+
+
+```{r, fig.height=4, fig.width=4}
+ind=ldply(rf[-1],function(x) as.data.frame(window(x,start=70,end=100),drop=T))  
+ind=ddply(ind,.(.id),transform,overfished=as.numeric(!(year%in%90:105)))
+ind=ddply(ind,.(.id),with, simple_roc(overfished,data))
+
+tab=ddply(ind,.(.id), with, { 
+                 best=max(TPR*(1-FPR))==TPR*(1-FPR);   
+                 data.frame(TPR=TPR[best],FPR=FPR[best],scores=scores[best])})
+
+ggplot(ind)+ 
+  geom_point(aes(FPR,TPR,col=.id))+
+  geom_line(aes(x,y),data.frame(x=seq(0,1,0.01),y=seq(0,1,0.01)))+
+  geom_point(aes(FPR,TPR),data=tab,size=2)+
+  xlab("False Negative Rate")+ylab("True Positive Rate")+
+  scale_color_manual("Indicator",values=rainbow(5))+
+  theme(legend.position="bottom")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** ROC curve of the three indicators of overfishing, points indicate the optimum value of the indicator.
+
+```{r}
+tab    
+```
+
+### Detection of recovery
+
+```{r, fig.height=4, fig.width=4}
+ind=ldply(rf[-1],function(x) as.data.frame(window(x,start=105),drop=T)) 
+ind=ddply(ind,.(.id),transform,overfished=as.numeric((year>105)))
+ind=ddply(ind,.(.id),with, simple_roc(overfished,data))
+
+tab=ddply(ind,.(.id), with, { 
+                 best=max(TPR*(1-FPR))==TPR*(1-FPR);   
+                 data.frame(TPR=TPR[best],FPR=FPR[best],scores=scores[best])})
+
+ggplot(ind)+      
+  geom_point(aes(FPR,TPR,col=.id))+
+  geom_line(aes(x,y),data.frame(x=seq(0,1,0.01),y=seq(0,1,0.01)))+
+  geom_point(aes(FPR,TPR),data=tab,size=2)+
+  xlab("False Negative Rate")+ylab("True Positive Rate")+
+  scale_color_manual("Indicator",values=rainbow(5))+
+  theme(legend.position="bottom")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** ROC curve of the three indicators of recovery, points indicate the optimum value of the indicator.
+
+```{r}
+tab
+```
+
+\newpage 
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+``` 
+

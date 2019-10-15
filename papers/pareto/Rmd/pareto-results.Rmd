@@ -1,0 +1,543 @@
+---
+title: "Conducting Management Strategy Evaluation Using Random Search to Evaluate Pareto-Optimal Solutions"
+subtitle: "Turbot Case Study"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: word_document
+github_document: 
+   mathjax: TRUE 
+---
+
+# Introduction
+
+An example of conducting Management Strategy Evaluation (MSE) using random search to evaluate Pareto-optimal solutions. An Operating Model (OM) conditioning on life history characteristics is used to evaluate an empirical Harvest Control Rule (HCR) based on an index of relative abundance.
+
+# Objectives
+
++ Develop a risk based framework for conducting MSE, where is risk is an uncertainty that matters and what matters are management objectives.
++ Develop an efficient way of tuning Management Procedures so that case specific management strategies can be developed.
++ Allow stakeholders to more easily agree management objectives and the trade-offs between them when conducting MSE.
+
+# Management Procedure
+
+The Management Procedure (MP) was based on an emprical HCR where catches are increased when the trend in an index of abundance is positive, alternatively catches are decreased if the trend is negative, namely 
+
+\begin{equation}
+ TAC^1_{y+1}=TAC_y\times 
+ \left\{\begin{array}{rcl}  
+    {1-k_1|\lambda|^{\gamma}} & \mbox{for} & \lambda<0\\[0.35cm]
+    {1+k_2\lambda} & \mbox{for} & \lambda\geq 0 
+ \end{array}\right.
+\end{equation}
+
+where $\lambda$ is the slope in the regression of $\ln I_y$ against year for the most recent $n$ years and $k_1$ and $k_2$ are \textit{gain} parameters and $\gamma$ actions asymmetry so that decreases in the index do not result in the same relative change as as an increase.
+
+The TAC is then the average of the last TAC and the value output by the HCR. 
+
+\begin{equation} 
+     TAC_{y+1} = 0.5\times\left(TAC_y+C^{\rm targ}_y\right)\\
+\end{equation}
+
+# Evaluation
+
+An empirical MP has to be tuned, i.e. run for a range of control parameters values ($k_1$,$k_2$, $\gamma$ and $\lambda$) which are then chosen based on the performance of the MP, i.e. the MP that best meets the management objectives is selected. There are trade-offs between the multiple objectives, however, and  deciding which is a "best" MP requires an iterative process involving between managers, stakeholders and scientists.  
+
+Once the objectives are agreed the traditional way to find the control parameters is to perform an exhaustive search through a manually specified set of control parameters, i.e. a grid search. Even for a limited number of control parameters this can take a substantial amount of computing time, a more efficient approach is to use random search where the control parameters are selected from all the potential combinations at random.
+
+
+# Results
+
+**Figure `r iFig=1;iFig `** shows the trade-off between yield (Yield:MSY) and B:Virgin are shown for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+**Figures `r iFig=iFig+1; iFig`**, **`r iFig=iFig+1; iFig`** and **`r iFig=iFig+1; iFig`** show the calibration regressions for the control parameters $k_1$ and $k_2$ obtained from the pareto frontier for Blim, yield and AAV in yield respectively. For a given level of a management objective the corresponding control value can be read off from the Y-axes. The scatter of points reflects that the Pareto frontiers are actually hyperdimensional surfaces projected into 2 dimensions. 
+
+To compare the value of information to the value of control Pareto frontiers were estimated for scenarios corresponding to different levels of uncertainty in the index of abundance (corresponding to CVs of 10, 20 and 30%) and alternative control rule options (i.e. number of years in the regression, either 3,5 or 7).
+
+It was assumed that the over riding management objective was to achieve B:Virgin~0.2, based on this the control parameters could be read off the Pareto frontiers. The control parameters and corresponing values of yield and AAV in yield are shown in **Table `r iTab=1`**.
+ 
+The MSE was run for the control parameters estimated in **Table `r iTab=1`**, and the summary statistics by scenario are shown in **Figure `r iFig=iFig+1; iFig`.** 
+
+
+# Discussion and Conclusions
+
++ Demonstrates a stepwise procedure for conducting MSE where 
+    - First a single MSE is run using random search and the Pareto frontiers constructed
+    - Based on this the main objectives and their trade-offs can be elicitated from stakeholders
+    - Uing the Pareto frontiers the control parameters can be derived from a calibration.
+    - Next a set of robustness trials can be developed and the correponding Pareto frontiers derived.
+    - Finally alternative control parameters estimated
+    
+
++ Since random search was used the outcomes partly depend on chance, however, intelligence can be added using Machine Learning to choose control parameters using the same framework.
+
+
+
+
+`r iFig=0; iTab=0 `
+
+
+# Figures
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =8, 
+               fig.height=8,
+               cache     =TRUE, 
+               fig.path  ="../tex/figs-",
+               cache.path="cache/figs/")
+
+iFig=0
+iTab=0
+```
+```{r, dir}  
+dirOM ="/home/laurence/Desktop/sea++/mydas/project/data/OM"
+dirRes="/home/laurence/Desktop/sea++/mydas/project/papers/pareto/data"
+```
+
+```{r, pkgs}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(reshape)
+
+library(mydas)
+```
+
+```{r, scen}
+scen=expand.grid(nyr    =c(3,5,7)[2],
+                 cv     =c(0.1,0.2,0.3)[2],
+                 stringsAsFactors=FALSE)
+```
+
+```{r, figs}
+rewards=c('yield','yieldAav','kobe','safety','blim','plim')
+
+load(file.path(dirRes,"base-turbot-pm.RData"))
+load(file.path(dirRes,"base-turbot-pareto.RData"))
+
+dat=data.frame(par=pareto$par,value=pareto$value)
+names(dat)=c("k1","k2",rewards[1:4])
+
+pts=rbind(cbind("What"="good",subset(pm,plim>=0.95)[,rewards[1:4]]),
+          cbind("What"="bad", subset(pm,plim< 0.95)[,rewards[1:4]]),
+          cbind("What"="fits", dat[,rewards[1:4]]))
+
+p=ggpairs(pts,
+        columns=rewards[c(1:2,4)],
+        mapping = ggplot2::aes(color=What),
+        #lower=list(continuous='points'), 
+        lower = list(continuous = wrap("points", size = 0.1), 
+                     combo = wrap("dot", alpha = 0.4)),
+        #axisLabels='none',  
+        diag=list(continuous="blank"),
+        upper=list(continuous = wrap("points", size = 0.1), 
+                     combo = wrap("dot", alpha = 0.4)))
+
+for(i in 1:p$nrow) 
+  for(j in 1:p$ncol)
+    p[i,j] <- p[i,j] + 
+        scale_fill_manual(values=c("green","red","black")) +
+        scale_color_manual(values=c("green","red","black"))  
+  
+```
+
+```{r}
+ggplot(pm)+geom_point(aes(k1,k2,col=(plim>=0.95)))
+```
+
+```{r, figs}
+rewards=c('yield','yieldAav','kobe','safety','blim','plim')
+
+load(file.path(dirRes,"base-turbot-pm.RData"))
+load(file.path(dirRes,"base-turbot-pareto95.RData"))
+
+pm95=subset(pm,plim>=0.95)
+
+dat=data.frame(par=pareto95$par,value=pareto95$value)
+names(dat)=c("k1","k2",rewards[c(1:2,4)])
+
+pts=rbind(cbind("What"="points",pm95[,rewards[c(1:2,4)]]),
+          cbind("What"="fits", dat[  ,rewards[c(1:2,4)]]))
+
+ggpairs(pts,
+        columns=rewards[c(1:2,4)],
+        mapping = ggplot2::aes(color=What),
+        #lower=list(continuous='points'), 
+        lower = list(continuous = wrap("points", size = 0.1), 
+                     combo = wrap("dot", alpha = 0.4)),
+        #axisLabels='none',  
+        diag=list(continuous="blank"),
+        upper=list(continuous = wrap("points", size = 0.1), 
+                     combo = wrap("dot", alpha = 0.4)))
+```
+
+```{r, figMSEsafety}
+ggplot(pm)+
+  geom_point(aes(blim,yield),size=1)+
+  geom_point(aes(blim,yield),data=dat,fill="grey",col="grey",shape=21)+
+  geom_point(aes(blim,yield),data=subset(dat,blim>=0.2&blim<=0.201)[1,],
+             fill="red",col="grey",shape=21,size=7.5)+
+  geom_point(aes(blim,yield),data=subset(dat,plim>=0.95&plim<=0.951)[1,],
+             fill="grey",col="grey",shape=21,size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab(expression(B:Virgin))+ylab(expression(Yield:MSY))+
+  guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The trade-off between yield (Yield:MSY) and the average SSB relative to $SSB_{virgin}$ are shown for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+
+```{r, figMSESafety}
+ggplot(pm)+
+  geom_point(aes(blim,safety),size=1)+
+  geom_point(aes(blim,safety),data=dat,fill="grey",col="grey",shape=21)+
+  geom_point(aes(blim,safety),data=subset(dat,plim>=0.95&plim<=0.951)[1,],
+             fill="grey",col="grey",shape=21,size=7.5)+
+  geom_point(aes(blim,safety),data=subset(dat,blim>=0.2&blim<=0.201)[1,],
+             fill="red",col="grey",shape=21,size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("Safety")+xlab(expression(B:Virgin))+
+  guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The trade-off between B:Virgin and safety (the minimum expected recruitment relative $R_{virgin}$) for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+
+```{r, figMSEAAV}
+ggplot(pm)+
+  geom_point(aes(yield,yieldAav),size=1)+
+  geom_point(aes(yield,yieldAav),data=dat,fill="grey",col="grey",shape=21)+
+  geom_point(aes(yield,yieldAav),data=subset(dat,blim>=0.2&blim<=0.2025)[1,],
+             fill="grey",col="grey",shape=21,size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("AAV in Yield")+xlab(expression(Yield:MSY))+
+  guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The trade-off between yield (Yield:MSY) and the average annual variation in yield are shown for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+
+```{r, figMSEplim}
+ggplot(pm)+
+  geom_point(aes(plim,yield),size=1)+
+  geom_point(aes(plim,yield),data=dat,fill="grey",col="grey",shape=21)+
+  geom_point(aes(plim,yield),data=subset(dat,blim>=0.2&blim<=0.2025)[1,],
+             fill="grey",col="grey",shape=21,size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("Yield")+xlab("B>Vigrin*.2")+
+  guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The trade-off between yield (Yield:MSY) and the average annual variation in yield are shown for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+```{r, control-blim, fig.height=5}
+ggplot(melt(dat[,c("k1","k2","blim")],id="blim"))+
+  geom_point(aes(blim,value,fill=variable),col="black",shape=21)+
+  geom_point(aes(blim,value,fill=variable),col="grey",shape=21,
+             data=subset(melt(subset(dat,blim>=0.2&blim<=0.2025)[1,][,c("k1","k2","blim")],id="blim")),size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab(expression(B:Virgin))+ylab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_fill_manual(values=c("grey","black"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Calibration regression values for the control parameters K1 and K2 for the pareto frontier for $B_{lim}$, large point is for B:Virgin=0.2.
+
+```{r, figYield, fig.height=5}
+ggplot(melt(dat[,c("k1","k2","yield")],id="yield"))+
+  geom_point(aes(yield,value,fill=variable),col="black",shape=21)+
+  geom_point(aes(yield,value,fill=variable),col="grey",shape=21,
+             data=subset(melt(subset(dat,blim>=0.2&blim<=0.2025)[1,][,c("k1","k2","yield")],id="yield")),size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab(expression(Yield:MSY))+ylab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_fill_manual(values=c("grey","black"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Calibration regression values for control parameters K1 and K2 from the pareto frontier for Yield, large point is for B:Virgin=0.2.
+
+```{r, figYieldAav, fig.height=5}
+ggplot(melt(dat[,c("k1","k2","yieldAav")],id="yieldAav"))+
+  geom_point(aes(yieldAav,value,fill=variable),col="black",shape=21)+
+  geom_point(aes(yieldAav,value,fill=variable),col="grey",shape=21,
+             data=subset(melt(subset(dat,blim>=0.2&blim<=0.2025)[1,][,c("k1","k2","yieldAav")],id="yieldAav")),size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab("AAV in Yield")+ylab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_fill_manual(values=c("grey","black"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Calibration regression values for control parameters K1 and K2 from the pareto frontier for AAV in yield, large point is for $B:Virgin$~0.2.
+
+
+```{r, pareto-safety}
+load(file.path(dirRes,"scenarios-turbot-pareto.RData"))
+load(file.path(dirRes,"scenarios-turbot-pm.RData"))
+
+best   =ddply(subset(pareto,blim>=0.2&blim<=0.201),.(nyr,cv), with, 
+           data.frame(yield=mean(yield),blim=mean(blim),safety=mean(safety),
+                      yieldAav=mean(yieldAav)))
+best 
+
+ggplot()+
+    facet_grid(nyr~cv)+
+    geom_point(aes(blim,yield),data=subset(pareto,cv=="0.2"&nyr==5)[,c("blim","yield")],
+               col="black",size=0.25)+
+    geom_point(aes(blim,yield),data=subset(best,cv==0.2&nyr==5)[,3:4],
+               fill="black", col="black", shape=21,size=5.0)+
+    geom_point(aes(blim,yield),data=pareto,
+               fill="blue",col="darkblue",shape=21,size=0.5)+
+    geom_point(aes(blim,yield),data=best,
+               fill="blue",col="darkblue",shape=21,size=5.0)+
+    theme_bw()+theme(legend.position="bottom")+
+    ylab("Mean Biomass:B0")+xlab(expression(Yield:MSY))+
+    guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The pareto frontiers for yield and mean $SSB:B_0$, large dot is for B:Virgin~0.2, the black points are for the reference case where CV=0.2 & years=5. 
+
+```{r, pareto-aav}
+load(file.path(dirRes,"scenarios-turbot-pareto.RData"))
+load(file.path(dirRes,"scenarios-turbot-pm.RData"))
+
+best   =ddply(subset(pareto,blim>=0.2&blim<=0.201),.(nyr,cv), with, 
+           data.frame(yield=mean(yield),yieldAav=mean(yieldAav)))
+
+ggplot()+
+    facet_grid(nyr~cv)+
+    geom_point(aes(yield,yieldAav),data=subset(pareto,cv=="0.2"&nyr==5)[,c("yield","yieldAav")],
+               col="black",size=0.25)+
+    geom_point(aes(yield,yieldAav),data=subset(best,cv==0.2&nyr==5)[,3:4],
+               fill="black", col="black", shape=21,size=5.0)+
+    geom_point(aes(yield,yieldAav),data=pareto,
+               fill="blue",col="darkblue",shape=21,size=0.5)+
+    geom_point(aes(yield,yieldAav),data=best,
+               fill="blue",col="darkblue",shape=21,size=5.0)+
+    theme_bw()+theme(legend.position="bottom")+
+    ylab("1-AAV Yield")+xlab(expression(Yield:MSY))+
+    guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+
+**Figure `r iFig=iFig+1; iFig`.** The pareto frontiers for yield and AAV in yield, large dot is for B:Virgin~0.2, the black points are for the reference case where CV=0.2 & years=5.
+
+```{r}
+load(file.path(dirRes,"sm.RData")) 
+sm[,"yieldAav"]=1-sm[,"yieldAav"]
+ggplot(melt(sm[,c("blim","safety","yield","yieldAav","cv","nyr")],
+            id=c("cv","nyr")))+
+  geom_violin( aes(x=as.character(cv),y=value),alpha=0.3)+
+  geom_boxplot(aes(x=as.character(cv),y=value),width=0.1)+
+  theme_bw()+
+  facet_grid(variable~nyr,scale="free")
+```
+
+**Figure `r iFig=iFig+1; iFig`.**  Summary statistics from MSE.  
+
+```{r, figMSEsafety}
+ggplot(pm)+
+  geom_point(aes(blim,yield),size=1)+
+  geom_point(aes(blim,yield),data=dat,fill="grey",col="grey",shape=21)+
+  geom_point(aes(blim,yield),data=subset(dat,blim>=0.2&blim<=0.201)[1,],
+             fill="red",col="grey",shape=21,size=7.5)+
+  geom_point(aes(blim,yield),data=subset(dat,plim>=0.95&plim<=0.951)[1,],
+             fill="grey",col="grey",shape=21,size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab(expression(B:Virgin))+ylab(expression(Yield:MSY))+
+  guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The trade-off between yield (Yield:MSY) and the average SSB relative to $SSB_{virgin}$ are shown for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+
+```{r, figMSESafety}
+ggplot(pm)+
+  geom_point(aes(blim,safety),size=1)+
+  geom_point(aes(blim,safety),data=dat,fill="grey",col="grey",shape=21)+
+  geom_point(aes(blim,safety),data=subset(dat,plim>=0.95&plim<=0.951)[1,],
+             fill="grey",col="grey",shape=21,size=7.5)+
+  geom_point(aes(blim,safety),data=subset(dat,blim>=0.2&blim<=0.201)[1,],
+             fill="red",col="grey",shape=21,size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("Safety")+xlab(expression(B:Virgin))+
+  guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The trade-off between B:Virgin and safety (the minimum expected recruitment relative $R_{virgin}$) for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+
+```{r, figMSEAAV}
+ggplot(pm)+
+  geom_point(aes(yield,yieldAav),size=1)+
+  geom_point(aes(yield,yieldAav),data=dat,fill="grey",col="grey",shape=21)+
+  geom_point(aes(yield,yieldAav),data=subset(dat,blim>=0.2&blim<=0.2025)[1,],
+             fill="grey",col="grey",shape=21,size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("AAV in Yield")+xlab(expression(Yield:MSY))+
+  guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The trade-off between yield (Yield:MSY) and the average annual variation in yield are shown for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+
+```{r, figMSEplim}
+ggplot(pm)+
+  geom_point(aes(plim,yield),size=1)+
+  geom_point(aes(plim,yield),data=dat,fill="grey",col="grey",shape=21)+
+  geom_point(aes(plim,yield),data=subset(dat,blim>=0.2&blim<=0.2025)[1,],
+             fill="grey",col="grey",shape=21,size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  ylab("Yield")+xlab("B>Vigrin*.2")+
+  guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The trade-off between yield (Yield:MSY) and the average annual variation in yield are shown for the individual management strategy evaluations (blue) along with the pareto frontier (grey).   
+
+```{r, control-blim, fig.height=5}
+ggplot(melt(dat[,c("k1","k2","blim")],id="blim"))+
+  geom_point(aes(blim,value,fill=variable),col="black",shape=21)+
+  geom_point(aes(blim,value,fill=variable),col="grey",shape=21,
+             data=subset(melt(subset(dat,blim>=0.2&blim<=0.2025)[1,][,c("k1","k2","blim")],id="blim")),size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab(expression(B:Virgin))+ylab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_fill_manual(values=c("grey","black"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Calibration regression values for the control parameters K1 and K2 for the pareto frontier for $B_{lim}$, large point is for B:Virgin=0.2.
+
+```{r, figYield, fig.height=5}
+ggplot(melt(dat[,c("k1","k2","yield")],id="yield"))+
+  geom_point(aes(yield,value,fill=variable),col="black",shape=21)+
+  geom_point(aes(yield,value,fill=variable),col="grey",shape=21,
+             data=subset(melt(subset(dat,blim>=0.2&blim<=0.2025)[1,][,c("k1","k2","yield")],id="yield")),size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab(expression(Yield:MSY))+ylab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_fill_manual(values=c("grey","black"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Calibration regression values for control parameters K1 and K2 from the pareto frontier for Yield, large point is for B:Virgin=0.2.
+
+```{r, figYieldAav, fig.height=5}
+ggplot(melt(dat[,c("k1","k2","yieldAav")],id="yieldAav"))+
+  geom_point(aes(yieldAav,value,fill=variable),col="black",shape=21)+
+  geom_point(aes(yieldAav,value,fill=variable),col="grey",shape=21,
+             data=subset(melt(subset(dat,blim>=0.2&blim<=0.2025)[1,][,c("k1","k2","yieldAav")],id="yieldAav")),size=7.5)+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab("AAV in Yield")+ylab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_fill_manual(values=c("grey","black"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Calibration regression values for control parameters K1 and K2 from the pareto frontier for AAV in yield, large point is for $B:Virgin$~0.2.
+
+
+```{r, pareto-safety}
+load(file.path(dirRes,"scenarios-turbot-pareto.RData"))
+load(file.path(dirRes,"scenarios-turbot-pm.RData"))
+
+best   =ddply(subset(pareto,blim>=0.2&blim<=0.201),.(nyr,cv), with, 
+           data.frame(yield=mean(yield),blim=mean(blim),safety=mean(safety),
+                      yieldAav=mean(yieldAav)))
+best 
+
+ggplot()+
+    facet_grid(nyr~cv)+
+    geom_point(aes(blim,yield),data=subset(pareto,cv=="0.2"&nyr==5)[,c("blim","yield")],
+               col="black",size=0.25)+
+    geom_point(aes(blim,yield),data=subset(best,cv==0.2&nyr==5)[,3:4],
+               fill="black", col="black", shape=21,size=5.0)+
+    geom_point(aes(blim,yield),data=pareto,
+               fill="blue",col="darkblue",shape=21,size=0.5)+
+    geom_point(aes(blim,yield),data=best,
+               fill="blue",col="darkblue",shape=21,size=5.0)+
+    theme_bw()+theme(legend.position="bottom")+
+    ylab("Mean Biomass:B0")+xlab(expression(Yield:MSY))+
+    guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** The pareto frontiers for yield and mean $SSB:B_0$, large dot is for B:Virgin~0.2, the black points are for the reference case where CV=0.2 & years=5. 
+
+```{r, pareto-aav}
+load(file.path(dirRes,"scenarios-turbot-pareto.RData"))
+load(file.path(dirRes,"scenarios-turbot-pm.RData"))
+
+best   =ddply(subset(pareto,blim>=0.2&blim<=0.201),.(nyr,cv), with, 
+           data.frame(yield=mean(yield),yieldAav=mean(yieldAav)))
+
+ggplot()+
+    facet_grid(nyr~cv)+
+    geom_point(aes(yield,yieldAav),data=subset(pareto,cv=="0.2"&nyr==5)[,c("yield","yieldAav")],
+               col="black",size=0.25)+
+    geom_point(aes(yield,yieldAav),data=subset(best,cv==0.2&nyr==5)[,3:4],
+               fill="black", col="black", shape=21,size=5.0)+
+    geom_point(aes(yield,yieldAav),data=pareto,
+               fill="blue",col="darkblue",shape=21,size=0.5)+
+    geom_point(aes(yield,yieldAav),data=best,
+               fill="blue",col="darkblue",shape=21,size=5.0)+
+    theme_bw()+theme(legend.position="bottom")+
+    ylab("1-AAV Yield")+xlab(expression(Yield:MSY))+
+    guides(col=guide_legend(title="AAV in Yield",size=2))
+```
+
+
+**Figure `r iFig=iFig+1; iFig`.** The pareto frontiers for yield and AAV in yield, large dot is for B:Virgin~0.2, the black points are for the reference case where CV=0.2 & years=5.
+
+```{r}
+load(file.path(dirRes,"sm.RData")) 
+sm[,"yieldAav"]=1-sm[,"yieldAav"]
+ggplot(melt(sm[,c("blim","safety","yield","yieldAav","cv","nyr")],
+            id=c("cv","nyr")))+
+  geom_violin( aes(x=as.character(cv),y=value),alpha=0.3)+
+  geom_boxplot(aes(x=as.character(cv),y=value),width=0.1)+
+  theme_bw()+
+  facet_grid(variable~nyr,scale="free")
+```
+
+**Figure `r iFig=iFig+1; iFig`.**  Summary statistics from MSE.  
+
+# Tables
+
+**Table `r iTab=iTab+1; iTab`.** 
+
+```{r}
+dirRes="/home/laurence/Desktop/sea++/mydas/project/papers/pareto/data"
+load(file.path(dirRes,"ks.RData"))
+round(ks,2)[,c(1:5,8:9)]     
+```
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLasher:   `r packageVersion('FLasher')`
+* FLife:     `r packageVersion('FLife')`
+* ggplotFL:  `r packageVersion('ggplotFL')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+```

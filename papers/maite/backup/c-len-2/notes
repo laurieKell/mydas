@@ -1,0 +1,5 @@
+I think the main issue is to make it clear to the reader/reviewer that we doing, i.e. comparing multiple methods using a simple common metric and then providing advice on the best methods to use. An analyst can then look at robustness to uncertainty given the peculiarities of their case study.
+
+For example I need to do some MSEs for a number of data poor stocks I dont want to run all the different methods out there, or even to write a new one. Simply to be able to choose the most appropriate method in each case. Of course I will also look at the impact of uncertainty in life history etc. but the results and discussion from our paper will help me both choose the most appropriate method and to design the MSE.
+
+Even within a class the methods have different parameter requirements so it is difficult to do a full sensitivity analysis instead was to see how well the methods perform when the data and knowledge requirements are met. this is a fair and simple comparison. The alternative would have been to run many more scenarios where the methods failed, but we can argue that we already know that, and that is why we did not run them.

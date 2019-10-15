@@ -1,0 +1,531 @@
+\documentclass[12pt,doublespacing,a4paper]{ouparticle}
+
+%\usepackage[scaled]{helvet}
+%\renewcommand\familydefault{\sfdefault} 
+%\usepackage[T1]{fontenc}
+
+
+\usepackage[authoryear]{natbib}
+\usepackage{lineno}
+
+\begin{document}
+
+\title{%I. The Sheriff of Nottingham Approach, Taking From the Poor and Giving to the Rich; \\
+       %II. Understanding Population Dynamics Is More Important Than Stock Assessment; or\\
+       An Evaluation of the Robustness of Indices of Productivity Used for the Management of Data Poor and Knowledge Limited Fish Species.}
+
+\author{%
+\name{Laurence T. Kell}
+\address{ICCAT Secretariat, C/Coraz\'{o}n de Mar\'{\i}a, 8. 28002 Madrid, Spain}
+\email{e-mail Laurie.Kell@iccat.int}
+\and
+\name{Flavia Lucena Fredou}
+\address{Universidade Federal Rural de Pernambuco (UFRPE), Departamento de Pesca e Aquicultura. Av. Dom Manuel s/n, Recife, Pernambuco, Brazil, 52171-900}
+\email{}
+%\and\name{Frederic Menard}\address{IRD, Mediterranean Institute of Oceanography (MIO), Aix-Marseille Universit\{´}e/CNRS/IRD/Universit\{´}e de Toulon, 13288 Marseille, France}\email{}
+}
+
+\abstract{
+%Scientific management advice for data rich stocks is based upon biological points and expert opinion to fix or meta-analyses to develop priors for difficult to estimate parameters. Whilst advice for data poor stocks is based upon life history parameters and outputs from data rich stock assessments to develop priors and propose indicators based upon life history traits.
+%To help propose and develop robust and non-redundant productivity indicators the reliability and stability of the indices are evaluated with reference to the data rich set. 
+}
+
+\date{\today}
+
+\keywords{Bayesian imputation; data poor; ecological risk assessment; life history; management; reference points; robustness; risk, stock assessment; uncertainty, value of information}
+ 
+\maketitle
+
+\newpage
+
+
+\linenumbers
+\linespread{2}
+
+
+\section{Introduction}
+
+%\cite{punt2011among}
+
+Biological reference points have become central to management following the adoption, by many fisheries organisations, of the precautionary approach \citep[PA,][]{garcia1996precautionary}. Reference points are used in management as targets to maximise surplus production and  limits to minimise the risk of depleting a resource to a level where productivity is compromised. They must integrate dynamic processes such as growth, recruitment, mortality and connectivity into indices for spawning reproductive potential \citep{kell2015spawning} and exploitation level. They are increasingly required for by-caught, threatened, endangered, and protected species where data and knowledge are limited \citep{sainsbury2003ref}, not just for the main commercial stocks, where analytical assessments are available.
+
+In data poor situations life history parameters, such as maximum size and size at first maturity have been used as proxies for productivity \citep{roff1984evolution,jensen1996beverton,caddy1998short,reynolds2001life,denney2002life}. For example in Ecological Risk Assessment (ERA) %also known as Productivity and Susceptibility Analysis, 
+where the risk of a stock to becoming overfished is evaluated using indices of productivity and susceptibility to fishing \citep{hobday2011ecological}. Life history attributes are combined and used to rank stocks, populations or species in order of productivity \citep[e.g.][]{cortes2010ecological,arrizabalaga2011productivity}. %Susceptibility is derived by estimating the overlap of fishing activity and stock distribution.
+
+Ranking using a mixture of attributes, however. is sensitive to the choice of attributes, the weights applied when combining them and the methods used in their derivation. Random errors may lead to a switch in rankings, and can influence outcomes considerably \citep{freyer2014robust}. Robust rankings, where ranking order is stable, are normally considered to be reliable and trustworthy, and conversely non-robust rankings as unreliable and unstable \citep{permanyer2011assessing}. The robustness of ranking in a composite index, however, may be due to a redundancy of attributes. If so it may make little sense to combine correlated indices \citep{mcgillivray1991human}. Robustness can therefore be both desirable and undesirable simultaneously. 
+
+For data poor stocks, where attributes may not be available for all species, a variety of ad-hoc approaches have been used to handle missing data, which may introduce noise and bias \citep{schafer2002missing}. An important objective when providing advice is robustness. In statistics, a test is robust if it provides insight despite its assumptions being violated. While in engineering, a robust control system is one that still functions correctly in the presence of uncertainty or stressful environmental conditions \citep{radatz1990ieee}. %To evaluate the robustness of data poor methods for estimating productivity we generate a data poor dataset from a data rich reference set, then derive indices of productivity using Bayesian imputation. The data poor indices are then compared to the population parameters of the reference set.
+
+%A definition of a robust measure is one that functions correctly despite the presence of uncertainty \citep{radatz1990ieee, zhou1996robust}. %This requires the management of risk, i.e. to reduce negative impacts (and increase positive impacts) of uncertainty on management objectives \cite{hillson2010exploiting}. 
+%Even in data rich stock assessments there is often large uncertainty about the actual dynamics \citep[i.e. model uncertainty][]{punt2008refocusing}. For example estimates of stock status are highly sensitive to the assumptions about natural mortality-at-age \citep{jiao2012modelling}, the vulnerability of age classes to the fisheries \citep{brooks2009analytical} and the relationship between stock and recruitment \citep[e.g.][]{simon2012effects}.
+%Risk is an uncertainty that matters \citep{hillson2010exploiting}, to manage risk for data poor stocks%
+%requires an evaluation of how uncertainty impacts on the ability to rank species by productivity. 
+
+A robust index should be both reliable and stable. An index or test has a high reliability if despite uncertainty it provides an accurate result. While an index is stable if despite random error, similar results are produced across multiple trials. To evaluate reliability and stability, and hence robustness, of data poor indices a data rich dataset was first compiled. Then a data poor dataset was created by removing values at random from the reference dataset. Indices were calculated using the data poor set and compared to the population parameters from the reference set, for which they are proxies. 
+
+\section{Material and Methods}
+
+Reliability and stability were evaluated by comparing rankings based on the indices of life history attributes from the data poor dataset and the population parameters from the reference set.  Spearman´s rank correlation coefficient \citep[$\rho$][]{spearman1904general} was used, $\rho$ is a non-parametric measure of dependence between two variables. A correlation coefficient or +1 or −1 indicates that there is a perfect monotonic relationship between two variables. 
+
+\subsection{Data}
+
+The reference set was created by selecting species of the order \textit{teleost} from FishBase %\citep{bentley2015data}
+where parameters for growth, length at maturity and length/weight parameters were available for several species within a family. The resulting reference set comprised eighteen families, namely \textit{Carangidae, Clupeidae,  Cyprinidae, Engraulidae, Gadidae, Lutjanidae, Merlucciidae, Mugilidae, Mullidae, Pleuronectidae, Salmonidae, Sciaenidae, Scombridae, Scophthalmidae, Sebastidae, Serranidae, Soleidae} and \textit{Sparidae}; 139 species in total.
+
+The data poor dataset was then generated by removing a third of the observations from the reference data set at random. 
+
+\subsection{Methods}
+
+For each species the life history parameters were used to parameterise a \cite{vonbert1957quantitative} growth curve, a logistic ogive for proportion mature-at-age ogive, natural mortality-at-age \citep{lorenzen2002density} and a \cite{beverton1993dynamics} stock recruit relationship. Spawning stock biomass (SSB) was was used as a proxy for stock reproductive potential \citep[SRP][]{trippel_estimation_1999,Trippel 1999,tomkiewicz2003avaliable}. This assumes that fecundity is proportional to the mass-at-age of the sexually mature portion of the population irrespective of the demographic composition of adults \citep{murawski_impacts_2001} and that processes such as sexual maturity are simple functions of age \citep{matsuda_inconsistency_1996} and independent of gender.
+
+These processes allow an equilibrium per-recruit model combined with a stock recruitment relationship \cite{sissenwine1987alternative} and a Leslie matrix \citep{caswell1989matrix} to be parameterised.
+
+Four population parameters were then derived, i.e. i) the ratio of $SSB_{MSY}$ to virgin biomass ($SSB_{MSY}/K$; ii) population growth rate at low population size ($r$); iii) population growth rate at $B_{MSY}$ ($r_{B_{MSY}}$); and iv) the size at which a year-class achieves its maximum biomass $L_{opt}$). $r$ is equivalent to level of exploitation that would drive a population to extinction since a population can not replenish itself if the harvest rate is greater than this, and corresponds to a limit exploitation reference point. $r_{B_{MSY}}$ corresponds to a target exploitation level, since fishing at this level will on average maintained a population at $SSB_{MSY}$. $SSB_{MSY}/K$. $r_{B_{MSY}}$ provides an index of the resilience to recruitment overfishing since if $SSB_{MSY}$ is small compared to $K$ then recruitment levels will be maintained at low stock levels. While $L_{opt}$ is a measure of resilience to growth overfishing.
+
+Reference points and population parameters are highly sensitive to the assumptions about natural mortality-at-age \citep{jiao2012modelling}, vulnerability of age classes to the fisheries \citep{brooks2009analytical}. While the relationship between stock and recruitment is difficult to estimate in practice \citep[e.g.][]{vert2013frequency,szuwalski2014examining,cury2014resolving,kell2015spawning,pepin2015reconsidering}. Therefore four scenarios \citep[][]{ono2015importance,kell2015spawning,boorman1997recognising} were considered. Each factors has two levels and were i) the shape of the selection pattern (dome shaped or flat topped), ii) whether juveniles  were vulnerable to fishing, iii) M varied by age and iv) steepness of the stock recruitment relationship. 
+
+\subsubsection{Imputation}
+
+The data poor dataset was generated by removing a third of the data points for the \cite{vonbert1957quantitative} growth equation parameters  $k$ the rate at which the rate of growth in length declines and the asymptotic length $L_\infty$, $L_{50}$ the length at which 50\% of individuals attain gonadal maturity for the first time, $L_{50}/L_\infty$ and $b$ the condition factor. This procedure was repeated 100 times and Multiple imputation \citep[MI,][]{rubin2004multiple} used to fill in the missing entries.
+
+Imputation involves drawing values from a posterior distribution, which reflects the uncertainty surrounding the parameters of the distribution that generated the data. It therefore simulates both the process generating the data and the uncertainty associated with the parameters. \cite{rubin1987calculation} showed that if the method to create the imputations is 'proper', then the resulting inferences will be statistically valid. Multiple imputations are said to be proper if the MI estimates $\hat{Q}_{MI}$ are asymptotically  normal with mean $\hat{Q}$ and a  consistent variance–covariance estimate $B$; and within-imputation variance estimate W is a consistent estimate of the variance–covariance estimate U with variability of a lower order than $Var(\hat{Q}_{MI})$. 
+
+Analysis of the imputed data is simpler than the same analysis without imputation since there is no need to bother with missing data. The final step pooling consists of computing statics such as the mean, variance, confidence interval, P value or rank over the simulated data sets. 
+
+Analysis was performed on each of the 100 data set singularly before pooling them into the final results. Indices considered were the life history parameters ($k$, $L_{50}$, $L_\infty$, $L_{50}/L_\infty$, $b$); combinations of them i.e. $index_{3}$ is the rank based on combining the ranks of $k$, $L_{50}$ and $L_\infty$ and $index_{3}$ based on combining the ranks of $k$, $L_{50}$, $L_\infty$, $L_{50}/L_\infty$ and $b$ and; the first two principal components of the life history parameters. 
+
+The benefit of improving the data poor dataset, by targeted studies, was evaluated by creating four datasets by replacing missing values with the values from the reference set for $k$, $L_\infty$, $L_{50}$ and $b$ in turn.
+
+%Using simulation allows us to verify the robustness of the approach. Imputation is usually the most challenging step since it must account for the process that created the missing data. Namely the data must be missing completely at random. Analysis of the imputed data is simpler than the same analysis without imputation since there is no need to bother with missing data \citep[see][]{flavia}. The final step pooling consists of computing statics such as the mean, variance, confidence interval, P value or rank over the m simulated data sets.
+
+Principal Component Analysis \citep[PCA,][]{dunteman1989principal} was used to summarise the datasets. PCA assumes that components with larger variance correspond to the interesting dynamics and lower ones to noise. The first principal axis is the one which maximizes the variance, as reflected by its eigenvalue. The second component is orthogonal to the first and maximizes the remaining variance. The first two component should therefore yield a good approximation of the original variables.
+
+
+\section{Results}
+
+Life history attributes, in the reference set, and the correlations between them are shown in Figure \ref{fig:lhpar}. The relationship between life history attributes ($k$, $L_{50}$, $L_\infty$, $L_{50}/L_\infty$ and $b$) is summarised in Figure \ref{fig:pcalh} for the reference set using PCA. 70\% of the variance is summarised by the first two components;  individual species are shown as points and the ellipses show the 0.95 normal probability density. The first component contrast species that reach a large size ($L_\infty$) with those that are fast growing ($k$) and mature early ($L_{50}/L_\infty$). The second component summarises body shape ($b$).  For example \textit{Clupeidae} are fast growing, early maturing and thin; in contrast to \textit{Sebastidae} which are late maturing and slow growing with a compact body shape. 
+
+The population parameters in the reference set, are summarised in Figure \ref{fig:pcalh}, across all scenarios, again 70\% of the variance is summarised by the first two components. The first component contrasts population growth rates ($r$ and $r_{B_{MSY}}$) with the shape of the production function ($sk$). Population characteristics are correlated, for example populations with high growth rates are resilient to recruitment overfishing. $L_{opt}$ is orthogonal, i.e. uncorrelated, to the shape of the production function and population growth rate at $B_{MSY}$. Families show a range of characteristic, e.g. \textit{Clupeidae} reach maximum biomass at small and \textit{Merlucciidae} at large size, while \textit{Cyprinidae} show a range of characteristics.
+
+Four factors with two levels each were run as scenarios to evaluate the sensitivity of the results to parameters that are difficult to measure, namely the shape of the selection pattern (dome shaped or flat topped), where juveniles were subjected to fishing mortality, whether M varied by age and steepness. Figure \ref{fig:pcaRefScen} showed that reducing steepness or assuming M varied at age reduced the ratio between Virgin biomass and $B_{MSY}$, while assuming M varied at age resulted in a reduction in $L_{opt}$. 
+
+Figure \ref{fig:stab3} summarises the Spearman rank correlations ($\rho$) between the data poor indices (columns) and the reference set population parameters (rows). A reliable index is one that shows a value of $\rho$ close to 1, while a stable index is one where the variability is small. The boxplot hinges correspond to the inter quartile range %(the $25^{th}$ and $75^{th}$ percentiles)
+, while the whiskers extends from the hinges to the values that are within 1.5 times the interquartile. 
+
+\begin{itemize}
+ \item The most reliable index is using $L_\infty$ for $L_{opt}$, it is also stable as variability is small. $L_{50}$ is the next best index, however, when the two attributes are combined as $L_{50}/L_\infty$ the index is a poor proxy.
+ \item For $r$ $k$ is the most reliable.
+ \item While for $r_{B_{MSY}}$  $L_50$, $L_\infty$ and $k$ are equally reliable and $L_{50}$ is the most stable
+ \item Similar results are seen for $sk$, apart from for $k$ which shows low reliability.
+ \item In all case combining all attributes into a single index and $L_{50}/L_\infty$ are not reliable. 
+\end{itemize}
+
+An index that is robust to uncertainty about processes will not vary by scenario. There were four scenarios with two factors each, these are shown in Figure \ref{fig:stab2}, all the interactions are shown. The first eight scenarios are for the when it is assumed that the M vector that does not vary by age and the last eight for the Gislason form of M. Odd scenarios are for a steepness of 0.75 and even for a steepness of 0.9. 
+
+\begin{itemize}
+ \item For $r$ and $r_{B_{MSY}}$ the assumption about M have a large effect. The indices are more reliable when M varies by age, while the assumption about steepness hase less effect. Vulnerability has no effect on $r$, while $r_{B_{MSY}}$  is affected when juveniles are vulnerability to fishing. 
+ \item For $sk$ the form of M has the biggest effect. 
+\end{itemize}
+
+The benefit of reducing uncertainty by collecting more data is evaluated in Figure \ref{fig:stab2}, and combines all the scenarios into a single box plot.
+
+  \begin{itemize}
+    \item Collecting data on $k$ improved the correlations between $k$ and $r$ and $r_{B_{MSY}}$, improving data on the other traits had little impact.  
+    \item That in general collecting more data did not have a large impact shows that the imputation process is robust. 
+    \item The variances were less for $L_{opt}$.
+  \end{itemize}
+
+\section{Discussion and Conclusions}
+
+\begin{description}
+
+ \item[Uncertainty]
+    In fisheries science and management uncertainties are pervasive due to imperfect information, the natural variability of aquatic ecosystems and lack of perfect control over fisheries \cite{peterman2004possible}. To ensure that the risk of failing to meet management objectives is low requires a consideration of uncertainty \citep{kell2015kobe}.
+      
+ \item[Risk] 
+    Risk is an uncertainty that matters. What matters depends on management and conservation objectives, and whether objectives are achieved depends on the management framework.  Depending on the level of uncertainty different procedures may be used to derive reference points for use in management \citep{reuter2010managing}. %Depending on the level of uncertainty some frameworks adopt an hierarchical approach, where stock assessment moves from qualitative through semi-quantitative to fully quantitative analyses. %http://www.environment.gov.au/science/supervising-scientist/research/ecological-risk
+    
+ \item[Management Frameworks] 
+    In data rich cases where an analytical stock assessment is available and a clear relationship between recruitment and spawning stock biomass is evident and growth, natural mortality (M), maturity and selectivity are known then maximum sustainable yield (MSY) based reference may be used. If the stock recruitment relationship is uncertain then per-recruit reference points are used instead. %If fishery variables are uncertain then only biomass based reference point can be estimated. 
+    While for information and data poor situations life history attributes are combined in to index and used to rank in order of productivity. 
+
+ \item[Robustness]
+    An aim of the study was to evaluate the robustness of productivity indices used in data poor situations. An index is robust if it provides insight despite the assumptions being violated. Therefore to evaluate robustness we generated a data poor dataset from a data rich reference set;  alternative data poor indices were then calculated and compared them to reference points and population parameters derived from the reference set. This was done for a range of scenarios to evaluate the sensitivity of the indices to parameters that are difficult to measure such as natural mortality and the relationship between recruitment and stock.
+    
+    Imputation was used to create a database of life history attributes, filling in missing values, before calculating the indices. Imputation is usually the most challenging step since it must account for the process that created the missing data. Namely the data must be missing completely at random. Analysis of the imputed data is simpler than the same analysis without imputation since there is no need to bother with missing data. The final step pooling consists of computing statics. In this case the statistic used was Spearman correlation to compare the reliability of ranks based on the indices and imputation used to evaluate the stability of the ranks. 
+
+    %\begin{description}
+    %  \item[Level 1] Ecological Risk Assessment \citep[ERA,][]{suter2006ecological} uses ranking to identify species populations and/or stocks at risk. If a management frameworks objective is to identify the main species at risk due to low productivity. Then to achieve a given probability of identifying the top ranked species more species would have to be selected.   
+    %  \item[Level 2]  Where frequency data are not available a Bayesian statistical approach which involves assessing degrees of ‘belief’ using qualitative or semi-quantitative reasoning is often used. 
+    %  \item[Level 3] The classical quantitative approach, based on frequency information for effects and exposure uses null hypothesis testing \& likelihood estimation (Figure 2).  
+    %\end{description}
+
+ \item[Lessons for data poor case studies]  
+    Knowledge about the structure is helpful in identify the mechanism which generated the missing data and for aiding in selection of an appropriate imputation method to estimate missing values \citep{templ2012exploring}. For example estimates of $L_\infty$ and $k$ are often correlated owing to a lack of large old fish in samples, and so only the product of the two can be estimated with reasonable precision \citep{gislason2010does}. 
+
+ \item[Lessons for data rich case studies] 
+    An Understanding of population rynamics is important for stock assessment, since data rich stock assessments often rely upon life history parameters for deriving priors for difficult to estimate population parameters \citep{lee2011m, lee2012steepness, jiao2012modelling,simon2012effects}. Life history parameters are also a major input into ecological risk assessments (ERA) used to prioritise management action \citep{suter2006ecological,cortes2010ecological} and ecological models used to help develop an ecosystem based approach to fisheries management \citep{thorson2012using}. 
+
+\end{description}
+
+https://www.ramas.com/CMdd.htm
+
+\section{Conclusions}
+
+
+\begin{itemize}
+ \item 
+ \item 
+ \item 
+ \item 
+\end{itemize}
+
+\section{Acknowledgement}
+
+This study does not necessarily reflect the views of ICCAT and in no way anticipates the Commission's future policy in any area. 
+
+\clearpage
+\bibliography{refs}
+\bibliographystyle{apalike}
+
+
+\clearpage
+\section{Figures}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{refLhPairs-1.png}
+\caption{Correlations between life history parameters in the data rich reference dataset.}
+\label{fig:lhpar}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pcaLh-1.png}
+\caption{Biplots from principle component analysis of life history parameters in the data rich reference dataset.}
+\label{fig:pcalh}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pcaPop-1.png}
+\caption{Biplots from principle component analysis of life history parameters in the data rich reference dataset by family.}
+\label{fig:pcaRef}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=4in]{pcaPop2-1.png}
+\caption{Biplots from principle component analysis of productivity metrics in the data rich reference dataset by scenarios.}
+\label{fig:pcaRefScen}
+\end{figure}
+
+%\begin{figure}[htbp]
+%\centering
+%\includegraphics[width=\textwidth]{mvl-1.png}
+%\caption{relationships between metrics and life history parameters.}
+%\label{fig:mvp}
+%\end{figure}
+
+%\begin{figure}[htbp]\centering
+%\includegraphics[width=\textwidth]{refSetSetHe-1.png}
+%\caption{Hypothesis error plot of for the MANOVA test of $H_0:\mu_y=0$. The size of the  ellipse for the intercept term relative to that for Error gives the strength of evidence for the difference between the sample means and the means under $H_0$ %(marked by the cross-hairs and green dot). The projection of this H ellipse outside the E ellipse signals allows the $H_0$ to be rejected.}
+%\label{fig:heplot}
+%\end{figure}
+
+
+%\begin{figure}[htbp]
+%\centering
+%\includegraphics[width=\textwidth]{/home/laurie/MEGAsync/papers/1lifeBalance/tex/rely-1.png}
+%\caption{Spearman rank correlation coefficients between life history parameters and indices and population parameters for the data rich reference set.}
+%\label{fig:rely}
+%\end{figure}
+
+%\begin{figure}[htbp]
+%\centering
+%\includegraphics[width=\textwidth]{/home/laurie/MEGAsync/papers/1lifeBalance/tex/stab-1.png}
+%\caption{Spearman rank correlation coefficients between life history parameters and indices and population parameters for the data poor set.}
+%\label{fig:stab}
+%\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{/home/laurie/MEGAsync/papers/1lifeBalance/tex/stab4-1.png}
+\caption{Spearman rank correlation coefficients between life history parameters and indices and population parameters for the data poor set. The upper and lower boxplot hinges correspond to the first and third quartiles (the $25^{th}$ and $75^{th}$ percentiles), while the whiskers extends from the hinge to the value that is within 1.5 times the interquartile range of the hinge.}
+\label{fig:stab1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{/home/laurie/MEGAsync/papers/1lifeBalance/tex/stab2-1.png}
+\caption{Spearman rank correlation coefficients between life history parameters and indices and population parameters for the data poor set; boxplots by scenarios. The upper and lower boxplot hinges correspond to the first and third quartiles (the $25^{th}$ and $75^{th}$ percentiles), while the whiskers extends from the hinge to the value that is within 1.5 times the interquartile range of the hinge.}
+\label{fig:stab2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\caption{Spearman rank correlation coefficients between life history parameters and indices and population parameters for the data poor set; boxplots by augmented dataset. The upper and lower boxplot hinges correspond to the first and third quartiles (the $25^{th}$ and $75^{th}$ percentiles), while the whiskers extends from the hinge to the value that is within 1.5 times the interquartile range of the hinge.}
+\includegraphics[width=\textwidth]{/home/laurie/MEGAsync/papers/1lifeBalance/tex/stab3-1.png}
+\label{fig:stab3}
+\end{figure}
+
+  
+% [1] Constant FALSE FALSE 0.75 Constant FALSE FALSE 0.9 
+% [3] Constant FALSE TRUE 0.75  Constant FALSE TRUE 0.9  
+% [5] Constant TRUE FALSE 0.75  Constant TRUE FALSE 0.9  
+% [7] Constant TRUE TRUE 0.75   Constant TRUE TRUE 0.9   
+% [9] Gislason FALSE FALSE 0.75 Gislason FALSE FALSE 0.9 
+%[11] Gislason FALSE TRUE 0.75  Gislason FALSE TRUE 0.9  
+%[13] Gislason TRUE FALSE 0.75  Gislason TRUE FALSE 0.9  
+%[15] Gislason TRUE TRUE 0.75   Gislason TRUE TRUE 0.9   
+
+%\begin{figure}[htbp]
+%\centering
+%\includegraphics[width=\textwidth]{/home/laurie/MEGAsync/papers/1lifeBalance/tex/stability-1.png}
+%\caption{Plots of Spearman rank correlation coefficients for the data poor dataset.}
+%\label{fig:stability}
+%\end{figure}
+
+%\begin{figure}[htbp]
+%\centering
+%\includegraphics[width=\textwidth]{/home/laurie/MEGAsync/papers/1lifeBalance/tex/power-1.png}
+%\caption{Plots of Spearman rank correlation coefficients for the data poor dataset.}
+%\label{fig:pow}
+%\end{figure}
+
+\clearpage
+\section{Appendix}
+
+\subsection{Population Growth Rate}
+
+The maximum theoretical rate of increase of a population in the absence of density-dependent regulation is given by
+
+\begin{equation} r=\frac{dN}{dt} \frac{1}{N}  \end{equation}
+
+
+\noindent where the intrinsic population growth rate ($r$) is a function of population size ($N$) and $\frac{dN}{dt}$ the instantaneous rate of increase of the population.
+
+In ecology Leslie matrices \citep{leslie1945use} are widely used to estimate r \citep{picard2009finding} and have been used in fisheries to develop Bayesian priors for r for use in stock assessment \citep[see][]{mcallister2001using}. The Leslie Matrix ($A$) is a transition matrix that models age dynamics. Each age-class is described by a vector ($B_t$) of length p equal to the terminal age. Entries in the matrix are fecundity ($f_i$) (the quantity of age zero females produced per unit of mature biomass by each age-class) and the survival (and growth if biomass) of an age-class ($s_i$) in each time step $i$, i.e.
+
+\begin{equation}
+\begin{array}{l}
+n_{1}= f_{2}n_{2}+ ... + f_{3}n_{p}\\
+n_{2}=s_{1}n_{1}\\
+~~~~~~...\\
+n_{p}=s_{p-1}n_{p-1}+s_{p}n_{p}\\
+\end{array}
+\end{equation}
+
+The matrix of this linear system is 
+\begin{equation}
+\mathbf{A}=%
+\begin{pmatrix}
+0 & f_{2} & ... & f_{p} \\ 
+s_{1} & 0 & ... & 0 \\ 
+ &...&\\
+0 & ... & s_{p-1} & s_{p}%
+\end{pmatrix}%
+\end{equation}
+
+If the initial population is
+
+\begin{equation}
+\mathbf{B}^{0}=%
+\begin{pmatrix}
+n_{1} \\ 
+n_{2} \\ 
+...\\
+n_{p}%
+\end{pmatrix}%
+\end{equation}
+
+then after time step i=1 the population is given by
+
+\begin{equation}
+\mathbf{B}^{i}=\mathbf{A}^{i}\mathbf{B}^{0}
+\end{equation}
+
+As $i$ tends to infinity the system reaches equilibrium and the contribution of each age group in the population becomes stable. The population growth rate $r$ is then derived from $\lambda$ the dominant eigenvalue of $A$ \citep{caswell1989matrix}.
+
+To construct the Leslie matrix requires estimates of $f_i$ and $p_i$. In this study these were derived by combining a stock recruitment relationship with a spawner-per-recruit ($S/R$) and yield-per-recruit ($Y/R$) analyses. The life history parameters were used to derive mass ($W$), proportion mature ($Q$), natural mortality ($M$) and  fishing mortality ($F$) at age. 
+
+\begin{equation}
+S/R=\sum\limits_{i=0}^{p-1} {e^{\sum\limits_{j=0}^{i-1} {-F_j-M_j}}} W_i Q_i + e^{\sum\limits_{i=0}^{p-1} {-F_i-M_i}} \frac{W_p Q_p}{1-e^{-F_p-M_p}}\\
+\end{equation} 
+
+\begin{equation}
+Y/R=\sum\limits_{a=r}^{n-1} {e^{\sum\limits_{i=r}^{a-1} {-F_i-M_i}}} W_a\frac{F_a}{F_a+M_a}\left(1-e^{-F_i-M_i} \right) + e^{\sum\limits_{i=r}^{n-1} {-F_n-M_n}} W_n\frac{F_n}{F_n+M_n}\\
+\end{equation} 
+
+The second term is the plus-group, i.e. the summation of all ages from the last age to infinity. 
+
+Growth in length is modelled by the Von Bertalanffy growth equation \cite{von1957quantitative}
+
+\begin{equation} L = L_\infty(1 - exp(-k(t-t_0)) \end{equation}
+         
+where $k$ is the rate at which the rate of growth in length declines as length approaches the asymptotic length  $L_\infty$ and $t_{0}$ is the hypothetical time at which an individual is of zero length.
+
+Length is converted to mass using the length-weight relationship 
+    
+\begin{equation} W = aL_t^b \end{equation}
+
+\noindent where $a$ is the condition factor and $b$ is the allometric growth coefficient.
+
+\cite{gislason2010does} showed that M is significantly related to body length, asymptotic length and k. Temperature is non-significant when k is included, since k itself is correlated with temperature. We therefore model M as
+
+\begin{equation}
+            M =  0.55L^{1.61}L_\infty^{1.44}k
+\end{equation} 
+
+Selection pattern of the fishery was represented by a double normal \cite[see][]{Hilbornetal2000}) with three parameters that describe the age at maximum selection ($a1$), the rate at which the left-hand  limb increases ($sl$) and the right-hand limb decreases ($sr$) which allows flat topped or domed shaped selection patterns to be chosen.
+         
+\begin{equation}
+f(x) = \left\{ \begin{array}{ll}
+			0                                 &\mbox{ if $(a_{50}-x)/a_{95} >  5$} \\
+			a_\infty                        &\mbox{ if $(a_{50}-x)/a_{95} < -5$} \\
+			\frac{m_\infty}{1.0+19.0^{(a_{50}-x)/_{95})}} &\mbox{ otherwise}
+		\end{array}
+       \right.
+\end{equation}
+
+The relationship between stock and recruitment was modelled by a Beverton and Holt stock-recruitment relationship \citep{beverton1993dynamics} reformulated in terms of steepness ($h$), virgin biomass ($v$) and $S/R_{F=0}$
+
+\begin{equation}
+R=\frac{0.8R_0h}{0.2S/R_{F=0}R_0(1-h)+(h-0.2)S}
+\end{equation} 
+
+\noindent where steepness is the ratio of recruitment at 20\% of virgin biomass to virgin recruitment ($R_0$) and $S/R_{F=0}$ is the spawner per recruit at virgin biomass, i.e. when fishing mortality is zero. Steepness is difficult to estimate from stock assessment data sets as there is often insufficient contrast in biomass levels required for its estimation \cite{pepin2015reconsidering}.
+
+S is spawning stock biomass, the sum of the products of the numbers of females, $N$, proportion mature-at-age, $Q$ and their mean fecundity-at-age, $F$, i.e. 
+
+\begin{equation} S = \sum\limits_{i=0}^{p} {N_iQ_iF_i} \end{equation}
+
+where fecundity-at-age is assumed proportional to biomass and the sex ratio to be 1:1. Proportion mature is 50\% at the age that attains a length of $l50$, 0\% below this age and 100\% above. 
+
+\end{document}
+
+\section{Ecology}
+
+%\Laurie{The ability of management strategies to achieve the fishery management goals are impacted by environmental variation and, therefore, also by global climate change. Management strategies can be modified to use environmental data using the “dynamic B0” concept, and changing the set of years used to define biomass reference points. Two approaches have been developed to apply management strategy evaluation to evaluate the impact of environmental variation on the performance of management strategies. The “mechanistic approach” estimates the relationship between the environment and elements of the population dynamics of the fished species and makes predictions for population trends using the outputs from global climate models. In contrast, the “empirical approach” examines possible broad scenarios without explicitly identifying mechanisms. Many reviewed studies have found that modifying management strategies to include environmental factors does not improve the ability to achieve management goals much, if at all, and only if the manner in which these factors drive the system is well known. As such, until the skill of stock projection models improves, it seems more appropriate to consider the implications of plausible broad forecasts related to how biological parameters may change in the future as a way to assess the robustness of management strategies, rather than attempting specific predictions per se. \citep{punt2013fisheries}.}
+
+
+https://www.ramas.com/index.htm
+
+The majority of stock assessment models, assume that density dependence acts through the stock recruitment relationship. Namely that there is an equilibrium population abundance ($K$, equivalent to virgin biomass $B_0$), which if the population size falls below then the population will increase and if it falls above will decrease. A population may  decline in the absence of fishing or increase due to a changing environment regardless of density \citep{hjort1926fluctuations,shaffer1981minimumh}. Assumptions about density dependence have important effects on sustainability and extinction risk \citep{ginzburg1990reconstructibility}. For example if biomass is determined by recruitment \citep{hjort1926fluctuations,gilbert1997towards,cury2014resolving} assuming density-dependent regulation may cause an underestimation of the risks of decline. 
+
+
+If a population has a long-term declining trend, or the long-term average of survival rates and fecundities give a finite rate of population change (eigenvalue) of less than 1, then it may not be appropriate to use some types of density dependence (e.g., Scramble, Contest, Ricker, Beverton-Holt, logistic, etc.), depending on how exactly they are modeled and parameterized (however, there are some exceptions to this; see below). In such cases, a density-independent ("exponential") model, a Ceiling type of density dependence, or a user-defined density dependence model may be more appropriate.
+
+In conservation a major problem is that many species are threatened by habitat loss, which is most commonly (and perhaps most naturally) modeled as a decline in the carrying capacity of the population. Thus, models that do not include such a habitat-related parameter (e.g., most density-independent models) may not be appropriate for modeling threats such as habitat loss.
+
+(Note that simulating habitat loss may require modifying Rmax or the stage matrix, in addition to the carrying capacity).
+
+As discussed above, an observed population decline may indicate that the population is not under density-dependent regulation. However, there are some exceptions to this. In the following situations, using a density-dependent model may be appropriate, even though the population may be declining:
+
+The population may be above the carrying capacity temporarily (for example due to recent environmental fluctuations or excess migration), and declining towards it. If the population was above the carrying capacity because the carrying capacity temporarily declined due to recent environmental fluctuations, then you should also use "Standard deviation of K" parameter to model stochasticity.
+   
+The population may be subject to Allee effects, and declining even though population is below the carrying capacity. In this case, you should specify a density-dependent model that includes Allee effects, or use a high extinction threshold.
+    
+The survival rates and fecundities (the stage matrix) may have been estimated during years at which the population happened to be declining due to environmental factors, and you have reason to believe that in the long run the population is stabilized by density-dependent factors.
+The population may be declining because of habitat loss, or decreased habitat quality, and you have reason to believe that if habitat loss stopped, the population would be stabilized by density-dependent factors. In this case, you should use the "Temporal change in K" parameter to model habitat loss.
+
+Conversely, if a population is observed to be increasing exponentially, this does not mean that a density-independent model is the most appropriate. The population may approach or reach its carrying capacity in the (future) simulated time horizon, even if currently it is far below the carrying capacity.
+
+Not using density dependence may cause an underestimation of risks of decline or extinction (or an overestimation of risks of spread of an invasive species), if the population is under the influence of Allee effects ("positive density dependence"). Often there are not sufficient data at low population densities, so it is difficult to model Allee effects. In such cases, focusing on the risk of decline to a sufficiently high threshold abundance may be appropriate.
+Bias in Rmax estimation
+
+Fitting a density dependent model to a time series data (count of total population size over time) may introduce a bias. Suppose you have a time series of population size estimates, N(1), N(2), N(3), etc.; and for each time step t, you calculate the growth rate as R(t) = N(t+1) / N(t) .
+
+To estimate density dependence, you may want to perform a regression of R(t) [or r(t)=log(R(t))] on N(t), and use the y-intercept as the estimate of Rmax [or rmax], assuming it is a declining function.
+
+However, note that N(t) appears both in the dependent and in the independent variable of the regression! This implies that if N(t) are measured with error (as they are in most cases), or are subject to other (stochastic) factors, then the estimate of the slope of the regression and, hence the estimate of Rmax, will be biased. In particular, if the data are from density-independent population fluctuations, you will often get an estimate of Rmax above 1.0, meaning that you will detect density dependence even though it does not exist.
+
+For example, the left figure below shows a time series produced by a density-independent, age-structured model with environmental stochasticity in survival rates and fecundities. The figure on the right shows an attempt to fit a simple density dependence model to this data. The line shows linear regression of population growth rate, ln(R), on population size, N. The population growth rate is calculated as ln(R(t)) = ln( N(t+1) / N(t) ). Even though the model that produced the data did not include density dependence, the negative slope of the regression line indicates density dependence, with an intercept of about 0.24, which corresponds to Rmax of about 1.3.
+
+Time series of population size (N), produced by a density-independent, age-structured, stochastic model. 	
+Fitting a density-dependent model to the time series on the left. The negative slope indicates density dependence, even though the time series was created by a density-independent model.
+
+One solution is to fit non-linear model N(t+1) = f(N(t)), where f is the density dependence function. In this case, N(t+1) and N(t) appear only once in the equation.
+
+Detecting and parameterizing density dependence is a complicated problem. For a discussion of complexities inherent in detecting and estimating density dependence, see Langton et al. (2002), Lande et al. (2002), Saether et al. (2002), as well as Hassell (1986), Hassell et al. (1989), Solow (1990), and Walters (1985).
+Underestimating maximum growth rate (Rmax)
+
+Rmax is defined as the maximal growth rate in the absence of density effects, namely at low population sizes. Thus, the observed growth rates at higher population sizes, especially the population growth rate when the population is approaching its equilibrium (carrying capacity) often underestimates Rmax. For example, if the stage matrix is estimated from a population approaching carrying capacity, and the eigenvalue of the matrix is used as Rmax, then the risks of decline and extinction may be overestimated.
+
+A similar mistake occurs when using Ceiling-type density dependence (which does not use Rmax). Ceiling-type density dependence assumes that the vital rates (the stage matrix) are not affected by the effects oif density until the population reaches the Ceiling level (K). If the vital rates are actually affected by density before the population reaches K, and the stage matrix is estimated from a population close to K, then this type of density dependence may overestimate the risks of extinction and decline.
+Overestimating maximum growth rate (Rmax)
+
+Although Rmax is defined as the maximal growth rate in the absence of density effects, merely observing a growth rate above 1.0 at low population densities does not justify using scramble- or contest-type density dependence (incl. logistic, Ricker, Beverton-Holt, theta logistic, etc.). You either have to fit an entire dataset as discussed above, or you need other evidence which shows that the population is regulated by these types of density dependence. This is because the observed growth rates are affected by factors other than density, such as stochasticity. Populations that are not regulated by scramble- or contest-type density dependence (for example those that are only subject to ceiling-type density dependence) will also frequently experience periods of positive growth, some of which will coincide with low population sizes. If you model such a population with a scramble- or contest-type density dependence, you may underestimate extinction risks, because of the stabilizing effect of these functions (see Ginzburg et al. 1990).
+
+Similar cautions apply to the estimation of Rmax in cases where the use of scramble- or contest-type density dependence is justified. Simply using the maximum growth rate ever observed (or observed under laboratory conditions, etc.) may overestimate the strength of density dependence, because this observed value might have been the result of factors other than the low density of the population or the lack of competition. If you have census (count data), consider using the statistical methods referenced above.
+
+Another way of overestimating Rmax is calculating its value for a long time step based on measurements at a short time step, especially if the long time step is longer than the generation time (or, even if it is shorter than generation time, but longer than period between reproduction events). For example, suppose that an insect species is observed to increase by two-fold in a generation (thus, Rmax is 2.0 per generation), and assume that there are 3 generations per year. Now, suppose you build a model with an annual time step. If the population can grow two-fold in one generation, it can grow 8-fold in three generations, if there is no density dependence. However, if you add density dependence to this model, it would be wrong to estimate Rmax as 8.0, because the effects of density would be felt in the population at a generation time scale, before the population grows by 8-fold. Thus, in this case it would be wrong to have a density dependent model with an annual time step. The correct model in this case would have a time step of 1/3 years and an Rmax of 2.0.
+Incorrectly modeling impact under density dependence
+
+When developing models for impact assessment, the interactions between density dependence and the simulated impact must be carefully considered; and the parameters of the model that need to be modified to simulate the impact must be carefully selected.
+
+One common mistake is to modify only the stage matrix elements (survival rates or fecundity) under Scramble or Contest type of density dependence. If density dependence type is Scramble or Contest, the program modifies the stage matrix elements during a simulation, according to the population size at each time step and the parameters of the density dependence function (see the help file and manual for details). Because of this, when density dependence type is Scramble or Contest, changing only the stage matrix elements to model pollution (or any other impact that affects vital rates) is not adequate (it would not produce any substantial difference in dynamics). The solution is to change both stage matrix elements and the density dependence function.
+
+Thus, modeling impacts on survival and fecundity under density dependence means changing either or both the maximum growth rate (Rmax) and carrying capacity (K). Which one should be modified to simulate impact depends on the interaction between the impact and the density dependence relationship. Changing only Rmaxor only K may not adequately describe what happens to the density dependence relationship under impact (see Figure 1).
+
+For example, changing only Rmax assumes that there is no impact on the population if the population size (N) is close to carrying capacity (K), and that the growth rate under impact is actually higher if N>K (Figure 1A). Changing only K assumes that there is no impact on the population if the population size is small (see Figure 1B).
+
+A. Impact (red): Rmax=1.3; Baseline (blue): Rmax=1.5 	
+B. Impact (red): K=60; Baseline (blue): K=100
+Figure 1. The effect of changing only Rmax (A, left) and only K (B, right) to simulate impact under density dependence. In both graphs, the blue curve shows the baseline model, and the red curve shows the impact model. The baseline model has Rmax=1.5; K=100.
+
+While the assumptions above may be valid in some situations, simulating impact in many cases requires modifying both the maximum growth rate (Rmax) and carrying capacity (K), as shown in Figure 2. The impact may reduce the growth rate of the population by the same amount regardless of population size, making the density dependence functions of baseline and impact models parallel (Figure 2A); or the effect may be stronger at high (Figure 2B) or low (Figure 2C) population sizes.
+
+A. Impact (red): Rmax=1.3; K=55 	Figure 2.The effect of changing both Rmax and K to simulate impact under density dependence.
+
+In all three graphs, the blue curve shows the baseline model, and the red curve shows the impact model. The baseline model has Rmax=1.5; K=100.
+
+
+B. Impact (red): Rmax=1.3; K=35 	
+C. Impact (red): Rmax=1.1; K=35
+Toxicity vs. harvest under density dependence
+
+Another mistake is to model mortality due to toxicity as harvest. These two types of mortality are not equivalent; there is a fundamental difference between them under density dependence. When a population regulated by density dependence is harvested, the remaining individuals may be better off than before the impact (harvest) because there may be more resources per individual. This is called compensation. The situation under toxicity is entirely different: the remaining individuals may be few, and there may be more resources per individual, but they are still poisoned. Most likely, they have higher probability of mortality, lower reproduction, and slower growth; in other words, they are probably not better off than before the impact (pollution).
+
+In most cases, harvest by itself does not change the density dependence relationship, and compensation effects are represented by the density dependence function. Toxicity, however, most likely shifts the density dependence curve downward, as in Figure 2 above.
+
+Note that there are limits to compensation even with harvest. Depending on its rate and timing, harvest can drive a population to extinction, even if the population is regulated by density dependence. Harvest may also interact with other factors. For example, Allee effects and stochasticity may cause a population reduced by harvest to decline even further or increase its risk of extinction.
+
+\end{document}
+
+\section{Notes}
+
+\begin{itemize}
+ \item ERA defines the risk to a population of being depleted as a function of (1) population productivity, which determines the rate at which the population can recover from depletion or stocks that are more vulnerable to overfishing and (2) population susceptibility, which defines its exposure to fishing activity (Cort\{´}es et al., 2009). Is this the definition in Cortes? If so OK, however, the definition of risk is impact of uncertainty on management objectives so broader than that used by Cortes. Also “r” also affects the speed at which a stock can be overfished not just how quickly it recovers. In this context they are two estimates of “r”, r at low pop size and r at current pop size.
+ \item Vulnerability (v) can be interpreted as a measure of the extent to which fishing mortality on a species will exceed its biological ability to renew itself (Stobutzki et al., 2002). Both productivity and susceptibility attributes for a given population (or stock) are used to produce a single risk score that quantifies its vulnerability. Stocks that received a low productivity score and a high susceptibility score are considered to be the most vulnerable to overfishing. Conversely stocks with a high productivity score and low susceptibility score are considered to be the least vulnerable. Each attribute of P (productivity) and S (susceptibility) was scored on a three-point scale, indicating low (1), medium (2), and high (3) values. For productivity, 3 indicated relative low productivity and anticipated high risk and 1 indicated relative high productivity and anticipated low risk. Conversely, for the susceptibility attributes, 3 indicated relative high susceptibility and anticipated high risk and 1 indicated relative low susceptibility and anticipated low risk.  Missing attributes were not given a score. 
+The score thresholds were defined based on the literature, specialist advice, and using a quantile method. Each attribute score was then weighted and the overall species productivity and susceptibility scores were a weighted mean of the adhoc attribute scores (section below explain the detail of the calculation of the productivity and susceptibility scores). 
+The two-dimensional nature of the PSA leads directly to the calculation of an overall vulnerability score (v) of a species, defined as, in ERA level 2 (semi-quantitative), the Euclidean distance from the origin of a PSA scatter plot:
+
+ 
+where X0 and Y0 are the (x, y) origin coordinates, respectively.
+Risk categories (high, moderate and low) were defined by ranking the vulnerability scores of the 60 species in three classes, using a quantile method.
+The scores were depicted graphically in a scatter plot, with P on the x-axis and S on the y-axis. In addition, the x-axis was reversed (i.e. it starts at 3 and ends at 1), so that the area of the plot close to the origin (which was at 3, 1) corresponded to high-productivity, low-susceptibility stocks, hence less vulnerable stocks. The most vulnerable stocks are those placed further from the origin.
+
+ \item 
+ \item 
+\end{itemize}
+                       
+                                   
+save(imp,file="/home/laurie/MEGAsync/papers/1lifeBalance/data/imp.RData")  
+
+\subsection{PCA}
+
+
+.We can see from the scatterplot that wine samples of cultivar 1 have much lower values of the first principal component than wine samples of cultivar 3. Therefore, the first principal component separates wine samples of cultivars 1 from those of cultivar 3.
+
+We can also see that wine samples of cultivar 2 have much higher values of the second principal component than wine samples of cultivars 1 and 3. Therefore, the second principal compo
+The global MSY is achieved by harvesting a cohort at the age (or size) at which it reaches its maximum biomass. Although this is not actually achievable it does provide a reference point for catch and biomass, and can be easily calculated. nent separates samples of cultivar 2 from samples of cultivars 1 and 3.
+
+Therefore, the first two principal components are reasonably useful for distinguishing wine samples of the three different cultivars.
+
+
+The impact of life history parameters are summarised in figure \ref{fig:heplot} and table \ref{tab:heplot} using a MANOVA, this shows ...
+
+
+

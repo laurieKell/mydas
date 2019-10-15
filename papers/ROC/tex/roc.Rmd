@@ -1,0 +1,543 @@
+---
+title: "Proxy $MSY$ Reference Points for data poor stocks"
+subtitle: "Power of length based indicators to detect overfishing."
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+    html_document:
+       includes:
+            in_header: header.tex 
+---
+
+# Introduction
+
+To provide advice on the status of data poor stocks ICES uses $MSY$ proxy reference points as part of a Precautionary Approach.
+
+Data poor stocks include those for which only trends such as lpue,  cpue,  and  mean  length  in  the  catch  are available (**Category 3**), and stocks for which only reliable catch data are available (**Category 4**).
+
+Methods currently approved by ICES for calculation of $MSY$ reference points for these stocks are 
+
++ Length based indicators 
++ Z derived from mean length 
++ Length based spawner per recruit; and
++ Surplus Production models
+
+Many approaches have emerged over the last few decades, for example Where length data are available methods include Length Based Spawning Potential Ratio (LBSPR), Length-Based Integrated Mixed Effects (LIME), and Length-Based Bayesian (LBB). While where only catch data are available methods include Catch-Maximum Sustainable Yield (Catch-MSY), State-Space Catch-Only Model (SSCOM), Depletion Based Stock Reduhction Analysis (DBSRA), and Simple Stock Synthesis (SSS) an extension of Catch-MSY (CMSY).
+
+Empirical indicators and reference points can also be used to monitor stocks and these include
+
++ $L_{max5\%}$ mean length of largest 5\%
++ $L_{95\%}$ $95^{th}$ percentile
++ $P_{mega}$ Proportion of individuals above $L_{opt} + 10\%$
++ $L_{25\%}$ $25^{th}$ percentile of length distribution
++ $L_{c}$ Length at $50\%$ of modal abundance
++ $L_{mean}$ Mean length of individuals $> L_c$
++ $L_{max_{y}}$ Length class with maximum biomass in catch
++ $L_{mean}$ Meanlength of individuals $> L$
+
+where potential  **reference points** include
+
++ $L_{opt} = L_{\infty}\frac{3}{3+\frac{M}{K}}$, assuming $M/K = 1.5$ gives $\frac{2}{3}L_{\infty}$
++ $L_{F=M} =  0,75l_c+0.25l_{\infty}$
+
+# Methods
+
+## Simulation
+
+Run scenarios with an increasing trend in F that leads to overfishing, then implement a recovery plan that brings fishing to the $F_{MSY}$ level then screen potential empirical MPs by
+
+   - Generating length, catch and CPUE indicators using an OEM 
+   - Compare indicators to OM using Reciever Operating Characteristics (ROCs) 
+
+## Receiver Operating Characteristics
+
+Sort the observed outcomes by their predicted scores with the highest scores first, then calculate cumulative True Positive Rate (TPR) and True Negative Rate (TNR) for the ordered observed outcomes
+
+<!-- + **Methods** Run scenarios with an increasing trend in F that leads to overfishing, then implement a recovery plan that brings fishing to the $F_{MSY}$ level then screen potential empirical MPs by -->
+<!--   - Generating length, catch and CPUE indicators using an OEM -->
+<!--   - Fit indices using LBSPR, SRA and a biomass dynamic model -->
+<!--   - Compare indicators to OM, both trends and status relative to reference points using Reciever Operating Characteristics (ROCs) -->
+
+<!-- + **Analysis**  Compare indicators to OM -->
+<!--   - Compare ability to estimate stock status relative to reference points using Reciever Operating Characteristics (ROCs) -->
+<!--   - Calculate MSY reference points and proxies -->
+<!--   - Generate indicators relative to reference points -->
+<!--   - Evaluate the power of the various indicators to detect stock status using Reciever Operating Characteristics -->
+
+<!-- + Receiver Operating Characteristics for parameter tuning -->
+<!--   - Chose best HCR parameters -->
+<!--   - Run MSE -->
+
+
+<!-- ## Prediction Skill -->
+
+<!-- + Screen model based MPs -->
+<!--   - Perform 1,2,3, step ahead projections using LBSPR, SRA and a biomass dynamic model -->
+<!--   - Use MASE to identify assessment models with prediction skill -->
+
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =6, 
+               fig.height=6,
+               cache     =TRUE, 
+               fig.path  ="tex/roc-",
+               cache.path="cache/roc/")
+
+iFig=0
+iTab=0
+```
+
+\newpage
+```{r, pkgs} 
+library(FLCore)
+library(FLBRP)
+library(FLasher)
+library(FLife)
+library(mydas)
+library(ggplotFL)
+
+library(plyr)
+library(dplyr)
+library(reshape)
+library(GGally)
+
+library(popbio)
+
+library(LBSPR)
+library(spatstat)
+```
+
+```{r, lh-params}
+## Read in parameters from fishbase
+load(url("https://github.com//fishnets//fishnets//blob//master//data//fishbase-web//fishbase-web.RData?raw=True"))
+
+## lh
+lh=subset(fb,species%in%c("Pollachius pollachius","Psetta maxima",
+                          "Scophthalmus rhombus","Raja clavata",
+                          "Sprattus sprattus","Sprattus sprattus sprattus")) 
+
+names(lh)[c(14:17)]=c("l50","l50min","l50max","a50")
+lh=lh[,c("species","linf","k","t0","a","b","a50","l50","l50min","l50max")]
+
+lh[is.na(lh["l50"]),"l50"]=(lh[is.na(lh["l50"]),"l50min"]+lh[is.na(lh["l50"]),"l50max"])/2
+lh=lh[,-(9:10)]
+
+# Add extra paramters for pollack
+lh[lh$t0>=0,"t0"]=NA
+lh=rbind(lh[1,],lh)
+lh[1,-c(1,7:8)]=c(84.6,0.19,-0.94,0.01017,2.98)
+lh[1,"l50"]=0.72*lh[1,"linf"]^0.93
+
+lh=transform(lh,l50linf=l50/linf)
+
+fctr=ddply(lh,.(species),with,mean(linf))
+fctr=as.character(fctr[order(fctr$V1),"species"])
+
+lh$species=factor(as.character(lh$species),levels=fctr)
+```
+
+```{r, cor}
+cor=cor(model.frame(lh)[,c("linf","k","l50","t0","a","b","l50linf")],
+        use="pairwise.complete.obs")
+
+my_smooth <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+    geom_point(...,size=.5)+
+    geom_smooth(...,method="lm",se=FALSE)}
+
+my_density <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+    geom_histogram(...,lwd=1)}
+
+theme_set(theme_bw(base_size=20))
+
+ggpairs(transform(lh[,c(1:3,8,6)],linf=log(linf),k=log(k),l50=log(l50)),
+          mapping = ggplot2::aes(color=species),
+          lower = list(continuous = wrap(my_smooth)),
+          diag=list(continuous=wrap(my_density,alpha=0.2)),
+          title = "")+
+  theme(legend.position ="none",
+        panel.grid.major =element_blank(),
+        axis.ticks       =element_blank(),
+        axis.text.x      =element_blank(),
+        axis.text.y      =element_blank(),
+        panel.border     =element_rect(linetype = 1, colour="black", fill=NA))
+```
+
+```{r, lhs}
+lhs=dlply(lh,.(species), with, {
+  
+    res=lhPar(FLPar(
+                   linf =mean(linf,na.rm=T),
+                   k    =mean(k,   na.rm=T),
+                   t0   =mean(t0,  na.rm=T),
+                   l50  =mean(l50, na.rm=T),
+                   a    =mean(a,   na.rm=T),
+                   b    =mean(b,   na.rm=T)))
+          
+     res=rbind(res,FLPar(lopt =2/3*mean(res["linf"])))
+     # also Linf*(3/(3+M/K)) 
+     res=rbind(res,FLPar(lmega=1.1*mean(res["lopt"])))
+     res})
+```
+
+```{r, oms}
+f=FLQuant(c(rep(0.1,60),seq(0.1,2.5,length.out=40)[-40],
+            seq(2.5,1,length.out=11),rep(1,20)))
+
+nits=100
+set.seed(234)
+srDev=rlnoise(nits,f%=%0,0.3,0)
+
+oms=llply(lhs, function(x,f,srDev){
+  eq      =lhEql(x)
+  fbar(eq)=f%*%refpts(eq)["msy","harvest"]
+  
+  ##check fmsy is estimated
+  if (any(is.na(refpts(eq)["msy","harvest"])))
+    fbar(eq)[,,,,,is.na(refpts(eq)["msy","harvest"])]=
+      f%*%refpts(eq)["f0.1","harvest",is.na(refpts(eq)["msy","harvest"])]
+  
+  om      =propagate(as(eq,"FLStock"),dim(srDev)[6])
+  om      =fwd(om,fbar=fbar(eq)[,-1],
+               sr=eq,residuals=srDev)
+  om},f=f,srDev=srDev)
+
+oms=FLStocks(oms)
+
+msy=ldply(lhs, function(x){
+  eq      =lhEql(x)
+  model.frame(refpts(eq)["msy",1:4])})
+
+msy=transform(msy,qname=factor(quant,labels=c("Rec","SSB","Catch","F"),
+                                      levels=c("rec","ssb","yield","harvest")))
+names(msy)[1]="stock"
+```
+
+
+\newpage
+\blandscape
+
+```{r, ts, fig.height=8, fig.width=12}
+p=plot(oms)
+p$data=transform(merge(p$data,msy,by=c("qname","stock")),data=data/msy)
+p$qname=factor(p$qname,levels=c("F","Rec","SSB","Catch"))
+p+facet_grid(qname~stock,scale="free")+
+  geom_hline(aes(yintercept=1),col="red",linetype=2)+
+  theme(legend.position="none")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series relative to MSY benchmarks.
+
+\elandscape
+
+
+
+\newpage
+## Mean length indicators
+```{r, alk}
+invAlks =llply(lhs,invAlk,cv=0.1)
+```
+
+```{r, lfd}
+lfds=mdply(data.frame(stock=as.character(names(oms)),stringsAsFactors=FALSE), 
+           function(stock){
+  om=window(oms[[stock]],start=2)
+  
+  if (any(any(catch.n(om)<0)))
+    catch.n(om)[catch.n(om)<0]=0.0
+  
+  lfd=lenSample(catch.n(om),invAlks[[stock]],nsample=500)
+  lfd=transform(melt(lfd),data=value)[,-4]
+  lfd=subset(as.data.frame(lfd,drop=TRUE),data>0)
+  
+  lfd})
+```
+
+```{r}
+save(lhs,lfds,  
+     file="/home/laurence/Desktop/sea++/mydas/project/papers/ROC/data/lhs.RData")
+```
+
+
+\newpage
+\blandscape
+
+```{r, lf, echo=FALSE}
+dat=ddply(subset(lfds,year%in%c(40,100,130)&iter==2),.(stock,year), transform,
+          len =len/max(len))
+ggplot(dat)+    
+  geom_histogram(aes(len,weight=data),binwidth=.05)+
+  #geom_vline(aes(xintercept=value,col=variable),data=melt(rln,id="year"))+
+  facet_grid(year~stock,scale="free")+
+  xlab("Relative Length")+ylab("")+
+  scale_color_manual("Indicator",values=rainbow(4))
+```
+**Figure `r iFig=iFig+1; iFig`.** Simulated length frequencies distributions with indicators.
+\elandscape
+
+
+\newpage
+\blandscape
+
+```{r}
+source('~/Desktop/sea++/mydas/pkg/R/oemLn.R')
+dat=transform(lfds,lopt=laply(lhs,function(x) x["lopt"])[stock])
+inds=ddply(dat,.(stock,year,iter), with,
+                lenInd(len,data,lopt))
+```
+
+```{r}
+quad=data.frame(x=c(50,80, 80, 50,  80,90,90,80, 90,105,105,90, 105,110,110,105, 110,130,130,110), 
+                y=rep(c(-Inf,-Inf,Inf,Inf),5),
+                f=c(rep("green", 4),rep("amber", 4),rep("red",4),
+                    rep("amber2",4),rep("green2",4)))
+
+lfm=FLQuants(dlply(subset(inds,year>=50),.(stock), with,
+                  as.FLQuant(data.frame(year=year,iter=iter,data=lfm),units="NA")))
+
+p=plot(lfm)+       
+  facet_grid(qname~.,scale="free")+
+  geom_polygon(aes(x,y,fill=f),data=quad,alpha=0.2)+
+  geom_vline(aes(xintercept=x),data=data.frame(y="2FMSY",x=c( 90,105)),col="red")+
+  geom_vline(aes(xintercept=x),data=data.frame(y="2FMSY",x=c( 80,110)),col="orange")+
+  scale_fill_manual(values=c("orange","orange","green","green","red","blue"))
+
+p5=p$layers[[5]]
+p$layers[[5]]=p$layers[[1]]
+p$layers[[1]]=p5
+p
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Lfm time series of indicators compared to $F:F_{MSY}$, vertical lines indicate 1 (green), 1.5 (orange) and 2 (red) times $F_{MSY}$.
+
+
+```{r}
+pmega=FLQuants(dlply(subset(inds,year>=50),.(stock), with,
+                  as.FLQuant(data.frame(year=year,iter=iter,data=pmega),units="NA")))
+
+p=plot(pmega)+       
+  facet_grid(qname~.,scale="free")+
+  geom_polygon(aes(x,y,fill=f),data=quad,alpha=0.2)+
+  geom_vline(aes(xintercept=x),data=data.frame(y="2FMSY",x=c( 90,105)),col="red")+
+  geom_vline(aes(xintercept=x),data=data.frame(y="2FMSY",x=c( 80,110)),col="orange")+
+  scale_fill_manual(values=c("orange","orange","green","green","red","blue"))
+
+p5=p$layers[[5]]
+p$layers[[5]]=p$layers[[1]]
+p$layers[[1]]=p5
+p
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Lfm time series of indicators compared to $F:F_{MSY}$, vertical lines indicate 1 (green), 1.5 (orange) and 2 (red) times $F_{MSY}$.
+
+\elandscape
+
+```{r, sa}
+#load("/home/laurence/Desktop/sea++/mydas/project/papers/ROC/data/lhs.RData")
+
+library(LBSPR)
+#source('~/Desktop/sea++/mydas/pkg/R/lbspr.R')
+
+lhs=FLPars(llply(lhs,function(x) rbind(x[1:20],popdyn(x)["mk"])))
+
+lfds$stock=as.character(lfds$stock)
+
+flqs=dlply(lfds, .(stock), with, {
+        len=as.FLQuant(data.frame(len =len,
+                                  year=as.numeric(as.character(year)),
+                                  iter=as.numeric(as.character(iter)),
+                                  data=value))
+        len=len[order(as.numeric(dimnames(len)[[1]])),
+                order(as.numeric(dimnames(len)[[2]]))]
+        
+        len[is.na(len)]=0
+        len})
+```
+
+```{r, eval=FALSE}
+lbs=mdply(data.frame(stock=names(flqs),stringsAsFactors=FALSE), function(stock)
+     lbspr(flqs[[stock]],lhs[[stock]]))
+```
+
+```{r, eval=FALSE}
+lbs=list("Sprattus sprattus sprattus"=lbspr(flqs[["Sprattus sprattus sprattus"]],lhs[["Sprattus sprattus sprattus"]]))
+```
+
+```{r, eval=FALSE}
+lbs["Scophthalmus rhombus"]=lbspr(flqs[["Scophthalmus rhombus"]],lhs[["Scophthalmus rhombus"]])
+```
+
+```{r, eval=FALSE}
+lbs["Psetta maxima"]=lbspr(flqs[["Psetta maxima"]],lhs[["Psetta maxima"]])
+```
+
+```{r, eval=FALSE}
+lbs["Pollachius pollachius"]=lbspr(flqs[["Pollachius pollachius"]],lhs[["Pollachius pollachius"]])
+```
+
+```{r, eval=FALSE}
+lbs["Raja clavata"]=lbspr(flqs[["Raja clavata"]],lhs[["Raja clavata"]])
+```
+
+```{r, eval=FALSE}
+fm =FLQuants(llply(lbs[-1], function(x) x[["fm"]]))
+names(fm) =names(lbs)
+plot(fm)
+```
+
+```{r, eval=FALSE}
+spr=FLQuants(llply(lbs[-1], function(x) x[["spr"]]))
+names(spr)=names(lbs)
+plot(spr)
+```
+
+```{r}
+#source('~/Desktop/sea++/mydas/pkg/R/roc.R')
+
+ind=subset(inds[,-6],year%in%70:100)
+ind=transform(ind,overfished=!(as.numeric(year)%in%90:105))
+ind=melt(ind[,-2],id=c("stock","iter","overfished"))
+ind=ddply(ind,.(stock,variable),with, mydas:::roc(overfished,value))
+
+ggplot(ind)+ 
+  geom_line(aes(FPR,TPR,group=variable,col=as.character(variable)))+
+  geom_line(aes(x,y),data.frame(x=seq(0,1,0.01),y=seq(0,1,0.01)))+
+  xlab("False Negative Rate")+ylab("True Positive Rate")+
+  #scale_color_manual("Indicator",values=rainbow(5))+
+  theme_bw(12)+
+  theme(legend.position="bottom")+
+  facet_wrap(~stock)
+```
+
+\newpage
+## Length Frequencies
+
+\newpage
+## Receiver Operating Characteristics
+
+### Detection of overfishing
+
+
+**Figure `r iFig=iFig+1; iFig`.** ROC curve of the three indicators of overfishing, points indicate the optimum value of the indicator.
+
+### Detection of recovery
+
+
+```{r}
+source('~/Desktop/sea++/mydas/pkg/R/rocrm(m.R')
+
+lhs=llply(lhs, function(x){ x["sel2"]=5000; x})
+
+oms=llply(lhs, function(x,f,srDev){
+  eq      =lhEql(x)
+  fbar(eq)=f%*%refpts(eq)["msy","harvest"]
+  
+  ##check fmsy is estimated
+  if (any(is.na(refpts(eq)["msy","harvest"])))
+    fbar(eq)[,,,,,is.na(refpts(eq)["msy","harvest"])]=
+      f%*%refpts(eq)["f0.1","harvest",is.na(refpts(eq)["msy","harvest"])]
+  
+  om      =propagate(as(eq,"FLStock"),dim(srDev)[6])
+  om      =fwd(om,fbar=fbar(eq)[,-1],
+               sr=eq,residuals=srDev)
+  om},f=f,srDev=srDev)
+
+
+lfds=mdply(data.frame(stock=names(oms)), function(stock){
+  
+  om=window(oms[[stock]],start=2)
+  
+  if (any(any(catch.n(om)<0)))
+    catch.n(om)[catch.n(om)<0]=0.0
+  
+  lfd=lenSample(catch.n(om),invAlks[[stock]],nsample=500)
+  lfd=transform(melt(lfd),data=value)[,-4]
+  lfd=subset(as.data.frame(lfd,drop=TRUE),data>0)
+  
+  lfd})
+
+dat=transform(lfds,lopt=laply(lhs,function(x) x["lopt"])[stock])
+inds=ddply(dat,
+           .(stock,year,iter), with,
+                lenInd(len,data,lopt[1]))
+ind2=subset(inds[,-6],year%in%70:100)
+ind2=transform(ind2,overfished=!(as.numeric(year)%in%90:105))
+ind2=melt(ind2[,-2],id=c("stock","iter","overfished"))
+ind2=ddply(ind2,.(stock,variable),with, roc(overfished,value))
+
+ind.=rbind(cbind(sel="flat",ind2),
+           cbind(sel="Maturity",ind))
+```
+
+
+
+\newpage
+\blandscape
+
+```{r, echo=FALSE, fig.height=8, fig.width=12}
+dat=ddply(subset(lfds,year%in%c(40,100,130)&iter==2),.(stock,year), transform,
+          len =len/max(len))
+ggplot(dat)+    
+  geom_histogram(aes(len,weight=data),binwidth=.05)+
+  #geom_vline(aes(xintercept=value,col=variable),data=melt(rln,id="year"))+
+  facet_grid(year~stock,scale="free")+
+  xlab("Relative Length")+ylab("")+
+  scale_color_manual("Indicator",values=rainbow(4))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Simulated length frequencies distributions with indicators.
+
+\elandscape
+
+```{r, echo=FALSE}
+ggplot(ind.)+ 
+  geom_line(aes(FPR,TPR,linetype=sel,col=variable))+
+  geom_line(aes(x,y),data.frame(x=seq(0,1,0.01),y=seq(0,1,0.01)))+
+  xlab("False Negative Rate")+ylab("True Positive Rate")+
+  #scale_color_manual("Indicator",values=rainbow(5))+
+  theme_bw(12)+
+  theme(legend.position="bottom")+
+  facet_wrap(~stock,ncol=2)
+```
+**Figure `r iFig=iFig+1; iFig`.**
+
+```{r}
+ind2=subset(inds[,-6],year%in%105:114)
+ind2=transform(ind2,overfished=(as.numeric(year)%in%110:114))
+ind2=melt(ind2[,-2],id=c("stock","iter","overfished"))
+ind2=ddply(ind2,.(stock,variable),with, roc(overfished,value))
+
+ind.=rbind(cbind(sel="flat",ind2),
+           cbind(sel="Maturity",ind))
+
+ggplot(ind.)+ 
+  geom_line(aes(FPR,TPR,linetype=sel,col=variable))+
+  geom_line(aes(x,y),data.frame(x=seq(0,1,0.01),y=seq(0,1,0.01)))+
+  xlab("False Negative Rate")+ylab("True Positive Rate")+
+  #scale_color_manual("Indicator",values=rainbow(5))+
+  theme_bw(12)+
+  theme(legend.position="bottom")+
+  facet_wrap(~stock,ncol=2)
+```
+**Figure `r iFig=iFig+1; iFig`.**
+
+
+\newpage 
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+``` 
+

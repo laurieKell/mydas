@@ -1,0 +1,412 @@
+---
+title: "Selection of Stock Assessment Methods and Reference Points for use in Management Procedures"
+subtitle: "Estimation of Prediction Skill using Mean Absolute Scaled Error (MASE) and Tuning using Receiver Operating Characteristic (ROC)."
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+# Summary
+
+There are many approaches to estimation for data-poor fisheries that have emerged and re-emerged over the last few decades. As noted by Bentley (2015) a key aspect of stock assessment is peer review, and therefore providing a comprehensive, yet concise, set of diagnostics is crucial to a stock assessment for data poor methods, so that they can be compared against the standards by which data-rich stock assessments are judged.
+
+To evaluate data limited methods we condition an Operating Model (OM) on based life history characteristics and then simulate a variety of data types (i.e. length, catch, and catch per unit effort) which are then used to fit a number of different assessment methods. The predictions from the assessment methods are compared to the OM using the Mean Absolute Scaled Error (MASE) and the ability of the methods to assess stock status to target and limit reference points using Receiver Operating Characteristic (ROC).
+
+
++ Set up OM and OEM, run contrasting assessment methods and compare projections and prediction skill using MASE and current stock status relative to reference points using ROC.  
++ The OM and OEM is based on WKLife, i.e. Fischer, DeOliveira and Kell (submitted).
++ The justification for the choice of methods is based on Pons, Kell and Cope (submitted), i.e. take the best performing length and catch only methods.
++ Compare the Cat 3&4 methods to a Cat 1 based on a biomass dynamic model
+
+# Introduction
+
+The provision of fisheries management advice requires fitting a model to historical data to assess current stock status, then predicting the future response of the stock to management. It is important to validate models used by checking that historical, current and future predictions are consistent with reality. This is difficult to do, however, as it is seldom possible to compare quantities derived from a model, such as Spawning Stock Biomass (SSB) and fishing mortality (F), to actual observations. Therefore simulation is commonly used to validate assessment methods used to provide advice. For example where an Operating Model (OM) is used to simulate observations from a fishery and stock using an Observation Error Model (OEM), allowing assessment models to be fitted then projected forward and the predictions compared to the OM.
+
+# Methods
+
+
+## Mean Absolute Scaled Error
+
+It is difficult to compare models based on diffent datasets using traditional methods such as AIC. Although Root mean square error (i.e. the square root of the variance of the difference between a prediction and the true value) is often used to indicates how well a model fits it cannot be used to compare across series. We therefore use mean absolute scaled error (MASE) as it is independent of the scale of the data, so can be used to compare forecasts across data sets with different scales. MASE can be used to compare future predcitions to be compare to a naive forecast. In a naive forecast observations from the last time period are used as the current period's forecast, without adjusting them or attempting to establish causal factors. If a method performs poorly compared to the naive forecast then it has no predictive ability.
+## Receiver Operating Characteristic
+
+ROC curves are used to identifty stock status relative to reference points, i.e. how to specify limit and target reference points, ROC is therefore a  way of tuning MPs.
+
+For example if the objective is to identify when a target is reached or a limit is exceeded then this can be done by plotting the true positive rate (TPR) against the false positive rate (FPR) at various threshold or model settings. For example if the objective is to avoid $F_{lim}$ using a length based method, what should be the value of the estimate of Z (i.e. the threshold) at which the limit is exceeded.    
+
+
+# Results
+
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =10, 
+               fig.height=10,
+               cache     =TRUE, 
+               fig.path  ="../tex/base-",
+               cache.path="cache/base/")
+
+iFig=0
+iTab=0
+```
+```{r, dir}  
+dirOM ="/home/laurence/Desktop/sea++/mydas/project/data/OM"
+dirRes="/home/laurence/Desktop/sea++/mydas/project/papers/mase/data"
+```
+
+```{r, pkgs}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(reshape)
+
+library(FLCore)
+library(FLBRP)
+library(FLasher)
+library(ggplotFL)
+library(FLife)
+library(randtests)
+
+library(mydas)
+library(mpb)
+library(LBSPR)
+
+```
+```{r}
+library(doParallel)
+library(foreach)
+
+cl=makeCluster(3)
+registerDoParallel(cl)
+```
+
+```{r, src}
+source("/home/laurence/Desktop/sea++/mydas/pkg/R/oemLn.R")
+
+```{r, turbot-sa}
+lbsprFn<-function(len,params,species="",units="cm"){
+  
+  pars        =new("LB_pars")
+  pars@Linf   =c(params["linf"]) 
+  pars@L50    =vonB(c(params["a50"]),params) 
+  pars@L95    =pars@L50+vonB(c(params["ato95"]),params)
+  pars@MK     =c(params["mk"])
+  pars@Species=species
+  pars@L_units=units
+  
+  #labs=dimnames(len)[[1]]
+  #brks=cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", labs) ),
+  #           upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", labs) ))
+  #mid=aaply(brks,1,mean)
+  
+  LBlen       =new("LB_lengths")
+  LBlen@LMids =as.numeric(dimnames(len)[[1]])
+  LBlen@LData =len
+  LBlen@Years =as.numeric(dimnames(len)[[2]])
+  LBlen@NYears=dim(len)[2] 
+  
+  res=LBSPRfit(pars,LBlen,verbose=FALSE)
+  
+  res@Ests}
+
+lbspr<-function(object,params){
+  
+  nits=max(dim(object)[6],dim(params)[2])
+  
+  if (!(dim(object)[6]%in%c(1,nits)|(dim(params)[2]%in%c(1,nits))))
+    stop("iters should be equal to n or 1")
+  
+  res=mdply(data.frame(iter=seq(nits)), function(iter)
+    lbsprFn(iter(object,iter)[drop=T],iter(params,iter)))
+  res=data.frame(year=dimnames(object)$year,res)
+  
+  rtn=FLPar(cast(melt(res,id=c("year","iter")),variable~year~iter),units="NA")
+  
+  rtn}
+```
+
+```{r, om}
+nits=500
+
+mseStart=c("brill"=54,"turbot"=54,"ray"=60,"pollack"=56,
+           "sprat"=52,"razor"=54, "lobster"=57)
+
+set.seed(1233)
+srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),.3,b=0.0)
+
+load(file.path(dirOM,"turbot.RData"))
+
+plot(om)   
+```
+
+**Figure `r iFig=iFig+1; iFig`** Operating model for turbot. 
+
+```{r, oem}
+obs=omSmry(om,eq,lh)
+```
+
+# Fits to entire time series
+
+## Biomass dynamic model using catch and CPUE
+```{r, bd, eval=FALSE}
+om=window(om,start=20,end=55)
+bd=as(om,"biodyn")
+
+params(bd)["r"] =median(c(prior["r"]))
+params(bd)["k"] =1000
+params(bd)["b0"]=0.8 
+params(bd)["p"] =median(c(mpb:::p(prior["bmsy"]/prior["v"])))
+
+u               =stock(bd,0.5)
+setParams(bd)   =u
+setControl(bd)  =params(bd)
+
+hat             =fit(bd,u)
+
+save(bd,hat,prior,file=file.path(dirRes,"turbot-bd.RData"),compress="xz")
+```
+
+```{r, bdFig}
+load(file.path(dirRes,"turbot-bd.RData"))
+
+plot(as(list("MP"=hat,"OM"=bd),"biodyns"),probs=c(0.25,0.75))+
+  theme_bw()
+```
+
+**Figure `r iFig=iFig+1; iFig`,** Simulation test of biomass dyanmic assessment for turbot.
+
+
+## Catch only
+
+```{r, sra, eval=FALSE}
+load(file.path(dirRes,"turbot-bd.RData"))
+
+dpl =stock(bd,0.5)%/%params(bd)["k"]
+dpl[,ac(c(22:52))]=NA
+
+control(bd)["q1",2:4]=c(100,1000,10000)
+
+sra=fit(bd,dpl)
+
+save(sra,hat,prior,file=file.path(dirRes,"turbot-sra.RData"),compress="xz")
+```
+
+```{r, sraFig}
+load(file.path(dirRes,"turbot-sra.RData"))
+
+plot(as(list("SRA"=sra,"OM"=bd),"biodyns"),probs=c(0.25,0.75))+
+  theme_bw()
+
+```
+
+## Length only
+
+```{r, turbot-alk, eval=FALSE}
+alkTurbot=alk(lh)  
+
+lfd=lenSample(catch.n(om)[,ac(20:55)],alkTurbot,nsample=500)
+
+save(alkTurbot,lfd,file=file.path(dirRes,"lfd.RData"),compress="xz")
+```
+
+```{r, turbot-oemplot, eval=FALSE}
+load(file.path(dirRes,"lfd.RData"))
+
+ggplot(melt(lfd[,ac(seq(21,55,5)),,,,1:4]))+
+  geom_histogram(aes(length,weight=value),binwidth=1)+
+  facet_grid(year~iter,scale="free")+
+  xlab("Length (cm)")+ylab("Frequency")+
+  coord_cartesian(xlim=c(0,mean(lh["linf"])))
+```
+
+
+```{r, lbspr, eval=FALSE}
+lb=lbspr(lfd,prior)  
+
+save(lb,file=file.path(dirRes,"lb.RData")) 
+```
+
+```{r, lbspr-sprFig}
+load(file.path(dirRes,"lb.RData")) 
+
+ggplot(melt(sweep(lb["SPR"],c(1,3),lb["SPR","40"],"/")))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  ylab("SPR")+xlab("Year")+theme_bw()
+```
+**Figure `r iFig=iFig+1; iFig`** Estimates of SPR. 
+
+```{r, lbspr-fmFig}
+ggplot(melt(sweep(lb["FM"],c(1,3),lb["FM","40"],"/")))+
+  geom_boxplot(aes(ac(year),value))+
+  scale_x_discrete(breaks=seq(20,60,10))+
+  ylab("F")+xlab("Year")+theme_bw()
+```
+
+**Figure `r iFig=iFig+1; iFig`,** Estimates of F+M
+
+
+# Hindcasts 
+
+## Biodyn
+```{r, bdHindcast, eval=FALSE}
+load(file.path(dirOM,"turbot.RData"))
+
+scen=expand.grid(end=40:70,cv=c(0.1,0.2,0.3),
+                 indx=c("juve","ssb","stock","cpue"),
+                 stringsAsFactors=FALSE)
+
+obs$juve=obs$stock-obs$ssb
+obs$cpue=obs$catch/obs$fbar
+
+bdRetro<-foreach(i=seq(dim(scen)[1]), 
+              .combine=rbind,
+              .multicombine=TRUE,
+              .export=c("scen","om","obs","prior"),
+              .packages=c("plyr","dplyr","reshape","FLCore",
+                          "mpb","FLife","mydas")) %dopar%{
+
+  fn<-function(end,indx,cv,om,prior,obs,nits=500){
+    ctc=window(catch(om),start=end,end=70)
+    om =window(om,start=20,end=end)
+    bd =as(om,"biodyn")
+    
+    params(bd)["r"] =median(c(prior["r"]))
+    params(bd)["k"] =1000
+    params(bd)["b0"]=0.8 
+    params(bd)["p"] =median(c(mpb:::p(prior["bmsy"]/prior["v"])))
+    
+    set.seed(12334)
+    obs$data=obs[,indx]
+    u            =window(as.FLQuant(obs[,c("data","year","iter")]),
+                            start=20,end=end)
+    setParams(bd)=u%*%FLife:::rlnoise(nits,FLQuant(0,
+                                      dimnames=dimnames(iter(u,1))),cv,b=0.0)
+  
+    setControl(bd)  =params(bd)
+    hat             =fit(bd,u)
+    hat             =fwd(hat,catch=ctc)
+    res=model.frame(mcf(FLQuants(hat,
+             stock=stock,harvest=harvest,
+             stock_msy   =function(x) stock(  x)%/%refpts(x)["bmsy"],
+             harvest_msy =function(x) harvest(x)%/%refpts(x)["fmsy"],
+             stock_virgin=function(x) stock(  x)%/%params(x)["k"])),
+             drop=TRUE)
+             
+    res}
+  
+  
+    res=with(scen[i,],fn(end,indx,cv,om=om,prior=prior,obs=obs))
+    
+    data.frame("end"=scen[i,"end"],"cv"=scen[i,"cv"],"index"=scen[i,"indx"],res)}
+
+save(bdRetro,file=file.path(dirRes,"turbot-bd.RData"))
+```
+
+```{r,eval=FALSE}
+load(file.path(dirRes,"turbot-bd.RData"))
+
+smry=subset(bdRetro,end==year|year==end-1)
+```
+
+
+```{r, sraHindcast, eval=FALSE}
+load(file.path(dirDat,"turbot-bd.RData"))
+
+dpl =stock(bd,0.5)%/%params(bd)["k"]
+dpl[,ac(c(22:52))]=NA
+
+control(bd)["q1",2:4]=c(100,1000,10000)
+
+sra=fit(bd,dpl)
+
+plot(as(list("SRA"=sra,"OM"=bd),"biodyns"),probs=c(0.25,0.75))+
+  theme_bw()
+```
+
+**Figure `r iFig=iFig+1; iFig`,** Simulation test of biomass dyanmic assessment for turbot.
+
+```{r, lbsprHindcast, eval=FALSE}
+
+```
+
+
+# MASE
+
+# ROC
+
+# Results
+
+# Figures
+
+# Tables
+
+```{r, pm, eval=FALSE}
+## Get summary stats
+source('~/Desktop/sea++/mydas/pkg/R/smryStat.R')
+source('~/Desktop/sea++/mydas/pkg/R/omOut.R')
+
+pm=mdply(scen,function(spp,ctrl,nyr,cv,
+                       start=1,end=40){
+  
+  load(file.path(dirRes,"base-turbot.RData"))
+  load(file.path(dirRes,paste("base-ranD-",
+                          iSpp,"-",ctrl,"-",cv,"-",nyr,".RData",sep="")))
+
+  mse=window(mse,start=mseStart[spp]+start,end=mseStart[spp]+end)
+  res=transform(omSmry(mse,eq,lh),
+                iter=factor(iter,level=ac(sort(as.numeric(ac(unique(iter)))))))
+  res=transform(res,year=year-start)
+  pm =ddply(res,.(iter), smryStat)
+  pm=merge(pm,transform(model.frame(controls[[ctrl]]),
+                iter=factor(iter,level=ac(sort(as.numeric(ac(iter)))))),
+           by="iter")
+  pm})
+
+pm$kobe    =pm$kobe.n/40
+pm$yieldAav=(1-pm$yieldAav)
+
+save(pm,file=file.path(dirRes,"base-turbot-pm.RData"))
+```
+
+
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLasher:   `r packageVersion('FLasher')`
+* FLife:     `r packageVersion('FLife')`
+* ggplotFL:  `r packageVersion('ggplotFL')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+```
+
+
+BMW X1 XDRIVE18D XLINE AU14GXJ 
+
+£125.32 

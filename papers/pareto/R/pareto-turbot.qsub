@@ -1,0 +1,35 @@
+#!/bin/sh
+## job name
+#PBS -N pareto-turbot
+## maximum runtime
+#PBS -l walltime=2:00:00 
+## select number of nodes, cpus (per node) and memory (per node)
+#PBS -l select=4:ncpus=24:mpiprocs=24:ompthreads=1:mem=120gb 
+## send mail when job aborts/begins/ends
+#PBS -M laurie@kell.es
+#PBS -m abe 
+## standard output standard error
+#PBS -o reports
+#PBS -e reports
+
+### print details about job
+echo "This is job $PBS_JOBID"
+echo "The following ressources have been allocated"
+cat $PBS_NODEFILE
+
+
+### set working directory
+cd $HOME/mydas
+
+## load modules
+## anaconda includes R and OpenMPI
+module load anaconda3/personal
+module load mpi
+
+### activate MPI environment
+source activate mpi
+
+### run MPI job
+mpiexec R CMD BATCH --vanilla --quiet $HOME/mydas/pareto-turbot.R $HOME/mydas/pareto-turbot.Rout
+
+echo "done!"
