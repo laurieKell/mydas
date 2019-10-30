@@ -1,0 +1,162 @@
+---
+title: "Brill life-history parameters for MYAS project"
+author: "Hans Gerritsen"
+date: "26 November 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE)
+```
+
+## MYDAS
+
+The MYDAS project <https://github.com/laurieKell/mydas> requires realistic life-history parameters for each of the case-study stocks. By default these are obtained from <http://www.fishbase.org> but the quality of these parameters is difficult to judge. For Pollack the MI has a reasonable amount of data available from surveys, observer trips and port sampling. Age data are available for the landings data for 2016 and 2017 and for a number of surveys.
+
+## Data extraction
+First load the required libraries
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# and the data (see turbot data extraction.R)
+load('brill.RData')
+```
+
+
+## Fishbase
+```{r}
+load(url("https://github.com//fishnets//fishnets//blob//master//data//fishbase-web//fishbase-web.RData?raw=True"))
+lh=subset(fb,species=="Scophthalmus rhombus")
+names(lh)[c(14:17)]=c("l50","l50min","l50max","a50")
+lh=lh[,c("species","linf","k","t0","a","b","a50","l50","l50min","l50max","country","sex")]
+lh[is.na(lh["l50"]),"l50"]=(lh[is.na(lh["l50"]),"l50min"]+lh[is.na(lh["l50"]),"l50max"])/2
+lh=lh[,-(9:10)]
+lh[lh$t0>=0,"t0"]=NA
+apply(lh[,2:8],2,mean,na.rm=T)
+```
+
+## Growth
+The MI have no age data for turbot. The fishbase data are quite limited. Females seem to grow faster and longer, which is similar to other flatfish.
+
+```{r,fig.height=7}
+lh$label <- paste(lh$sex,lh$country)
+lh$col <- rainbow(nrow(lh))
+plot(NA,xlim=c(0,20),ylim=c(0,60),xlab='age',ylab='length')
+for(i in 1:nrow(lh)){
+  lines(seq(0,20,0.01),lh$linf[i]*(1-exp(-lh$k[i]*(seq(0,20,0.01)-lh$t0[i]))),col=as.numeric(lh$sex[i]),lty=i)
+}
+legend('bottomright',legend=lh$label,lty=1:nrow(lh),col=as.numeric(lh$sex),ncol=2)
+```
+
+
+This looks as good as it gets. The mean growth parameters of the remaining data are: Linf = `r round(mean(lh[,2],na.rm=T),1)`, k = `r round(mean(lh[,3],na.rm=T),2)` and t0 = `r round(mean(lh[,4],na.rm=T),1)`.
+
+If we want sex-specific growth parameters, the female means are:  Linf = `r round(mean(lh[1,2],na.rm=T),1)`, k = `r round(mean(lh[1,3],na.rm=T),2)` and t0 = `r round(mean(lh[1,4],na.rm=T),1)`.
+
+And the males:
+ Linf = `r round(mean(lh[2:3,2],na.rm=T),1)`, k = `r round(mean(lh[2:3,3],na.rm=T),2)` and t0 = `r round(mean(lh[2:3,4],na.rm=T),1)`.
+
+
+## Length frequency of the landings
+```{r}
+len1 <- len %>% group_by(lenCls) %>% summarise(lenNum=sum(lenNum))
+ggplot(len1) + geom_point(aes(lenCls,lenNum))
+```
+
+The largest fish is `r max(len$lenCls/10)` cm. That can tell us something about Linf. If growth levels off in the older fish, you would expect the largest fish to be a couple of standard deviations above Linf, so you wouldnt expect Linf to be less than, say 50cm for females and 35 for males.
+
+
+## Biological data
+The MI has no age data but quite a few observations of sex, maturity and individual weight:
+```{r}
+bio %>% group_by(dataType,dataSource) %>% summarise(
+  total=length(age),aged=sum(age>0,na.rm=T),
+  sex=sum(sex%in%c('F','M')),
+  mat=sum(matStage>0),
+  wt=sum(indWt>0))
+```
+
+## Growth by sex
+We have no age data but might be worth looking at sex to see if they grow/die at different rates
+
+```{r}
+bio2 <- subset(bio,sex%in%c('F','M'))  %>% group_by(len=round(lenCls/50)*50) %>% summarise(sr=sum(sex=='F')/length(sex))
+ggplot(bio2) + geom_point(aes(len,sr)) + ylim(0,1)
+```
+
+Yes. All large turbot are females, that means that either the males die before they get big or that they grow slower or stop growing sooner.
+
+## Length-weight
+```{r, eval=F}
+#The length-weight data need a bit of tyding. The weights are converted to live weight in grams.
+ggplot(subset(bio,indWt>0)) + geom_point(aes(lenCls/10,indWt)) + coord_trans(x="log10", y="log10")
+```
+
+Fit a linear model
+```{r}
+lw <- with(subset(bio,indWt>50 & lenCls<710), lm(log(indWt)~log(lenCls/10)))
+lw
+a <- exp(lw$coefficients[1])
+b <- lw$coefficients[2]
+```
+
+Compare this to fishbase
+
+```{r,fig.height=7}
+fishbase <- subset(lh,a>0 & b>0)
+
+with(subset(bio,indWt>50),plot(lenCls/10,indWt,cex=0.5))
+lngt <- seq(0,100,by=0.1)
+wt <- a*lngt^b
+lines(lngt,wt,col=6,lwd=3)
+
+for(i in 1:2){
+  wt <- fishbase$a[i]*lngt^fishbase$b[i]
+  lines(lngt,wt,lwd=1,col=i)
+}
+legend('topleft',legend=paste(fishbase$country,fishbase$sex)[1:2],lwd=1,col=1:2,title='Fishbase')
+legend('top',legend='MI data',lwd=3,col=6)
+```
+
+French data dont look so good. Lets just use the MI data.
+
+Conclusion: the suggested final length-weight parameters are: a = `r round(a,5)`; b = `r round(b,2)`
+
+## Maturity
+All data
+
+```{r}
+bio$mature <- as.numeric(as.numeric(as.character(bio$matStage))>2)
+bio2 <- subset(bio,as.numeric(as.character(matStage))%in%(1:8))  %>% group_by(len=round(lenCls/100)*10,sex) %>% summarise(pm=sum(mature)/length(mature))
+ggplot(bio2,aes(len,pm,col=sex)) + geom_point() + geom_line()
+```
+
+You get different results in spring, compared to Q4, it is probably only possible to tell the difference between virgin and spent in spring. But not much data. Best guess: L50 around 25cm. Maybe best just to use fishbase
+
+```{r}
+bio$mature <- as.numeric(as.numeric(as.character(bio$matStage))>2)
+bio2 <- subset(bio,as.numeric(as.character(matStage))%in%(1:8))  %>% group_by(len=round(lenCls/100)*10,Q1=week<20) %>% summarise(pm=sum(mature)/length(mature),count=length(mature))
+subset(bio2,Q1)
+ggplot(bio2,aes(len,pm,col=Q1)) + geom_point() + geom_line()
+```
+
+
+## Summary
+Growth parameters: Average from fishbase seems reasonable after removing outliers and data from Med and Baltic but note difference between male and female.
+
+Both sexes: Linf = `r round(mean(lh[,2],na.rm=T),1)`, k = `r round(mean(lh[,3],na.rm=T),2)` and t0 = `r round(mean(lh[,4],na.rm=T),1)`.
+
+Female only:  Linf = `r round(mean(lh[1,2],na.rm=T),1)`, k = `r round(mean(lh[1,3],na.rm=T),2)` and t0 = `r round(mean(lh[1,4],na.rm=T),1)`.
+
+Male only: Linf = `r round(mean(lh[2:3,2],na.rm=T),1)`, k = `r round(mean(lh[2:3,3],na.rm=T),2)` and t0 = `r round(mean(lh[2:3,4],na.rm=T),1)`.
+
+
+Length-weight parameters: a = `r round(exp(lw$coefficients[1]),5)`; b = `r round(lw$coefficients[2],2)`
+
+Maturity: 25cm? Fishbase is probably better.
+
+

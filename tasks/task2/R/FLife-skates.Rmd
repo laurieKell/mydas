@@ -1,0 +1,130 @@
+---
+title: "MyDas"
+subtitle: "Skate Life History Relationships"
+author: "Laurie Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+```{r dir}
+dirMy="/home/laurence/Desktop/sea++/mydas"
+#dirMy =getwd()
+dirInp=file.path(dirMy,"tasks/inputs")
+dirDat=file.path(dirMy,"tasks/data")
+```
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =!TRUE,
+               echo      =TRUE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =FALSE,
+               fig.height=6,
+               fig.width =8,
+               fig.path  ="../tex/lh-")
+
+iFig=0
+```
+
+
+```{r, pkgs, message=FALSE}
+library(ggplot2)
+library(GGally)
+
+library(FLife)
+library(plyr)
+library(reshape)
+```
+
+```{r, theme, echo=FALSE}
+theme_set(theme_bw())
+options(digits=3)
+```
+
+# Life history parameters
+```{r, data}
+load(file.path(dirDat,"skates.RData"))
+```
+
+
+```{r, fig.height=8, echo=FALSE}
+my_smooth <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+  geom_point(...,size=.5)+
+  geom_smooth(...,method="lm",se=FALSE)}
+
+my_density <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+  geom_density(...,lwd=1)}
+
+ggpairs(transform(skates[,c(4,9:11,14:17)],linf=log(linf),k=log(k),l50=log(lmat)),
+  mapping = ggplot2::aes(color=sex),
+  lower = list(continuous = wrap(my_smooth)),
+  diag=list(continuous=wrap(my_density,alpha=0.2)),
+  title = "")+
+  theme(legend.position ="none",
+  panel.grid.major =element_blank(),
+  axis.ticks       =element_blank(),
+  axis.text.x      =element_blank(),
+  axis.text.y      =element_blank(),
+  panel.border     =element_rect(linetype = 1, colour="black", fill=NA))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Pairwise scatter plots of life history parameters.
+
+
+# Equilibrium Dynamics
+
+Create an `FLPar`
+```{r FLPar, eval=FALSE}
+wkpar=as(wklife[,6:13],"FLPar")
+attributes(wkpar)[names(wklife)[1:5]]=wklife[,1:5]
+```
+
+Then use life history relationships to estimate missing values  
+```{r m-gislason, eval=FALSE}
+par=lhPar(wkpar)
+```
+
+and then to derive vectors for processses such as natural mortality 
+ 
+```{r eqls, eval=FALSE}
+library(FLBRP)
+
+eql=lhEql(par)
+```
+
+```{r vectors, eval=FALSE}
+ggplot(FLQuants(eql,"m","catch.sel","mat","catch.wt"))+
+  geom_line(aes(age,data,col=attributes(wkpar)$name[iter]))+
+  facet_wrap(~qname,scale="free")+
+  scale_x_continuous(limits=c(0,15))+ 
+  guides(colour=guide_legend(title="Species",title.position="top"))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Vectors of m, selection pattern, maturity and weight-at-age.
+
+and estimate equilibrium dynamics and reference points, e.g. for lemon sole
+
+```{r eql, eval=FALSE}
+plot(iter(eql,7))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Equilibrium curves for lemon sole.
+
+# Simulation
+
+Create a forward projection, i.e. an `FLStock` from an equilibrium object
+
+```{r eql-lmsl, eval=FALSE}
+lmsl=as(iter(eql,7),"FLStock")
+
+plot(lmsl)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Simulate a stock with increasing F

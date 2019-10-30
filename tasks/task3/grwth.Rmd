@@ -1,0 +1,82 @@
+---
+title: "Growth Rate"
+author: "Laurence Kell"
+date: "December 4, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)  
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(FLCore)
+library(ggplotFL)
+library(plyr)
+
+load("/tmp/mozilla_laurence0/cod7ek.Rdata")
+swt=cbind(spp="cod",as.data.frame(stock.wt(xsa.stock)))
+
+load("/tmp/mozilla_laurence0/whg7bk.Rdata")
+swt=rbind(swt,cbind(spp="whg",as.data.frame(stock.wt(stock))))
+
+load("/tmp/mozilla_laurence0/had7bk.Rdata")
+swt=rbind(swt,cbind(spp="had",as.data.frame(stock.wt(stock))))
+```
+
+
+```{r, echo=FALSE, fig.height=10,fig.width=6}
+ggplot(swt)+
+  geom_line(aes(age,data^0.3,colour=year-age,group=year-age))+
+  facet_grid(spp~.,scale="free")
+```
+
+
+```{r, echo=FALSE, fig.height=6,fig.width=8}
+load("/tmp/mozilla_laurence0/cod7ek.Rdata")
+stk=cbind(spp="cod",as.data.frame(ssb(xsa.stock)))
+
+load("/tmp/mozilla_laurence0/whg7bk.Rdata")
+stk=rbind(stk,cbind(spp="whg",as.data.frame(ssb(stock))))
+
+load("/tmp/mozilla_laurence0/had7bk.Rdata")
+stk=rbind(stk,cbind(spp="had",as.data.frame(ssb(stock))))
+
+ggplot(stk)+geom_line(aes(year,data,col=spp))
+```
+
+```{r, echo=FALSE, fig.height=8,fig.width=10}
+stdz=function(x) (x-mean(x))/var(x)^0.5
+dt=ddply(swt,.(spp,age), transform, dat=stdz(data))
+ggplot()+geom_point(aes(year,age,size=dat),data=subset(dt,dat>0))+
+  geom_point(aes(year,age,size=-dat),data=subset(dt,dat<0),col="red")+
+  facet_grid(spp~.,scale="free")+
+    scale_size(range = c(1,10)) +
+  geom_line(aes(year,ssb),col="blue",size=1,data=ddply(stk,.(spp), transform, ssb=4+data/mean(data)))
+
+```
+
+```{r}
+incr<-function(x) {
+  (x[-1,-1]-x[-dim(x)[1],-dim(x)[2]])/x[-dim(x)[1],-dim(x)[2]]}
+
+
+stdz=function(x) (x-mean(x))/var(x)^0.5
+dt=ddply(as.data.frame(stock.n(stock)),.(age), transform, dat=stdz(data))
+
+ggplot()+
+  geom_point(aes(year,age,size=dat),data=subset(dt,dat>0))+
+  geom_point(aes(year,age,size=-dat),data=subset(dt,dat<0),col="red")+
+  facet_grid(spp~.,scale="free")+
+    scale_size(range = c(1,10)) +
+  geom_line(aes(year,ssb),col="blue",size=1,data=ddply(stk,.(spp), transform, ssb=4+data/mean(data)))
+
+ggplot(as.data.frame(incr(swt)))+
+  geom_point(aes(year,age,size=data))+
+  scale_size(range = c(0,10)) +
+  geom_line(aes(year,ssb),col="blue",size=1,data=ddply(stk,.(spp), transform, ssb=4+data/mean(data)))
+
+
+```
+

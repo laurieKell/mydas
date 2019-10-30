@@ -1,0 +1,252 @@
+---
+beamer_presentation: default
+author: "Laurence Kell, Alex Tidd, Coilin Minto & Maite Pons"
+date: "November 20, 2018"
+output:
+  ioslides_presentation: default
+  beamer_presentation: default
+subtitle: Funded by the Irish Exchequer and EMFF 2014-2020
+title: "mydas"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo      =FALSE)
+```
+
+```{r libraries}
+library(grid)
+library(png)
+```
+
+
+## Tasks
+
+**Develop MSY reference points** or proxies across the spectrum of data-limited stocks.
+
+<!-- Economic value; Importance; Sensitivity to the impacts of fishing; Available data. -->
+  
+  **Simulation Framework**, as a number of data-limited methods already exist implement a common framework to compare their performance
+
+**Diagnostics** to assess sensitivity to assumptions and bias. 
+
+**Management Strategy Evaluation** to ensure robustness to uncertainty 
+
+# Simulation Framework
+## Life Histories 
+####### [life history vignette](https://github.com/laurieKell/mydas/tree/master/vignettes/FLife-wklife)
+```{r,echo=FALSE, out.width="60%"}
+knitr::include_graphics("figs/figsfb-1.png")
+```
+
+## Case Studies
+Turbot, Brill, Pollack, Ray, Sprat, Lobster, Razors
+
+```{r ,echo=FALSE, out.width="60%"}
+knitr::include_graphics('figs/turbot-pairs-1.png')
+```
+
+
+## Natural Mortality
+```{r,echo=FALSE, out.width="60%"}
+knitr::include_graphics('figs/figsm-1.png')
+```
+
+## Biology
+```{r ,echo=FALSE, out.width="65%"}
+knitr::include_graphics('figs/turbot-vectors-1.png')
+```
+
+## Equilibrium and Reference Points
+```{r,echo=FALSE,out.width="70%"}
+knitr::include_graphics('figs/turbot-eqRun-1.png')
+```
+
+## Operating Model
+####### [Conditioning OM vignettes](https://github.com/laurieKell/mydas/tree/master/tasks/task4/R)
+```{r,echo=FALSE, out.width="60%"}
+knitr::include_graphics('figs/turbot-ts-1.png')
+```
+
+# Sensitvity Analysis
+
+## Elasticity
+Reference Points
+```{r ,echo=FALSE,out.width="70%"}
+knitr::include_graphics('figs/elasRef-1.png')
+```
+
+## Elasticity
+Reference Points
+```{r,echo=FALSE,out.width="70%"}
+knitr::include_graphics('figs/elasRef2-1.png')
+```
+
+## Elasticity
+
+Population Growth Rate
+```{r ,echo=FALSE,out.width="75%"}
+knitr::include_graphics('figs/elasR-1.png')
+```
+
+## Elasticity
+
+Mean age at virgin and $F_{MSY}$, and $L_{opt}$
+```{r ,echo=FALSE, out.width="70%"}
+knitr::include_graphics('figs/elasGt-1.png')
+```
+
+## Elasticity
+
+Species
+```{r,echo=FALSE, out.width="70%"}
+knitr::include_graphics('figs/comp-1.png')
+```
+
+# Length v Catch Methods
+
+## Scenarios
+Stock trends 
+
+```{r ,echo=FALSE, out.width="50%"}
+knitr::include_graphics('figs/maite-l-scen.png')
+```
+
+## Evaluation
+
+```{r ,echo=FALSE, out.width="70%"}
+knitr::include_graphics('figs/maite-cl.png')
+```
+
+# Length Based Methods
+
+## Observation Error Model
+Selection pattern
+
+```{r ,echo=FALSE, out.width="70%"}
+knitr::include_graphics('figs/maite-l-sel.png')
+```
+
+## Evaluation 
+```{r ,echo=FALSE,out.width="40%"}
+knitr::include_graphics('figs//maite-l.png')
+```
+
+# Turbot Example
+
+
+## Operating Model
+#######[Turbot OM vignettes](https://github.com/laurieKell/mydas/blob/master/tasks/task4/R/turbot.Rmd)
+```{r,echo=FALSE,out.width="60%"}
+knitr::include_graphics('figs/turbot-ts-1.png')
+```
+
+## Category 1: Age based
+#######[Category 1 XSA assessment](https://github.com/laurieKell/mydas/blob/master/tasks/task5/R/mse-xsa.R) 
+```{r ,echo=FALSE, out.width="50%"}
+knitr::include_graphics('figs/vpa-xsa-turbot-1.png')
+```
+
+## Category 1: Biomass based
+#######[Category 1 MPB assessment](https://github.com/laurieKell/mydas/blob/master/tasks/task5/R/mse-mpb.R) 
+```{r ,echo=FALSE, out.width="60%"}
+knitr::include_graphics('figs/bd-turbot-1.png')
+```
+
+## Category 3: Catch only
+#######[Category 3 SRA assessment](https://github.com/laurieKell/mydas/blob/master/tasks/task5/R/mse-sra.R) 
+```{r ,echo=FALSE, out.width="55%"}
+knitr::include_graphics('figs/bdsra-turbot-plot-1.png')
+```
+
+## LBSPR
+
+Fishing Mortality 
+
+```{r,echo=FALSE, out.width="60%"}
+knitr::include_graphics('figs/lbspr-turbot-fm-1.png')
+```
+
+
+## MLZ
+```{r ,echo=FALSE, out.width="60%"}
+knitr::include_graphics('figs/mlz-turbot-z-1.png')
+```
+
+# MSE
+
+## Performance Measures 
+### **Safety** 
++ Probability of avoiding limits
+
+### **Status** 
++ Probability of achieving targets, recovery and long-term
+
+### **Yield** 
++ MSY
+
+### **Variability** 
++ Annual variability in yield
+
+## Cat 1; Aged based ICES AR
+
+```{r ,echo=FALSE,  out.width="30%"}
+knitr::include_graphics('figs/mp-a.png')
+```
+
+## Cat 1; Biomass based ICES AR
+
+```{r ,echo=FALSE,out.width="30%"}
+knitr::include_graphics('figs/mp-b.png')
+```
+
+## Cat 1;  Comparison
+
+```{r 5,echo=FALSE,out.width="40%"}
+knitr::include_graphics('figs/mp-c1.png')
+```
+
+## Empirical HCRs
+Index Relative to Reference
+
+```{r ,echo=FALSE, out.width="40%"}
+knitr::include_graphics('figs/mp-p.png')
+```
+
+## Empirical HCRs
+Trend in Index 
+
+```{r f,echo=FALSE, out.width="60%"}
+knitr::include_graphics('figs/mp-d.png')
+```
+
+## Compare  Performance
+
+```{r ,echo=FALSE,out.width="60%"}
+knitr::include_graphics('figs/mp-c.png')
+```
+
+
+# Conclusions
+## Conclusions
+### **Risk**
+An uncertainty that matters, what matters are management objectives
+
+### **Management Procedures**
+Consider the data along with the assumptions, estimator and management and feedback between the various elements
+
+### **Value of infomation**
+Models are cheap, but data is expensive
+
+### **Diagnostics**
+Compare across species, stocks, fisheries and advice rules
+
+## R Packages
+
++ FLR
++ FLife
++ mydas
++ mpb
++ R Packages
++ LBSPR
++ MLZ
++ ...

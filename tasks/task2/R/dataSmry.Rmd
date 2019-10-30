@@ -1,0 +1,367 @@
+---
+title: "Dataset for use in data poor methods"
+author: "Laurence Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               echo      =!TRUE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               tidy.opts=list(width.cutoff=80),
+               fig.height=10,
+               fig.width =10,
+               fig.path  ="../tex/task5_plan",
+               cache.path="../cache/task5_plan/")
+
+iFig=0
+```
+
+## MYDAS
+  
+Task 5 of the MYDAS project <https://github.com/laurieKell/mydas> requires a review of data avialble on length composition, mean size, catch and indices of abudance (commercial or survey).
+
+Data are available from the MI  or from collective sources such as DATRAS <http://www.ices.dk/marine-data/data-portals/Pages/DATRAS.aspx> 
+for survey data and the STECF <https://stecf.jrc.ec.europa.eu/data-dissemination> for commercial data. 
+
+## Work plan
+
++	Condition the operating model using life histories (from table above) from brill, turbot, skate and Pollack as per the Mydas project (see the quick start). Will have to use MI estimates for sprat.  Use estimates of length (brill, sprat, skate). Obtain length frequencies for turbot and pollack from MI.
+
+The life histories were reviewed by Hans, using data from the MI databases.
+
++	With further investigation look at predicted abundance estimates for brill, sprat (although on high side) and skate (abundance was for all species of skates and rays, will have to make consistent with commercial species... maybe use thornback only). Pollack and turbot catches are greater than abundance so cannot use these.
+
+If the absolute abundance estimates are wrong relative indices can be used, as normal practice.  
+
++	With such good time series of survey length data for brill, sprat and skate it would good to sim test the mean size by using the mlz package <https://cran.r-project.org/web/packages/MLZ/vignettes/MLZ.html#introduction>. This would give an estimate of Z (assuming constant M) and thus look at changes in F. 
+
+MLZ uses mean size, it is unlikely to provide good estimates of Z for sppart due to high M and high recruitment variability, the mean size is therefore determined by recruitment not F.
+
++	It may also be worth pursuing the LBSR for length-based composition for the above  (and compare) with life-history parameters M/K ratio and Linf to estimate F/M and F/FMSY.  With SPR being the biological reference point. <https://cran.r-project.org/web/packages/LBSPR/vignettes/LBSPR.html>
+
+LBSPR is better at estimating F.
+
++	For turbot and pollack it maybe beneficially to use and empirical approach  (as survey info pretty poor) based on the commercial cpue (biomass index from MI lengths or estimated by weights) such as the ICES 2/3 rule (as per Simon Fischer).  
+
+The surveys could be used in the 
+
+For the observation model commercial cpues could be used.
+
+Further: Need to discuss with MI what data we can get for Lobsters and Razors in terms of lengths.  We have 1 set of priors from Iyves.
+
+
+```{r, pkgs, message=FALSE}
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(DBI)
+library(RPostgreSQL)
+library(reshape)
+```
+
+```{r notation, echo=FALSE}
+options(scipen=999)
+```
+
+```{r, connection}
+drv  = dbDriver("PostgreSQL")
+
+con  = dbConnect(drv, host = 'postgresql-seascope.csffkpr9jjjn.eu-west-2.rds.amazonaws.com',
+                 dbname = 'mydasDev',
+                 port = 5432,
+                 user = 'MydasApplication',
+                 password = 'gmit2017!')
+```
+
+## Survey data extraction
+Extract via sql the case study stocks from Mydas survey database and get numbers at length
+```{r, data}
+bio = dbGetQuery(con, paste0("SELECT year, speciesgp, fishlength_cm,  SUM(number*(60/hauldur_min)) AS number
+                               FROM data_surveybio
+                               WHERE speciesgp in ('TUR','BLL','POL','SKA','SPR')
+                               GROUP BY year, speciesgp, fishlength_cm;"))
+```
+For more in depth detail of the data see <https://data.marine.gov.scot/sites/default/files//SMFS%200816.pdf>
+
+Calculate weighted mean length for case study species
+```{r, weighted.mean}
+lenn=bio%>%
+  group_by(year, speciesgp)%>%
+  summarise(mnlen= weighted.mean(fishlength_cm,number), totnum=sum(number))
+```
+
+```{r}
+save(bio,file="/home/laurence/Desktop/tmp/bio.RData")
+```
+
+```{r, pollack, echo=FALSE}
+ggplot(subset(bio, speciesgp =='POL'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity", fill="blue")+theme_bw()+
+  facet_wrap(~year, scale ="free")+expand_limits(x=0,y=0)+
+  theme(text = element_text(size=8,face="bold"),  panel.grid.major = element_blank(),          panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold")) + geom_vline(data = subset(lenn,speciesgp =='POL'), aes(xintercept = mnlen, colour = "red"), linetype = "dashed", size=1) +theme(legend.position="none")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Plot of numbers at length for pollock with weighted mean length represented by dashed red line.
+
+
+```{r, turbot, echo=FALSE}
+ggplot(subset(bio, speciesgp =='TUR'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity", fill="blue")+theme_bw()+facet_wrap(~year, scale ="free")+expand_limits(x=0,   y=0)+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),        panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold")) + geom_vline(data = subset(lenn,speciesgp =='TUR'), aes(xintercept = mnlen, colour = "red"), linetype = "dashed",size=1) +theme(legend.position="none")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Plot of numbers at length for turbot with weighted mean length represented by dashed red line.
+
+```{r, brill, echo=FALSE}
+ggplot(subset(bio, speciesgp =='BLL'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity",  fill="blue")+theme_bw()+facet_wrap(~year, scale ="free")+expand_limits(x=0,   y=0)+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold")) + geom_vline(data = subset(lenn,speciesgp =='BLL'), aes(xintercept = mnlen, colour = "red"), linetype = "dashed",size=1)+theme(legend.position="none")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Plot of numbers at length for brill with weighted mean length represented by dashed red line.
+
+
+```{r, brill-ls, fig.height=3,fig.width=8}
+bio$yr=bio$year-1989
+mnl=ddply(bio,.(speciesgp,yr), with, data.frame(meanLn=sum(fishlength_cm*number)/sum(number)))
+
+ggplot(subset(bio, speciesgp =='BLL'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity", fill="blue")+
+  geom_vline(aes(xintercept=meanLn),data=subset(mnl,speciesgp=="BLL"),col="red")+
+  geom_vline(aes(xintercept=41.78016),col="cyan")+
+  geom_vline(aes(xintercept=25),col="black")+
+  geom_vline(aes(xintercept=26.75958),col="green")+
+  theme_bw()+
+  facet_grid(.~yr,scale="free_y")+
+  coord_flip()+
+  scale_y_continuous(breaks=NULL)+
+  ylab("Frequency")+xlab("Length (cm)")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Plot of numbers at length for brill with weighted mean length represented by dashed red line.
+
+
+```{r, skate,  echo=FALSE}
+ggplot(subset(bio, speciesgp =='SKA'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity", fill="blue")+theme_bw()+facet_wrap(~year, scale ="free")+expand_limits(x=0,   y=0)+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold")) + geom_vline(data = subset(lenn,speciesgp =='SKA'), aes(xintercept = mnlen, colour = "red"), linetype = "dashed",size=1)+theme(legend.position="none")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Plot of numbers at length for skate with weighted mean length represented by dashed red line.
+
+```{r, sprat, echo=FALSE }
+ggplot(subset(bio, speciesgp =='SPR'), aes(fishlength_cm, number)) +
+  geom_bar(stat="identity", fill="blue")+theme_bw()+facet_wrap(~year, scale ="free")+expand_limits(x=0,   y=0)+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold")) + geom_vline(data = subset(lenn,speciesgp =='SPR'), aes(xintercept = mnlen, colour = "red"), linetype = "dashed", size=1)+theme(legend.position="none")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Plot of numbers at length for sprat with weighted mean length represented by dashed red line.
+
+```{r, mnseries, echo=FALSE}
+ggplot(lenn, aes(year, mnlen, colour=speciesgp)) + geom_line(size=1)+expand_limits( y=0)+theme_bw()+
+  theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),        panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+
+  facet_grid(speciesgp~.,scale="free_y")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series of weighted mean length.
+
+Get all survey data from sql query
+
+```{r}
+bio1 = dbGetQuery(con, paste0("SELECT *
+                               FROM data_surveybio
+                               WHERE speciesgp in ('TUR','BLL','POL','SKA','SPR');"))
+```
+Estimate fish weight in kgs
+
+```{r, estweight}
+bio1$weight = ((bio1$lwra*bio1$fishlength_cm**bio1$lwrb)/1000)*bio1$number
+```
+
+
+```{r, survcpuewt}
+bio1$n      = bio1$hauldur_min/60
+effort = bio1 %>% group_by(survey_acronym, ices_division,year) %>% summarise(hours=sum(n))
+
+catch=bio1%>%group_by(speciesgp, survey_acronym,ices_division, year) %>% summarise(catchwt=sum(weight))    
+cpue_surv = effort %>% inner_join(catch) %>% mutate(cpue=round(log(catchwt/hours, 4)))
+
+cpuemn= ddply(subset(cpue_surv,year>1992) , .(year, speciesgp), summarise, mncpue=mean(cpue))
+```
+```{r, cpuewt, echo=FALSE}
+ggplot(subset(cpue_surv, year >1992), aes(as.factor(year), cpue))+
+  geom_boxplot(fill="#56B4E9",alpha=0.8, outlier.shape = NA,  outlier.fill="red",outlier.size=3)+ 
+  geom_line(data=cpuemn, aes(as.factor(year), mncpue, colour="red", group=1))+
+  theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(legend.position="none",axis.text.x=element_text(size=7,angle = -90, hjust = 0))+facet_grid(speciesgp~., scale="free_y")+
+  expand_limits(y=0)+
+  ylab("log(catch (kg) per hour)")+xlab("year")
+```  
+
+**Figure `r iFig=iFig+1; iFig`** Catch per unit effort in kgs (CPUE) time series with red line depicting mean cpue.
+
+Fish numbers
+```{r, survcpuen}
+catchn=bio1%>%group_by(speciesgp, survey_acronym,ices_division, year) %>% summarise(catchn=sum(number))    
+cpue_survn = effort %>% inner_join(catchn) %>% mutate(cpue=round(log(catchn/hours, 4)))
+
+cpuemnn= ddply(subset(cpue_survn, year>1992), .(year, speciesgp), summarise, mncpue=mean(cpue))#
+
+```
+```{r, svcpuewt, echo=FALSE}
+ggplot(subset(cpue_survn, year>1992), aes(as.factor(year), cpue))+
+  geom_boxplot(fill="#56B4E9",alpha=0.8, outlier.shape = NA,  outlier.fill="red",outlier.size=3)+ 
+  geom_line(data=cpuemnn, aes(as.factor(year), mncpue, colour="red", group=1))+
+  theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(legend.position="none",axis.text.x=element_text(size=7,angle = -90, hjust = 0))+facet_grid(speciesgp~., scale="free_y")+
+  expand_limits(y=0)+
+  ylab("log(catch (No) per hour)")+xlab("year")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Catch per unit effort in numbers (CPUE) time series with red line depicting mean cpue.
+
+## Commercial data
+Part of the issues with the main catch data in the stecf database is that the effort does not match
+up by gear and area with the effort estimations. Here the STECF Annual Economic Report database is used.
+
+Extract the data via sql 
+```{r, commercial}
+ct_ef   = dbGetQuery(con, paste0("SELECT * FROM data_stecf_aer_cpuedays
+                                  WHERE  speciesgp in ('TUR','BLL','POL','SKA','SPR'); "))
+```
+Estimate catch in kgs per day
+
+```{r, cpuecom}
+ct_ef1 = ct_ef %>% group_by(year, speciesgp)%>%
+  mutate(cpue = round(log(totctch/totdays)))
+```
+```{r,cpuecomwt, echo=FALSE}
+ggplot(ct_ef1, aes(factor(year), cpue))+stat_boxplot(geom ='errorbar')+
+geom_boxplot(fill="#56B4E9")+facet_grid(speciesgp~., scale="free_y")+ expand_limits(y=0)+
+  ylab("log(catch (kg) per day)")+xlab("year") +theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(axis.text.x=element_text(size=7,angle = -90, hjust = 0))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series of commercial cpue.
+
+```{r, catchsum, echo=FALSE}
+commctch=ddply(ct_ef, .(year, speciesgp), summarise, tottonnes=sum(totctch))
+
+ggplot(commctch, aes(as.factor(year),tottonnes/1000))+geom_bar(stat="identity", fill="blue")+
+  facet_grid(speciesgp~., scale="free_y")+theme_bw()+theme(text = element_text(size=8,face="bold"),       panel.grid.major = element_blank(),       panel.grid.minor = element_blank(),       strip.background = element_blank(),       axis.text=element_text(size=8),       axis.title.x = element_text(face="bold", size=8),       axis.title.y = element_text(face="bold", size=8, angle=90),       strip.text.x = element_text(size = 8,face="bold"))+theme(axis.text.x=element_text(size=7,angle = -90, hjust = 0))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series of total catch in tonnes.
+
+## Estimate abundance from survey data
+See <http://www.fao.org/docrep/w5449e/w5449e0f.htm> section 13.7
+```{r, surden}
+rects     = dbGetQuery(con, paste0("select * from data_icesrects"))
+surdense  = bio1 %>% group_by( year, speciesgp, ices_rectangle, ices_division) %>% 
+            summarise(cabund= sum(densbiom_kg_sqkm/1000)) #in tonnes per km2
+```
+Get survey stations
+```{r, stns}
+surv_eff  = dbGetQuery(con, paste0("SELECT *FROM data_surveystns"))
+```
+
+Calculate total area/total number of stations the survey covered by division and merge with catch tonnes perkm2
+```{r, stnsden}
+nstations = surv_eff %>% group_by(year, ices_rectangle,ices_division) %>%
+  summarise(totn=length(unique(haulid))) %>% inner_join(rects)%>%
+  group_by(year, ices_division)%>%summarise(totarea=sum(area_km2), totstn=sum(totn)) %>%       inner_join(surdense)
+```
+Biomass = totalsurveyarea x 1/total number of stations within the survey area x sum of catch
+```{r, abundance}
+nstations$relabund = ((nstations$totarea/1))*(1/nstations$totstn)*nstations$cabund
+nstations2 = nstations %>%group_by(year, speciesgp,ices_division) %>% summarise(totabund= sum(relabund))
+nstations3 = nstations2 %>% group_by(year, speciesgp) %>% summarise(totabun= sum(totabund) )
+
+```
+```{r, abunplot, echo=FALSE}
+library(gam)
+
+ggplot(subset(nstations3, year >2000), aes(year,totabun))+geom_line()+geom_point()+expand_limits(y=0)+theme_bw()+ylab("Abundance in tonnes")+
+  stat_summary(fun.data=mean_cl_normal) + facet_grid(speciesgp~., scale="free_y")+
+  geom_smooth(formula=y~x, colour="red") +theme(axis.text.x=element_text(size=7,angle = -90, hjust = 0))
+```
+
+## Life history parameters from the literature 
+
+```{r, lhist}
+lh   = dbGetQuery(con, paste0("SELECT * FROM data_lhistories
+                               WHERE  speciesgp in ('TUR','BLL','POL','SKA','SPR'); "))
+library(knitr)
+kable(lh, caption="life history paramters")
+```
+
+## Conclusion from the above analysis for 5 of the 7 case studies
+
+•	Pollack and turbot have poor coverage in terms of numbers at length from the survey data and hence potentially poor abundance estimates.
+
+•	Brill, sprat and skates have long time series of numbers at length. Brill has adequate numbers from 1993 to 2016 as has skate, while sprat contains a longer time series from 1985-to 2016.
+
+•	Observations from the commercial time-series show that for all species there are 9 years of data.
+
+•	There are enough life history parameters from the literature to condition an operating model for all case-study species apart from sprat.
+
+
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* plyr:         `r packageVersion('plyr')`
+* dplyr:        `r packageVersion('dplyr')`
+* ggplot2:      `r packageVersion('ggplot2')`
+* DBI:          `r packageVersion('DBI')`
+* RPostgreSQL:  `r packageVersion('RPostgreSQL')`
+* reshape       `r packageVersion('reshape')`
+* **Compiled**: `r date()`
+
+## Author information
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+7.	Deniel, C. (1981). Les poissons plats (TelCostCens, Pleuronecti- formes) en baie de Douarnenez. Reproduction croissance et migration des Bothidae, Scophthalmidae, Pleuronectidae et Soleidae. These, Universite Bretagne Occidentale, Brest. 476 PP. 
+
+8.	Deniel, C. (1990). Comparative study of growth of flatfishes on the west
+coast of Brittany. Journal of Fish Biology, 37: 149–166.
+
+9.	Dorel, D. (1986). Poissons de l’Atlantique Nord-Est Relations tailles-poids.
+
+12.	Greenstreet, S.P.R., Rossberg, A.G., Fox, C.J., Le Quesne, W.J.F., Blasdale, T., Boulcott, P., Mitchell, I., Millar, C., Moffat, C.F. (2012). Demersal fish biodiversity: species- level indicators and trends-based targets for the Marine Strategy Framework Directive. ICES J. Mar. Sci. 69, 1789–1801. 
+
+13.	Holden, M. J. (1972). The growth rates of R. brachyura, R. clavata and R. montagui as determined by tagging data. Journal du Conseil International pour l’Exploration de la Mer 34:161–168. 
+
+15.	Jones, A. (1974). Sexual maturity, fecundity and growth of the turbot, Scophthalmus maximus L. Journal of the Marine Biological Association of the UK, 54: 109–125.
+
+16.	Knijn, R.J., Boon, T.W., Heessen, H.J.L., Hislop, J.F.G. (1993). “Atlas of North Sea Fishes” (ICES Coop. Res. Rep. 194, ICES, Copenhagen, 1993). 
+
+17.	Mengi, T. (1963). Ber. Deut. Wiss. Komm. 7, 119.
+
+18.	Moreau, J. (1964). Contribution a` l’e´tude du lieu jaune (Gadus pollachius
+L.). Revues de Traveaux Institut de Peˆches Maritimes, 28:237–255.
+
+19.	Muus, B.J., Nielson, J. G. (1999). Sea Fish (Scandinavian Fishing Year Book, Hedehusene, Denmark. 
+
+20.	Pauly, D. (1978). A preliminary compilation of fish length growth parameters.
+Berichte des Institut fu¨r Meereskunde an der Universita¨t Kiel, 55. 200 pp.
+
+22.	Vinther, M.  (1989).  Some notes on the biology of the starry ray, Raja radiata, in the North Sea. Working document: ICES Study Group on Elasmobranch Fisheries, 4/1989, 1–20. mimeo.
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+```
+
+

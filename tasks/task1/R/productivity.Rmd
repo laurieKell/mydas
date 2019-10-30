@@ -1,0 +1,264 @@
+---
+title: "MyDas"
+subtitle: "Species Productivity"
+author: "Laurie Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+```{r dir, echo=FALSE}
+getScriptPath <- function() {
+  # location of script can depend on how it was invoked:
+  # source() and knit() put it in sys.calls()
+  path <- NULL
+
+  if(!is.null(sys.calls())) {
+    # get name of script - hope this is consisitent!
+    path <- as.character(sys.call(1))[2] 
+    # make sure we got a file that ends in .R, .Rmd or .Rnw
+    if (grepl("..+\\.[R|Rmd|Rnw]", path, perl=TRUE, ignore.case = TRUE) )  {
+      return(path)
+    } else { 
+      message("Obtained value for path does not end with .R, .Rmd or .Rnw: ", path)
+    }
+  } else{
+    # Rscript and R -f put it in commandArgs
+    args <- commandArgs(trailingOnly = FALSE)
+  }
+  return(path)
+}
+
+dirMy=dirname(dirname(getScriptPath()))
+dirInp=file.path(dirMy,"inputs")
+dirDat=file.path(dirMy,"data")
+```
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+
+## Global options
+opts_chunk$set(echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =FALSE,
+               fig.height=6,
+               fig.width =8,
+               fig.path  ="../tex/r-",
+               cache     =TRUE,
+               cache.path="../cache/r/")
+
+iFig=0
+iTab=0
+```
+
+```{r, pkgs, message=FALSE}
+library(ggplot2)
+library(GGally)
+
+library(plyr)
+library(dplyr)
+library(reshape)
+
+library(RPostgreSQL)
+library(popbio)
+library(numDeriv)
+
+library(FLife)
+library(mydas)
+```
+
+```{r}
+#source('~/Desktop/flr/FLife/R/sim.R')
+#source('~/Desktop/flr/FLife/R/getScriptPath.R')
+```
+
+```{r, theme, echo=FALSE}
+theme_set(theme_bw())
+options(digits=3)
+```
+
+
+```{r, db}
+drv  = dbDriver("PostgreSQL")
+
+con  = dbConnect(drv, host = 'postgresql-seascope.csffkpr9jjjn.eu-west-2.rds.amazonaws.com',
+                 dbname='mydasDev',
+                 port = 5432,
+                 user = 'MydasApplication',
+                 password = 'gmit2017!')
+
+lh=dbGetQuery(con, "select * from data_lhistories")
+lh=mutate(lh[,c(3:8)],t0.=-abs(as.numeric(as.character(t.0))),
+                      t0 =-exp(-0.3922-0.2752*log(linf)-1.038*log(k)))[,-2]
+names(lh)[1]='code'
+names(lh)=tolower(names(lh))
+
+# create FLPar
+lh   =dlply(lh,.(code),with,FLife:::mf2FLPar(data.frame(linf=linf,k=k,lmat=lmat,t0=t0.)))
+```
+
+```{r, sim}
+# Monte Carlo
+lhsim=llply(lh,sim,niters=500)
+```
+
+```{r, par}
+# create FLPar
+lhpar=llply(lhsim[-8],lhPar)
+```
+
+```{r, eql}
+# equilibium dynamics
+eq=llply(lhpar,lhEql)
+```
+
+```{r, leslie}
+library(FLBRP)
+L=llply(eq,function(x) leslie(x,fbar=c(refpts(x)["crash","harvest"])))      
+```
+
+```{r, r}
+r=ldply(L,function(x) log(aaply(x, 3, lambda)))
+save(r,file=file.path(dirDat,"r.RData"))
+```
+
+```{r, plot}
+ggplot(melt(t(r[,-1])))+
+    geom_histogram(aes(value))+
+    facet_wrap(~names(eq)[X2])+
+    scale_x_continuous(limits=c(0,3))
+```
+
+**Figure `r iFig=iFig+1; iFig`** r.
+
+
+```{r}
+save(lh,file=file.path(dirDat,"lh.RData"))
+```
+
+```{r elasticity, eval=FALSE}
+library(numDeriv)
+
+load("/home/laurence/Desktop/sea++/mydas/tasks/task1/data/lh.RData")
+
+res=FLPar(aaply(lh[[7]],1,mean,na.rm=TRUE))
+res=lhPar(res)[c("k","linf","t0","a50","b","bg","s","a1","sl","sr")]
+res=rbind(res,FLPar(m1=0.55,m2=-1.61,m3=1.44))
+
+fn=function(x){
+  res=lhPar(x)
+  eql=lhEql(res,
+            m=function(length,params) exp(params["m1"])*(length^params["m2"])%*%(params["linf"]^params["m3"])%*%params["k"])
+  
+  log(c(log(lambda(leslie(eql,fbar=c(refpts(eql)["crash","harvest"]))[drop=TRUE])),
+        log(lambda(leslie(eql,fbar=c(refpts(eql)["msy","harvest"]))[drop=TRUE]))))}
+
+jac=jacobian(fn,res)
+dimnames(jac)=list(var=c("r","r.c"),params=dimnames(res)$params)
+jac
+```
+
+\newpage
+
+**Table `r iTab=iTab+1; iTab`** Life history Parameters.
+```{r}
+laply(lh,function(x) apply(x,1,mean,na.rm=T))
+```
+
+**Table `r iTab=iTab+1; iTab`** Population growth rate at low population size (r) and at $B_{MSY}$ (r.c).
+```{r pr}
+res=laply(lh,function(x) FLPar(aaply(x,1,mean,na.rm=TRUE)))
+res[is.na(res[,"t0"]),"t0"]=with(as.data.frame(res[is.na(res[,"t0"]),c("linf","k")]),-exp(-0.3922-0.2752*log(linf)-1.038*log(k)))
+res=as.data.frame(res)
+res=FLife:::mf2FLPar(res)
+res=lhPar(res)[c("k","linf","t0","a50","b","bg","s","a1","sl","sr"),]
+res=rbind(res,propagate(FLPar(m1=0.55,m2=-1.61,m3=1.44),9))
+
+prod=function(x){
+  
+  fn=function(x){
+    res=lhPar(FLPar(x))
+    eql=lhEql(res,
+              m=function(length,params) exp(params["m1"])*(length^params["m2"])%*%(params["linf"]^params["m3"])%*%params["k"])
+    
+    c(log(lambda(leslie(eql,fbar=c(refpts(eql)["crash","harvest"]))[drop=TRUE])),
+      log(lambda(leslie(eql,fbar=c(refpts(eql)["msy","harvest"]))[drop=TRUE])))}
+
+  res=fn(x)
+  names(res)=c("r","r.c")
+  
+  res}
+
+pr=aaply(res,2,prod)
+dimnames(pr)=list(spp=names(lh),params=c("r","r.c"))
+
+pr
+```
+
+**Table `r iTab=iTab+1; iTab`** Population doubling time at low population size (r) and at $B_{MSY}$ (r.c).
+```{r}
+log(2)/pr
+```
+
+```{r elasticity2}
+elas=function(x){
+  
+  fn=function(x){
+    res=lhPar(FLPar(x))
+    eql=lhEql(res,
+              m=function(length,params) exp(params["m1"])*(length^params["m2"])%*%(params["linf"]^params["m3"])%*%params["k"])
+    
+    log(c(log(lambda(leslie(eql,fbar=c(refpts(eql)["crash","harvest"]))[drop=TRUE])),
+          log(lambda(leslie(eql,fbar=c(refpts(eql)["msy","harvest"]))[drop=TRUE]))))}
+
+  jac=jacobian(fn,x)
+  dimnames(jac)=list(var=c("r","r.c"),params=dimnames(x)$params)
+  
+  jac}
+
+jac=aaply(res,2,elas)
+
+dimnames(jac)$params=dimnames(res)$params
+
+jac=FLPar(aperm(jac,c(2:3,1)))
+
+jac
+```
+
+```{r, fig.height=6, fig.width=6}
+library(GGally)
+
+dat=cbind(laply(lh,function(x) apply(x,1,mean,na.rm=T)),log(2)/pr)
+
+my_smooth <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+  geom_point(...,size=.5)+
+  geom_smooth(...,method="lm",se=FALSE)}
+
+my_density <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+  geom_density(...,lwd=1)}
+
+ggpairs(transform(dat,linf=log(linf),k=log(k),lmat=log(lmat))[,c("r.c","linf","k","t0","lmat")],
+  lower = list(continuous = wrap(my_smooth)),
+  diag=list(continuous=wrap(my_density,alpha=0.2)),
+  title = "")+
+  theme(legend.position ="none",
+  panel.grid.major =element_blank(),
+  axis.ticks       =element_blank(),
+  axis.text.x      =element_blank(),
+  axis.text.y      =element_blank(),
+  panel.border     =element_rect(linetype = 1, colour="black", fill=NA))
+```
+
+```{r}
+load(file.path(dirDat,"stk.RData"))
+
+rfs=as.data.frame(laply(stk,refs))
+```
+
+
+

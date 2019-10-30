@@ -1,0 +1,139 @@
+---
+title: "Priors for Operating Models"
+author: " L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =10, 
+               fig.height=10,
+               cache     =TRUE, 
+               fig.path  ="../tex/priors/",
+               cache.path="../cache/priors/")
+
+iFig=0
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+```
+```{r, pkgs}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(reshape)
+library(GGally)
+
+library(FLCore)
+library(ggplotFL)
+library(FLBRP)
+library(FLife)
+library(popbio)
+library(mydas)
+```
+
+```{r, brill}
+load(file.path(dirDat,"brill.RData"))
+source('~/Desktop/flr/FLife/R/priors.R')
+
+growth=vonB
+
+prior=priors(lh,eq)
+save(lh,eq,om,prior,file=file.path(dirDat,"brill.RData"),compress="xz")
+
+plot(prior)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Brill priors.
+
+
+```{r, turbot}
+load(file.path(dirDat,"turbot.RData"))
+
+
+prior=priors(lh,eq)
+save(lh,eq,om,prior,file=file.path(dirDat,"turbot.RData"),compress="xz")
+```
+
+```{r, turbot-plot}
+plot(prior)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Turbot priors.
+
+
+```{r, sprat}
+load(file.path(dirDat,"sprat.RData"))
+
+prior=priors(lh,eq)
+save(lh,eq,om,prior,file=file.path(dirDat,"sprat.RData"),compress="xz")
+```
+
+```{r, sprat-plot}
+plot(prior)
+```
+**Figure `r iFig=iFig+1; iFig`** Sprat priors.
+
+
+```{r, ray}
+load(file.path(dirDat,"ray.RData"))
+
+prior=priors(lh,eq)
+save(lh,eq,om,prior,file=file.path(dirDat,"ray.RData"),compress="xz")
+```
+
+```{r, ray-plot}
+plot(prior)
+```
+**Figure `r iFig=iFig+1; iFig`** Ray priors.
+
+
+```{r, pollack}
+load(file.path(dirDat,"pollack.RData"))
+
+prior=priors(lh,eq)
+save(lh,eq,om,prior,file=file.path(dirDat,"pollack.RData"),compress="xz")
+```
+
+```{r, pollack-plot}
+plot(prior)
+```
+**Figure `r iFig=iFig+1; iFig`** Pollack priors.
+
+
+```{r, lobster}
+load(file.path(dirDat,"lobster.RData"))
+
+prior=priors(lh,eq)
+save(lh,eq,om,prior,file=file.path(dirDat,"lobster.RData"),compress="xz")
+```
+
+```{r, lobster-plot}
+plot(prior)
+```
+**Figure `r iFig=iFig+1; iFig`** Lobster priors.
+
+
+```{r, razor}
+load(file.path(dirDat,"razor.RData"))
+
+prior=priors(lh,eq)
+save(lh,eq,om,prior,file=file.path(dirDat,"razor.RData"),compress="xz")
+```
+
+```{r, razors-plot}
+plot(prior)
+```
+**Figure `r iFig=iFig+1; iFig`** Razor clams priors.
+

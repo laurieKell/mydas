@@ -1,0 +1,104 @@
+---
+title: "Biodyn"
+subtitle: "Biomass Dynamic"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+vignette: >
+  %\VignetteIndexEntry{FLife}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+github_document:
+    mathjax: TRUE
+tags: FLife
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               cache.path="../cache/spict/",
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               fig.height=9,
+               fig.width =8,
+               fig.path  ="../tex/spict")
+
+options(digits=3)
+
+iFig=0
+```
+```{r pkgs}
+library(ggplot2)
+library(reshape)
+library(plyr)
+library(dplyr)
+library(FLCore)
+library(ggplotFL)
+
+library(mpb)
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy ="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+```
+
+
+```{r, brill}
+load("/home/laurence/Desktop/sea++/mydas/tasks/task2/data/bio.RData")
+
+dat=subset(bioCs,stock=="meg_rock_2016")
+
+bd=biodyn(catch=as.FLQuant(transmute(subset(dat,fleet==1),data=obs,year=year)))
+u =as.FLQuant(transmute(subset(dat,fleet!=1),data=obs,year=as.integer(year)))
+u =window(u,end=2015)
+
+params(bd)["k"]=20000
+params(bd)["r"]=0.5
+params(bd)["p"]=-0.5
+params(bd)["b0"]=0.5
+
+bd=fwd(bd,catch=catch(bd))
+setParams(bd)   =u
+setControl(bd)  =params(bd)
+
+hat              =fit(bd,u)
+
+plot(hat)
+```
+
+**Figure `r iFig=iFig+1; iFig`,** Biomass dyanmic assessment
+
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* FLCore: `r packageVersion('FLCore')`
+* FLife:  `r packageVersion('FLife')`
+* FLBRP:  `r packageVersion('FLBRP')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
+

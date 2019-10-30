@@ -1,0 +1,118 @@
+---
+title: "MyDas"
+subtitle: "Stock Assssments"
+author: "Laurie Kell & Alex Tidd"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown:::pdf_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+tags: FLPKG FLR
+license: Creative Commons Attribution-ShareAlike 4.0 International
+---
+
+```{r knitr, echo=FALSE}
+library(knitr)
+
+opts_chunk$set(comment=NA, fig.width =8, 
+               fig.height=6,
+               fig.path  ="../tex/",
+               warning=FALSE, 
+               message=FALSE, 
+               error  =FALSE, 
+               echo   =FALSE,
+               cache  =TRUE)
+iFig=0
+iTab=0
+```
+```{r}
+library(FLCore)
+library(ggplotFL)
+library(FLife)
+library(plyr)
+library(dplyr)
+library(FLife)
+library(stringr)
+
+theme_set(theme_bw())
+```
+```{r dir}
+dirMy=dirname(FLife:::getScriptPath())
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task2"
+
+dirInp=file.path(FLCore:::getDir(FLCore:::getDir(dirMy)),"inputs")
+dirDat=file.path(FLCore:::getDir(FLCore:::getDir(dirMy)),"data")
+```
+
+Stocks and species
+```{r stocks, echo=FALSE}
+cs=read.csv(file.path(dirInp,"cs/StockAssessmentGraphs_2017128ijaewuckpic5ftyotcrcu20f.csv"))
+ns=read.csv(file.path(dirInp,"ns/StockAssessmentGraphs_2017128ijaewuckpic5ftyotcrcu20f.csv"))
+
+stocks=rbind(data.frame(wg="Celtic Sea",stock=unique(cs[,"FishStock"])),
+             data.frame(wg="North Sea", stock=unique(ns[,"FishStock"])))
+
+stocks=mutate(stocks,code  =substr(stock,1,regexec('\\.',ac(stock))[[1]][1]-1),
+                     x1    =substr(stock,  regexec('\\.',ac(stock))[[1]][1]+1,nchar(ac(stock))),
+                     region=substr(x1,   1,regexec('\\.',x1)[[1]][1]-1),
+                     area  =substr(x1,     regexec('\\.',x1)[[1]][1]+1,nchar(x1)))[,-4]
+
+spp=read.csv(file.path(dirInp,"species.txt"),header=FALSE)[,-2]
+spp=transmute(spp,code=str_trim(tolower(V1)),spp=str_trim(tolower(V3)),worm=V4)
+
+stocks=merge(stocks,spp,by="code",all.x=TRUE)
+stocks=stocks[do.call("order",stocks[,c("code","wg","area")]),]
+
+substr(stocks$spp,1,1)=toupper(substr(stocks$spp,1,1))
+
+stocks[,c("code","spp","wg","area")]
+```
+
+Missing species
+```{r lhparams}
+unique(sort(ac(stocks$stock)))
+
+unique(subset(stocks,is.na(spp))$code)
+```
+
+Life history parameters
+
+MyDas WKLife species
+```{r lhpar-mydas}
+load(file.path(dirDat,"fishbase-web.RData"))
+data(wklife)
+names(fb)[1]="spp"
+
+cmn = c("Sprat","Gurnards","Saithe","Pollock","Ling","Rays","Skates","John Dory","Turbot","Brill")
+nm  = c("Sprattus sprattus sprattus",
+        "Chelidonichthys cuculus",
+        "Pollachius virens","Pollachius pollachius","Molva molva",
+        "Chondrichthyes","Chondrichthyes",
+        "Zeus faber",
+        "Scophthalmus maximus","Scophthalmus rhombus")
+lhpmydas=subset(fb,spp%in%nm)
+
+unique(lhpmydas$spp)
+```
+
+All Celtic and North Sea Stocks
+MyDas species
+```{r lhpar-csns}
+lhpcns=merge(fb,stocks,by="spp")
+
+unique(lhpcns$spp)
+```
+
+```{r lhpar-skgu}
+gurnards=subset(fb,family%in%"Triglidae")
+skates  =subset(fb,family%in%"Rajidae")
+```
+
+```{r lhpar-save}
+save(stocks,  file=file.path(dirDat,"stocks.RData"),  compress="xz")
+save(lhpcns,  file=file.path(dirDat,"lhpcns.RData"),  compress="xz")
+save(lhpmydas,file=file.path(dirDat,"lhpmydas.RData"),compress="xz")
+save(gurnards,file=file.path(dirDat,"gurnards.RData"),compress="xz")
+save(skates,  file=file.path(dirDat,"skates.RData"),  compress="xz")
+```

@@ -1,0 +1,338 @@
+\begin{thebibliography}{44}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Arrizabalaga et~al.(2011)Arrizabalaga, De~Bruyn, Diaz, Murua,
+  Chavance, de~Molina, Gaertner, Ariz, Ruiz, and
+  Kell]{arrizabalaga2011productivity}
+H.~Arrizabalaga, P.~De~Bruyn, G.~Diaz, H.~Murua, P.~Chavance, A.~de~Molina,
+  D.~Gaertner, J.~Ariz, J.~Ruiz, and L.~Kell.
+\newblock Productivity and susceptibility analysis for species caught in
+  {A}tlantic tuna fisheries.
+\newblock \emph{Aquatic Living Resources}, 24\penalty0 (01):\penalty0 1--12,
+  2011.
+
+\bibitem[Carruthers et~al.(2014)Carruthers, Punt, Walters, MacCall, McAllister,
+  Dick, and Cope]{carruthers2014evaluating}
+T.~R. Carruthers, A.~E. Punt, C.~J. Walters, A.~MacCall, M.~K. McAllister,
+  E.~J. Dick, and J.~Cope.
+\newblock Evaluating methods for setting catch limits in data-limited
+  fisheries.
+\newblock \emph{Fisheries Research}, 153:\penalty0 48--68, 2014.
+
+\bibitem[Carruthers et~al.(2016)Carruthers, Kell, Butterworth, Maunder,
+  Geromont, Walters, McAllister, Hillary, Levontin, Kitakado,
+  et~al.]{carruthers2016performance}
+T.~R. Carruthers, L.~T. Kell, D.~D. Butterworth, M.~N. Maunder, H.~F. Geromont,
+  C.~Walters, M.~K. McAllister, R.~Hillary, P.~Levontin, T.~Kitakado, et~al.
+\newblock Performance review of simple management procedures.
+\newblock \emph{ICES J. Mar. Sci.}, 73\penalty0 (2):\penalty0 464--482, 2016.
+
+\bibitem[Catchpole et~al.(2005)Catchpole, Frid, and
+  Gray]{catchpole2005discards}
+T.~Catchpole, C.~Frid, and T.~Gray.
+\newblock Discards in north sea fisheries: causes, consequences and solutions.
+\newblock \emph{Marine Policy}, 29\penalty0 (5):\penalty0 421--430, 2005.
+
+\bibitem[Cope and Punt(2009)]{cope2009length}
+J.~M. Cope and A.~E. Punt.
+\newblock Length-based reference points for data-limited situations:
+  applications and restrictions.
+\newblock \emph{Marine and Coastal Fisheries: Dynamics, Management, and
+  Ecosystem Science}, 1\penalty0 (1):\penalty0 169--186, 2009.
+
+\bibitem[Deroba et~al.(2015)Deroba, Butterworth, Methot, De~Oliveira,
+  Fernandez, Nielsen, Cadrin, Dickey-Collas, Legault, Ianelli, Kell,
+  et~al.]{deroba2014simulation}
+J.~Deroba, D.~Butterworth, R.~Methot, J.~De~Oliveira, C.~Fernandez, A.~Nielsen,
+  S.~Cadrin, M.~Dickey-Collas, C.~Legault, J.~Ianelli, L.~Kell, et~al.
+\newblock Simulation testing the robustness of stock assessment models to
+  error: some results from the ices strategic initiative on stock assessment
+  methods.
+\newblock \emph{ICES J. Mar. Sci.}, 72\penalty0 (1):\penalty0 19--30, 2015.
+
+\bibitem[Dowling et~al.(2015)Dowling, Dichmont, Haddon, Smith, Smith, and
+  Sainsbury]{dowling2015empirical}
+N.~Dowling, C.~Dichmont, M.~Haddon, D.~Smith, A.~Smith, and K.~Sainsbury.
+\newblock Empirical harvest strategies for data-poor fisheries: A review of the
+  literature.
+\newblock \emph{Fisheries Research}, 171:\penalty0 141--153, 2015.
+
+\bibitem[Fortuna et~al.(2014)Fortuna, Kell, Holcer, Canese, Filidei~Jr,
+  Mackelworth, and Donovan]{fortuna2014summer}
+C.~M. Fortuna, L.~Kell, D.~Holcer, S.~Canese, E.~Filidei~Jr, P.~Mackelworth,
+  and G.~Donovan.
+\newblock Summer distribution and abundance of the giant devil ray (mobula
+  mobular) in the adriatic sea: Baseline data for an iterative management
+  framework.
+\newblock \emph{Scientia Marina}, 78\penalty0 (2):\penalty0 227--237, 2014.
+
+\bibitem[Fr{\'e}dou et~al.(2016)Fr{\'e}dou, Fr{\'e}dou, Gaertner, Kell, Potier,
+  Bach, Travassos, Hazin, and M{\'e}nard]{fredou2016life}
+F.~L. Fr{\'e}dou, T.~Fr{\'e}dou, D.~Gaertner, L.~Kell, M.~Potier, P.~Bach,
+  P.~Travassos, F.~Hazin, and F.~M{\'e}nard.
+\newblock Life history traits and fishery patterns of teleosts caught by the
+  tuna longline fishery in the south atlantic and indian oceans.
+\newblock \emph{Fisheries Research}, 179:\penalty0 308--321, 2016.
+
+\bibitem[Fromentin et~al.(2014)Fromentin, Bonhommeau, Arrizabalaga, and
+  L.~Kell]{fromentin2014spectre}
+J.-M. Fromentin, S.~Bonhommeau, H.~Arrizabalaga, and L.~L.~Kell.
+\newblock The spectre of uncertainty in management of exploited fish stocks:
+  the illustrative case of {A}tlantic bluefin tuna.
+\newblock \emph{Marine Policy}, 47:\penalty0 8--14, 2014.
+
+\bibitem[Garcia(1996)]{garcia1996precautionary}
+S.~Garcia.
+\newblock The precautionary approach to fisheries and its implications for
+  fishery research, technology and management: an updated review.
+\newblock \emph{{FAO} Fisheries Technical Paper}, pages 1--76, 1996.
+
+\bibitem[Glenn et~al.(2012)Glenn, Tingley, Maro{\~n}o, Holm, Kell, Padda,
+  Edvardsson, Asmundsson, Conides, Kapiris, et~al.]{glenn2012trust}
+H.~Glenn, D.~Tingley, S.~S. Maro{\~n}o, D.~Holm, L.~Kell, G.~Padda, I.~R.
+  Edvardsson, J.~Asmundsson, A.~Conides, K.~Kapiris, et~al.
+\newblock Trust in the fisheries scientific community.
+\newblock \emph{Marine Policy}, 36\penalty0 (1):\penalty0 54--72, 2012.
+
+\bibitem[Hillary et~al.(2015)Hillary, Preece, Davies, Kurota, Sakai, Itoh,
+  Parma, Butterworth, Ianelli, and Branch]{hillary2015scientific}
+R.~M. Hillary, A.~L. Preece, C.~R. Davies, H.~Kurota, O.~Sakai, T.~Itoh, A.~M.
+  Parma, D.~S. Butterworth, J.~Ianelli, and T.~A. Branch.
+\newblock A scientific alternative to moratoria for rebuilding depleted
+  international tuna stocks.
+\newblock \emph{Fish and Fisheries}, 2015.
+
+\bibitem[Jiao et~al.(2011)Jiao, Cort{\'e}s, Andrews, and Guo]{jiao2011poor}
+Y.~Jiao, E.~Cort{\'e}s, K.~Andrews, and F.~Guo.
+\newblock Poor-data and data-poor species stock assessment using a bayesian
+  hierarchical approach.
+\newblock \emph{Ecological Applications}, 21\penalty0 (7):\penalty0 2691--2708,
+  2011.
+
+\bibitem[Kell et~al.(2005{\natexlab{a}})Kell, Pastoors, Scott, Smith, Van~Beek,
+  {O'Brien}, and Pilling]{kell2005flat}
+L.~Kell, M.~Pastoors, R.~Scott, M.~Smith, F.~Van~Beek, C.~{O'Brien}, and
+  G.~Pilling.
+\newblock Evaluation of multiple management objectives for northeast {A}tlantic
+  flatfish stocks: sustainability vs. stability of yield.
+\newblock \emph{ICES J. Mar. Sci.}, 62\penalty0 (6):\penalty0 1104--1117,
+  2005{\natexlab{a}}.
+
+\bibitem[Kell et~al.(2005{\natexlab{b}})Kell, Pilling, Kirkwood, Pastoors,
+  Mesnil, Korsbrekke, Abaunza, Aps, Biseau, Kunzlik, et~al.]{kell2005round}
+L.~Kell, G.~Pilling, G.~Kirkwood, M.~Pastoors, B.~Mesnil, K.~Korsbrekke,
+  P.~Abaunza, R.~Aps, A.~Biseau, P.~Kunzlik, et~al.
+\newblock An evaluation of the implicit management procedure used for some
+  {ICES} roundfish stocks.
+\newblock \emph{ICES J. Mar. Sci.}, 62\penalty0 (4):\penalty0 750--759,
+  2005{\natexlab{b}}.
+
+\bibitem[Kell et~al.(2006{\natexlab{a}})Kell, De~Oliveira, Punt, {McAllister},
+  and Kuikka]{kell2006operational}
+L.~Kell, J.~A. De~Oliveira, A.~E. Punt, M.~K. {McAllister}, and S.~Kuikka.
+\newblock Operational management procedures: an introduction to the use of
+  evaluation frameworks.
+\newblock \emph{Developments in Aquaculture and Fisheries Science},
+  36:\penalty0 379--407, 2006{\natexlab{a}}.
+
+\bibitem[Kell et~al.(2006{\natexlab{b}})Kell, Pilling, Kirkwood, Pastoors,
+  Mesnil, Korsbrekke, Abaunza, Aps, Biseau, Kunzlik,
+  et~al.]{kell2006evaluation}
+L.~Kell, G.~Pilling, G.~Kirkwood, M.~Pastoors, B.~Mesnil, K.~Korsbrekke,
+  P.~Abaunza, R.~Aps, A.~Biseau, P.~Kunzlik, et~al.
+\newblock An evaluation of multi-annual management strategies for ices
+  roundfish stocks.
+\newblock \emph{ICES J. Mar. Sci.}, 63\penalty0 (1):\penalty0 12--24,
+  2006{\natexlab{b}}.
+
+\bibitem[Kell et~al.(2007)Kell, Mosqueira, Grosjean, Fromentin, Garcia,
+  Hillary, Jardim, Mardle, Pastoors, Poos, et~al.]{kell2007flr}
+L.~Kell, I.~Mosqueira, P.~Grosjean, J.~Fromentin, D.~Garcia, R.~Hillary,
+  E.~Jardim, S.~Mardle, M.~Pastoors, J.~Poos, et~al.
+\newblock {FLR:} an open-source framework for the evaluation and development of
+  management strategies.
+\newblock \emph{ICES J. Mar. Sci.}, 64\penalty0 (4):\penalty0 640, 2007.
+
+\bibitem[Kell et~al.(2015{\natexlab{a}})Kell, Levontin, Davies, Harley, Kolody,
+  Maunder, Mosqueira, Pilling, and Sharma]{kell2015quantification}
+L.~T. Kell, P.~Levontin, C.~R. Davies, S.~Harley, D.~S. Kolody, M.~N. Maunder,
+  I.~Mosqueira, G.~M. Pilling, and R.~Sharma.
+\newblock The quantification and presentation of risk.
+\newblock \emph{Management Science in Fisheries: An Introduction to
+  Simulation-Based Methods}, page 348, 2015{\natexlab{a}}.
+
+\bibitem[Kell et~al.(2015{\natexlab{b}})Kell, Nash, Dickey-Collas, Mosqueira,
+  and Szuwalski]{kell2015spawning}
+L.~T. Kell, R.~D. Nash, M.~Dickey-Collas, I.~Mosqueira, and C.~Szuwalski.
+\newblock Is spawning stock biomass a robust proxy for reproductive potential?
+\newblock \emph{Fish and Fisheries}, 2015{\natexlab{b}}.
+
+\bibitem[Kell et~al.(2016{\natexlab{a}})Kell, Kimoto, and
+  Kitakado]{kell2016evaluation}
+L.~T. Kell, A.~Kimoto, and T.~Kitakado.
+\newblock Evaluation of the prediction skill of stock assessment using
+  hindcasting.
+\newblock \emph{Fisheries Research}, 183:\penalty0 119--127,
+  2016{\natexlab{a}}.
+
+\bibitem[Kell et~al.(2016{\natexlab{b}})Kell, Levontin, Davies, Harley, Kolody,
+  Maunder, Mosqueira, Pilling, and Sharma]{kell2016quantification}
+L.~T. Kell, P.~Levontin, C.~R. Davies, S.~Harley, D.~S. Kolody, M.~N. Maunder,
+  I.~Mosqueira, G.~M. Pilling, and R.~Sharma.
+\newblock The quantification and presentation of risk.
+\newblock \emph{Management Science in Fisheries: An Introduction to
+  Simulation-based Methods}, page 348, 2016{\natexlab{b}}.
+
+\bibitem[Kokkalis et~al.(2015)Kokkalis, Thygesen, Nielsen, and
+  Andersen]{kokkalis2015limits}
+A.~Kokkalis, U.~H. Thygesen, A.~Nielsen, and K.~H. Andersen.
+\newblock Limits to the reliability of size-based fishing status estimation for
+  data-poor stocks.
+\newblock \emph{Fisheries Research}, 171:\penalty0 4--11, 2015.
+
+\bibitem[Leach et~al.(2014)Leach, Levontin, Holt, Kell, and
+  Mumford]{leach2014elicit}
+A.~Leach, P.~Levontin, J.~Holt, L.~Kell, and J.~Mumford.
+\newblock Identification and prioritization of uncertainties for management of
+  eastern {A}tlantic bluefin tuna (\textit{Thunnus thynnus}).
+\newblock \emph{Marine Policy}, 48:\penalty0 84???92, 2014.
+
+\bibitem[Needle(2015)]{needle2015using}
+C.~L. Needle.
+\newblock Using self-testing to validate the surbar survey-based assessment
+  model.
+\newblock \emph{Fisheries Research}, 171:\penalty0 78--86, 2015.
+
+\bibitem[Nielsen and Berg(2014)]{nielsen2014estimation}
+A.~Nielsen and C.~W. Berg.
+\newblock Estimation of time-varying selectivity in stock assessments using
+  state-space models.
+\newblock \emph{Fisheries Research}, 158:\penalty0 96--101, 2014.
+
+\bibitem[Pilling et~al.(2008)Pilling, Kell, Hutton, Bromley, Tidd, and
+  Bolle]{pilling2008can}
+G.~M. Pilling, L.~T. Kell, T.~Hutton, P.~J. Bromley, A.~N. Tidd, and L.~J.
+  Bolle.
+\newblock Can economic and biological management objectives be achieved by the
+  use of msy-based reference points? a north sea plaice (pleuronectes platessa)
+  and sole (solea solea) case study.
+\newblock \emph{ICES Journal of Marine Science: Journal du Conseil},
+  65\penalty0 (6):\penalty0 1069--1080, 2008.
+
+\bibitem[Pomarede et~al.(2010)Pomarede, Hillary, Ibaibarriaga, Bogaards, and
+  Apostolaki]{pomarede2010evaluating}
+M.~Pomarede, R.~Hillary, L.~Ibaibarriaga, J.~Bogaards, and P.~Apostolaki.
+\newblock Evaluating the performance of survey-based operational management
+  procedures.
+\newblock \emph{Aquatic Living Resources}, 23\penalty0 (1):\penalty0 77--94,
+  2010.
+
+\bibitem[Pons et~al.(2017)Pons, Branch, Melnychuk, Jensen, Brodziak, Fromentin,
+  Harley, Haynie, Kell, Maunder, et~al.]{pons2017effects}
+M.~Pons, T.~A. Branch, M.~C. Melnychuk, O.~P. Jensen, J.~Brodziak, J.~M.
+  Fromentin, S.~J. Harley, A.~C. Haynie, L.~T. Kell, M.~N. Maunder, et~al.
+\newblock Effects of biological, economic and management factors on tuna and
+  billfish stock status.
+\newblock \emph{Fish and Fisheries}, 18\penalty0 (1):\penalty0 1--21, 2017.
+
+\bibitem[Prince et~al.(2015)Prince, Victor, Kloulchad, and
+  Hordyk]{prince2015length}
+J.~Prince, S.~Victor, V.~Kloulchad, and A.~Hordyk.
+\newblock Length based spr assessment of eleven indo-pacific coral reef fish
+  populations in palau.
+\newblock \emph{Fisheries Research}, 171:\penalty0 42--58, 2015.
+
+\bibitem[Punt and Donovan(2007)]{punt2007developing}
+A.~Punt and G.~Donovan.
+\newblock Developing management procedures that are robust to uncertainty:
+  lessons from the {International} {Whaling} {Commission}.
+\newblock \emph{ICES J. Mar. Sci.}, 64\penalty0 (4):\penalty0 603--612, 2007.
+
+\bibitem[Radatz et~al.(1990)Radatz, Geraci, and Katki]{radatz1990ieee}
+J.~Radatz, A.~Geraci, and F.~Katki.
+\newblock Ieee standard glossary of software engineering terminology.
+\newblock \emph{IEEE Std}, 610121990:\penalty0 121990, 1990.
+
+\bibitem[Restrepo and Powers(1999)]{restrepo1999precautionary}
+V.~Restrepo and J.~Powers.
+\newblock Precautionary control rules in us fisheries management: specification
+  and performance.
+\newblock \emph{ICES Journal of Marine Science: Journal du Conseil},
+  56\penalty0 (6):\penalty0 846--852, 1999.
+
+\bibitem[Roa-Ureta et~al.(2015)Roa-Ureta, Molinet, Barahona, and
+  Araya]{roa2015hierarchical}
+R.~H. Roa-Ureta, C.~Molinet, N.~Barahona, and P.~Araya.
+\newblock Hierarchical statistical framework to combine generalized depletion
+  models and biomass dynamic models in the stock assessment of the chilean sea
+  urchin (loxechinus albus) fishery.
+\newblock \emph{Fisheries Research}, 171:\penalty0 59--67, 2015.
+
+\bibitem[Rosenberg et~al.(2014)Rosenberg, Fogarty, Cooper, Dickey-Collas,
+  Fulton, Guti{\'e}rrez, Hyde, Kleisner, Kristiansen, Longo,
+  et~al.]{rosenberg2014developing}
+A.~A. Rosenberg, M.~Fogarty, A.~Cooper, M.~Dickey-Collas, E.~Fulton,
+  N.~Guti{\'e}rrez, K.~Hyde, K.~Kleisner, T.~Kristiansen, C.~Longo, et~al.
+\newblock \emph{Developing new approaches to global stock status assessment and
+  fishery production potential of the seas}.
+\newblock Food and Agriculture Organization of the United Nations, 2014.
+
+\bibitem[Sainsbury and Sumaila(2003)]{sainsbury2003ref}
+K.~Sainsbury and U.~R. Sumaila.
+\newblock 20 incorporating ecosystem objectives into management of sustainable
+  marine fisheries, {Including'Best} {Practice'Reference} points and use of
+  marine protected areas.
+\newblock \emph{Responsible fisheries in the marine ecosystem}, page 343, 2003.
+
+\bibitem[Thorson and Cope(2015)]{thorson2015catch}
+J.~T. Thorson and J.~M. Cope.
+\newblock Catch curve stock-reduction analysis: An alternative solution to the
+  catch equations.
+\newblock \emph{Fisheries Research}, 171:\penalty0 33--41, 2015.
+
+\bibitem[Thorson et~al.(2015)Thorson, Kell, De~Oliveira, Sampson, and
+  Punt]{thorson2015introduction}
+J.~T. Thorson, L.~T. Kell, J.~A. De~Oliveira, D.~B. Sampson, and A.~E. Punt.
+\newblock Introduction.
+\newblock \emph{Fisheries Research}, 171:\penalty0 1--3, 2015.
+
+\bibitem[Tidd et~al.(2017)Tidd, Brouwer, and Pilling]{tidd2017barrel}
+A.~Tidd, S.~Brouwer, and G.~Pilling.
+\newblock Shooting fish in a barrel? assessing fisher-driven changes in
+  catchability within tropical tuna purse seine fleets.
+\newblock \emph{Fish and Fisheries}, pages n/a--n/a, 2017.
+\newblock ISSN 1467-2979.
+\newblock \doi{10.1111/faf.12207}.
+\newblock URL \url{http://dx.doi.org/10.1111/faf.12207}.
+
+\bibitem[Tidd et~al.(2011)Tidd, Hutton, Kell, and Padda]{tidd2011exit}
+A.~N. Tidd, T.~Hutton, L.~Kell, and G.~Padda.
+\newblock Exit and entry of fishing vessels: an evaluation of factors affecting
+  investment decisions in the north sea english beam trawl fleet.
+\newblock \emph{ICES J. Mar. Sci.}, 68\penalty0 (5):\penalty0 961--971, 2011.
+
+\bibitem[Tidd et~al.(2012)Tidd, Hutton, Kell, and Blanchard]{tidd2012dynamic}
+A.~N. Tidd, T.~Hutton, L.~T. Kell, and J.~L. Blanchard.
+\newblock Dynamic prediction of effort reallocation in mixed fisheries.
+\newblock \emph{Fish. Res.}, 125:\penalty0 243--253, 2012.
+
+\bibitem[Tidd et~al.(2015)Tidd, Vermard, Marchal, Pinnegar, Blanchard, and
+  Milner-Gulland]{tidd2015fishing}
+A.~N. Tidd, Y.~Vermard, P.~Marchal, J.~Pinnegar, J.~L. Blanchard, and
+  E.~Milner-Gulland.
+\newblock Fishing for space: fine-scale multi-sector maritime activities
+  influence fisher location choice.
+\newblock \emph{PloS one}, 10\penalty0 (1):\penalty0 e0116335, 2015.
+
+\bibitem[Tidd et~al.(2016)Tidd, Reid, Pilling, and Harley]{tidd2016estimating}
+A.~N. Tidd, C.~Reid, G.~M. Pilling, and S.~J. Harley.
+\newblock Estimating productivity, technical and efficiency changes in the
+  western pacific purse-seine fleets.
+\newblock \emph{ICES Journal of Marine Science: Journal du Conseil},
+  73\penalty0 (4):\penalty0 1226--1234, 2016.
+
+\end{thebibliography}

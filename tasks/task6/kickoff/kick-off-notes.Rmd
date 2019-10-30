@@ -1,0 +1,46 @@
+---
+title: "MyDas"
+subtitle: "Action Points from Kick-Off Meeting"
+output: html_notebook
+---
+
+# Choice of stocks and justification  
+
++ The wiki has a summary stocks from the original call,  however, the actual stocks still have to be chosen. This could be done based on a variety of justifications, e.g. commercial value of the stocks, ecological importance, or based on catch compostion of fleets. Stocks could also be selected based on productivity, i.e. stocks that are low in productivity relative to target species are more likely to be below $B_{MSY}$. Alternatively stocks could be selected based on susceptibility, i.e. are there found in the same area as the fishing metiers/fleets/gears. 
+
++ Once the data are collated it will be possible to conduct analysis on productivity, susceptiblity and ecological economic importance. Then to propose a list of final stocks. 
+
++ Choice of stocks may also be made based on suitablity for different approaches, e.g. teh Robin Hood approach where similar species are assessed simultaneusly.  
+
+# Data 
+
++ Collating of data and liaising with which people who hold and understand them
+
++ Datras has many outputs, what outputs do we want and how clean is the data.  Are data definitions across countries the same?
+
++ There is a link to Datras web services and also and an R package to link straight up. 
+
++ What market sampling data are available?  Hans suggested that otoliths were collected to meet requirements.  Can we get hold of this data and also other countries data for the stocks on the wiki? 
+
++ Be interesting to look at the market sampling data and landings, as it will be necessary to summarize what proportions of landed weights were sampled and how many landings were and were not sampled? Hans suggested this will be low?  Do you see this as important? Poor sampling will generally increase errors in estimating the stock size?
+
++ Is there a time series available from stecf from DCR/DCF/DCMAP etc?   Do you have access to this or can we get access… Fleet annual economic report (AER) will have info on economic data..?
+
++ Biological data are available from FishBase and FishNets, these will be extracted and a life history database made available.
++ Stock Assessment datasets will be collated, e.g. from ICES and stock assessment.org
+
+# Collaboration
+
+[add emails and more details about what they are doing]
++ Claire Mason ageing sprat – collaborations
++ Paul Bouch
++ Luke
+
+# Database 
+
++ Once the main datasets and associated databaases are identified SQL queries will be used to create views. It was agreed that a Postgres database was the prefered option, especially as postgres can be used to store and retrieve simulation results Hans will look into hosting a server at MI. Postgres can also be accessed using tools like shiny apps to set up an interactive tools for exloring results.
+
+# Meetings 
++ 6 monthly, but before November start we will have a meeting in September d October to report progress.  
++ Laurie will update the wiki.  Aex and Coilin will meet regularly also. 
++ Alex and Coilin to talk over skype regarding HR logistics and contract etc…

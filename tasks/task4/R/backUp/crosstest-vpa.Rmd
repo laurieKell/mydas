@@ -1,0 +1,332 @@
+---
+title: "Cross test using Operating Model based on Life History"
+subtitle: "VPA"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+vignette: >
+  %\VignetteIndexEntry{FLife}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+github_document:
+    mathjax: TRUE
+tags: FLife
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               cache.path="../cache/crosstest/bd",
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               fig.height=10,
+               fig.width =8,
+               fig.path  ="../tex/crosstest-bd")
+
+options(digits=3)
+
+iFig=0
+```
+```{r pkgs}
+library(ggplot2)
+library(reshape)
+library(plyr)
+library(dplyr)
+library(FLCore)
+library(ggplotFL)
+
+library(FLAssess)
+library(FLXSA)
+
+library(doParallel)
+library(foreach)
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+
+xsaCtrl=list("default"=FLXSA.control(
+                         tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE))
+
+xsaTest=function(om,pg=10,ctrl=FLXSA.control()){
+  
+  stk=setPlusGroup(om,pg)
+  idx=FLIndex(index=stock.n(stk))
+  range(idx)[c("plusgroup","startf","endf")]=c(pg,0.01,.1)
+  
+  stk+FLXSA(stk,idx,control=ctrl,diag.flag=FALSE)}
+```
+
+```{r, xsa-brill}
+load(file.path(dirDat,"brill.RData"))
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=xsaTest(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["brill"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test for brill.
+
+
+```{r, xsa-turbot}
+load(file.path(dirDat,"turbot.RData"))
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=xsa(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["turbot"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test for turbot.
+
+
+```{r, xsa-ray}
+load(file.path(dirDat,"ray.RData"))
+
+om=trim(om,age=3:40)
+#om=FLCore:::iter(om,1:10)
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=75)
+mp=xsa(om,ctrl=xsaControl,pg=20)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["ray"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test for ray.
+
+
+```{r, xsa-pollack}
+load(file.path(dirDat,"pollack.RData"))
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 3,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=xsa(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["pollack"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test for pollack.
+
+
+```{r, xsa-sprat}
+load(file.path(dirDat,"sprat.RData"))
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=xsa(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["sprat"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test for sprat.
+
+
+```{r, xsa-lobster}
+load(file.path(dirDat,"lobster.RData"))
+
+om=trim(om,age=3:40)
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=75)
+mp=xsa(om,ctrl=xsaControl,pg=20)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["lobster"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test for lobster.
+
+
+```{r, xsa-razors}
+load(file.path(dirDat,"razor.RData"))
+
+range(om)[c("minfbar","maxfbar")]=ceiling(mean(lh["a1"]))
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+om=window(om,start=25,end=70)
+mp=xsa(om,ctrl=xsaControl)
+
+plot(FLStocks(list("xsa"=mp,"om"=om)))
+
+xsaCtrl["razors"]=xsaControl
+save(xsaCtrl,file=file.path(dirDat,"xsaCtrl"),compress="xz")
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Cross test for razor.
+
+```{r, xsa-fwd, eval=FALSE}
+registerDoParallel(4)
+
+load(file.path(dirDat,"turbot.RData"))
+om=window(om,start=25)
+
+xsaControl=FLXSA.control(tol    =1e-09, maxit   =150, 
+                         min.nse=0.3,   fse     =1.0, 
+                         rage   =1,     qage    =6, 
+                         shk.n  =TRUE,  shk.f   =TRUE, 
+                         shk.yrs=1,     shk.ages=4, 
+                         window =10,    tsrange =10, 
+                         tspower= 0,
+                         vpa    =FALSE)
+
+xsafwd=foreach(assYr=seq(75,40,-5), 
+              .combine=list,
+              .multicombine=TRUE,
+              .packages=c("FLCore","FLAssess","FLXSA","FLasher","FLBRP","plyr")) %dopar%{
+
+    mp =xsa(window(om,end=assYr),ctrl=xsaControl)
+    sr =fmle(as.FLSR(mp,model="bevholt"),control=list(trace=FALSE))
+    mp =fwdWindow(mp,end=assYr+10,FLBRP(mp))
+          
+    fwd(mp,catch=catch(om)[,assYr+0:10],sr=sr)
+    }
+
+xsafwd=as(xsafwd,"FLStocks")
+
+theme_set(theme_bw())
+
+names(xsafwd)=seq(75,40,-5)
+plot(xsafwd)+
+  guides(col=guide_legend(title="Assessment\n Year"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Retrospective cross test
+
+
+```{r, eval=FALSE}
+theme_set(theme_bw())
+
+plot(iter(xsafwd,67))+
+  guides(col=guide_legend(title="Assessment\n Year"))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** Single retrospective cross test
+
+
+\newpage
+## Session Info
+
+```{r}
+sessionInfo()
+```
+
+## Software Versions
+
+* `r version$version.string`
+* FLCore: `r packageVersion('FLCore')`
+* FLife:  `r packageVersion('FLife')`
+* FLBRP:  `r packageVersion('FLBRP')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}

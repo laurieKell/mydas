@@ -1,0 +1,229 @@
+---
+title: "FLife: Operating Model Conditioning"
+subtitle: "Lobster"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+  
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =10, 
+               fig.height=10,
+               cache     =TRUE, 
+               fig.path  ="../tex/om/lobster-",
+               cache.path="../cache/om/lobster/")
+
+iFig=0
+iTab=0
+```
+```{r, dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#sdirMy="/home/laurence/Desktop/sea++/mydas/tasks/task4"
+dirDat=file.path(dirMy,"data")
+
+nits=500
+```
+```{r, pkgs}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(reshape)
+library(GGally)
+
+library(FLCore)
+library(FLBRP)
+library(FLasher)
+library(ggplotFL)
+library(FLife)
+```
+```{r devs}
+set.seed(1233)
+srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:105)),.3,b=0.0)
+```
+
+## Life history parameters
+
+```{r, lh}
+ab=cbind(a=c(0.00126,0.000919,0.0017,0.0004,0.001086,0.000447),
+         b=c(3.36,2.922,2.797,3.123,2.896,3.01))
+         
+lh=read.csv("/home/laurence/Desktop/sea++/mydas/project/tasks/task4/inputs/lobsterGrw.csv")
+lh=cbind(lh,rbind(ab,cbind(a   =rep(NA,dim(lh)[1]-dim(ab)[1]),
+                           b   =rep(NA,dim(lh)[1]-dim(ab)[1]))))
+lh[,1]=lh[,1]/10
+
+lh=cbind(lh,cbind(a50=c( 6.0,rep(NA,dim(lh)[1]-1)),
+                  l50=c(77.5/10,rep(NA,dim(lh)[1]-1)),
+                  t0 =c(-0.1,rep(NA,dim(lh)[1]-1))))
+```
+
+```{r, par}
+my_smooth <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+    geom_point(...,size=.5)+
+    geom_smooth(...,method="lm",se=FALSE)}
+
+my_density <- function(data,mapping,...){
+  ggplot(data=data,mapping=mapping)+
+    geom_density(...,lwd=1)}
+
+theme_set(theme_bw(base_size=20))
+
+ggpairs(transform(lh,linf=log(linf),k=log(k),a50=a50),
+        lower = list(continuous = wrap(my_smooth)),
+        diag=list(continuous=wrap(my_density,alpha=0.2)),
+        title = "")+
+  theme(legend.position ="none",
+        panel.grid.major =element_blank(),
+        axis.ticks       =element_blank(),
+        axis.text.x      =element_blank(),
+        axis.text.y      =element_blank(),
+        panel.border     =element_rect(linetype = 1, colour="black", fill=NA))
+```
+
+**Figure `r iFig=iFig+1; iFig`** Pairwise scatter plots of life history parameters.
+
+
+## Equilibrium dynamics
+
+The parameters are then used by `lhEql` to simulate the equilibrium dynamics by combining the spawner/yield per recruit relationships with a stock recruiment relationship.
+
+```{r, eqRun}
+sim<-function(x,niters=500,se=0.3){
+  
+  mn=aaply(x,1,mean, na.rm=TRUE)
+  sd=aaply(x,1,var,  na.rm=TRUE)^0.5
+  n =aaply(x,1,function(x) sum(!is.na(x)))
+  se=sd/n^0.5
+  
+  if (any(is.na(se))) se[is.na(se)]=se
+  
+  y=data.frame(mn=mn,se=se)
+  y=mdply(y,function(mn,se) rnorm(niters,mn,se))[,-(1:2)]
+  
+  res=FLPar(array(unlist(c(y)),c(dim(x)[1],niters)))
+  
+  dimnames(res)$params=names(mn)
+  
+  res}
+
+# create FLPar
+lh=FLife:::mf2FLPar(lh)
+
+lh=sim(lh,    niters=nits)
+
+lh=lhPar(lh,s=0.8, sl=1)
+eq=lhEql(lh,spwn=0)
+```
+
+```{r vectors}
+sel<-function(x) 
+  catch.sel(x)%/%fapex(catch.sel(x))
+
+dat=FLQuants(eq,"M"=m,"Selectivity"=sel,"Maturity"=mat,"Mass"=stock.wt)
+
+res=ldply(dat,function(x) cast(as.data.frame(quantile(x,probs=c(0.025,0.25,0.5,0.75,0.975))),
+                               age~iter,value="data"))
+
+ggplot(res)+
+  geom_ribbon(aes(age,ymin=`25%`,ymax=`75%`),alpha=0.5,fill="red")+
+  geom_ribbon(aes(age,ymin=`2.5%`,ymax=`97.5%`),alpha=0.1,fill="red")+
+  geom_line(aes(age,`50%`))+
+  facet_wrap(~.id,scale="free")+
+  scale_x_continuous(limits=c(0,10))+
+  xlab("Age")+ylab("")
+```
+
+**Figure `r iFig=iFig+1; iFig`** Vectors.
+
+
+```{r, eq, fig.height=6,fig.width=8}
+plot(iter(eq,1),refpts=FALSE)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Example equilibrum Curve.
+
+
+## Population dynamics
+
+```{r om}
+#http://www.fishbase.org/manual/Key%20Facts.htm
+
+#gTime=4 #round(FLife:::genTime(FLPar(aaply(lh,1,mean))))
+
+genTime<-function(object,f=0){
+  
+     object@fbar=object@fbar[,1]%=%f
+     n=stock.n(object)[,1]
+     
+     apply(stock.wt(object)%*%n%*%ages(stock.wt(object)),6,sum)%/%
+     apply(stock.wt(object)%*%n,6,sum)}
+
+gTime=round(mean(genTime(eq)))
+
+eq@fbar=refpts(eq)["msy","harvest"]%*%FLQuant(c(rep(.1,19),
+                                              seq(.1,2,length.out=30),
+                                              seq(2,1.0,length.out=gTime)[-1],
+                                              rep(1.0,61)))[,1:105]
+
+om=as(eq,"FLStock")
+om=fwd(om,fbar=fbar(om)[,-1],sr=eq,residuals=srDev)
+           
+save(lh,eq,om,file=file.path(dirDat,"lobster.RData"),compress="xz")  
+```
+
+```{r om-fig}
+plot(om)
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series.
+
+```{r ts}
+plot(FLQuants(om, 
+          "ssb" = function(x) ssb(x)%/%refpts( eq)["msy","ssb"], 
+          "f" =   function(x) fbar(x)%/%refpts(eq)["msy","harvest"], 
+          "rec" = function(x) rec(x)%/%refpts( eq)["msy","rec"], 
+          "catch"=function(x) landings(x)%/%refpts(eq)["msy","yield"])) + 
+  geom_hline(aes(yintercept=1),col="red") 
+```
+
+**Figure `r iFig=iFig+1; iFig`** Time series relative to MSY benchmarks.
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLasher:   `r packageVersion('FLasher')`
+* FLife:     `r packageVersion('FLife')`
+* ggplotFL:  `r packageVersion('ggplotFL')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+```
+
+

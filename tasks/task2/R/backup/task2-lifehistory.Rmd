@@ -1,0 +1,93 @@
+---
+title: "MyDas" 
+subtitle: "Life History Parameters"
+author: "Laurence Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown:::pdf_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+bibliography: /home/laurence/Desktop/sea++/cie/greySnapper/tex/refs.bib
+tags: FLPKG FLR
+license: Creative Commons Attribution-ShareAlike 4.0 International
+---
+
+```{r knitr, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =!TRUE,
+               cache.path="../cache/task2-sa",
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =FALSE,
+               fig.height=6,
+               fig.width =8,
+               fig.path  ="../tex/task2-sa-")
+
+iFig=0
+```
+```{r, pkgs}
+library(plyr)
+library(dplyr)
+library(reshape2)
+library(ggplot2)
+
+library(FLCore)
+library(FLBRP)
+library(ggplotFL)
+library(diags)
+library(FLife)
+
+theme_set(theme_bw())
+options(digits=3)
+```
+```{r dir}
+dirMy=dirname(dirname(FLife:::getScriptPath()))
+#dirMy="/home/laurence/Desktop/sea++/mydas/tasks/task2"
+
+dirInp=file.path(FLCore:::getDir(FLCore:::getDir(dirMy)),"inputs")
+dirDat=file.path(FLCore:::getDir(FLCore:::getDir(dirMy)),"data")
+```
+
+```{r lhpar-mydas}
+load(file.path(dirDat,"stocks.RData"))
+load(file.path(dirDat,"fishbase-web.RData"))
+
+data(wklife)
+names(fb)[1]="spp"
+
+cmn = c("Sprat","Gurnards","Saithe","Pollock","Ling","Rays","Skates","John Dory","Turbot","Brill")
+nm  = c("Sprattus sprattus sprattus",
+        "Chelidonichthys cuculus",
+        "Pollachius virens","Pollachius pollachius","Molva molva",
+        "Chondrichthyes","Chondrichthyes",
+        "Zeus faber",
+        "Scophthalmus maximus","Scophthalmus rhombus")
+lhpmydas=subset(fb,spp%in%nm)
+
+unique(lhpmydas$spp)
+```
+
+```{r lhpar-csns}
+lhpcns=merge(fb,stocks,by="spp")
+
+unique(lhpcns$spp)
+```
+
+```{r lhpar-skgu}
+gurnards=subset(fb,family%in%"Triglidae")
+skates  =subset(fb,family%in%"Rajidae")
+```
+
+```{r lhpar-save}
+save(stocks,  file=file.path(dirDat,"stocks.RData"),  compress="xz")
+save(lhpcns,  file=file.path(dirDat,"lhpcns.RData"),  compress="xz")
+save(lhpmydas,file=file.path(dirDat,"lhpmydas.RData"),compress="xz")
+save(gurnards,file=file.path(dirDat,"gurnards.RData"),compress="xz")
+save(skates,  file=file.path(dirDat,"skates.RData"),  compress="xz")
+```

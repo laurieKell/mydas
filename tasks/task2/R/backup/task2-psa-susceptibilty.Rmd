@@ -1,0 +1,166 @@
+---
+title: "Risk Analysis"
+subtitle: "Productivity Analysis" 
+author: "Laurie Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r dir}
+dirMy =getwd()
+dirInp=file.path(dirMy,"inputs")
+dirDat=file.path(dirMy,"data")
+```
+
+```{r knitr, echo=FALSE}
+library(knitr)
+
+opts_chunk$set(comment=NA, fig.width =8, 
+               fig.height=6,
+               fig.path  ="../tex/",
+               warning=FALSE, 
+               message=FALSE, 
+               error  =FALSE, 
+               echo   =FALSE,
+               cache  =TRUE)
+iFig=0
+iTab=0
+```
+
+```{r init}
+library(ggplot2)
+library(reshape2)
+
+library(plyr)
+library(dplyr)
+
+library(FLCore)
+library(FLife)
+library(popbio)
+
+library(ggthemes)
+library(scales)
+
+theme_set(theme_bw())
+```
+
+
+```{r lhparams}
+oss have a look at this for susceptibility: code below
+
+
+library(DBI)
+library(RPostgreSQL)
+library(dplyr)
+library(plyr)
+library(reshape)
+
+library(ggplot2)
+options(scipen = 999)
+
+
+drv  = dbDriver("PostgreSQL")
+
+con  = dbConnect(drv, host = 'postgresql-seascope.csffkpr9jjjn.eu-west-2.rds.amazonaws.com',
+                 dbname='mydasDev',
+                 port = 5432,
+                 user = 'MydasApplication',
+                 password = 'gmit2017!')
+
+stecf            = dbGetQuery(con,"SELECT * FROM data_stecflandings")
+land2016         = subset(stecf, year %in% c(2016))
+#remove area 4bc etc
+land2016$flag    = ifelse(land2016$species %in% "LIN" & land2016$latitude <57.5 & land2016$area %in% "4", 1, 0)
+land2016         = subset(land2016, flag==0)
+land2016         = subset(land2016, !(area %in% "6B RFMO"))
+area             = dbGetQuery(con,"SELECT * FROM div_area")
+
+#ices division isnt broken down by division in North sea
+land2016$division = ifelse(land2016$area %in% "4", "4A", land2016$division)
+#convert in order to join and sum with landings
+area$division     = ifelse(area$division %in% c("12A","12B","12C"), "12",
+                    ifelse(area$division %in% c("14A","14B"), "14", area$division))
+#areas not in euro zone so remove
+area              = subset(area, !(area_27 %in% c("8.d.1","7.k.1","7.c.1","6.b.1","7.j.1")))
+
+totarea           = ddply(area, .(division), summarise, totareakm=sum(area_km2))
+
+allareas          = inner_join(land2016, totarea)
+
+allland           = ddply(allareas, .(country, gear, mesh, stock, speciesgp, length), summarise, totland=sum(landings))
+allland           = subset(allland, totland >0)
+alllandarea       = ddply(allareas, .(country, gear, mesh, stock, speciesgp, length, ices_rectangle), summarise, uniarea=unique(area_km2))
+allareatot        = ddply(alllandarea, .(country, gear, mesh, stock, speciesgp, length), summarise, totfleetarea=sum(uniarea))
+combi             = inner_join(allland, allareatot)
+
+divarea           = ddply(allareas, .(stock, division), summarise, area=unique(totareakm))
+allstockarea      = ddply(divarea, .(stock), summarise, stockarea=sum(area))
+
+overlap           = inner_join(combi, allstockarea)
+overlap$olap_percent   = (overlap$totfleetarea/overlap$stockarea)*100
+overlap$price     =  ifelse(overlap$speciesgp %in% c("BLL"), 5.62,
+                     ifelse(overlap$speciesgp %in% c("TUR"), 8.54,   
+                     ifelse(overlap$speciesgp %in% c("LIN"), 1.22,  
+                     ifelse(overlap$speciesgp %in% c("JOD"), 4.38,
+                     ifelse(overlap$speciesgp %in% c("SKA"), 1.22,
+                     ifelse(overlap$speciesgp %in% c("SPR"), 0.20,
+                     ifelse(overlap$speciesgp %in% c("POL"), 1.76,
+                     ifelse(overlap$speciesgp %in% c("POK"), 1.10,
+                     ifelse(overlap$speciesgp %in% c("GUG"), 1.45,
+                     0)))))))))
+#management categories - NEED to check, 6 = completely datapoor, 3 has LPUE time series etc for TAC
+overlap$category  =  ifelse(overlap$speciesgp %in% c("BLL"), 3, 
+                     ifelse(overlap$speciesgp %in% c("POL"), 4,                         
+                     ifelse(overlap$speciesgp %in% c("GUG"), 6,                             
+                     ifelse(overlap$speciesgp %in% c("SPR"), 3, NA))))
+#horizontal overlap categories 3 highest 1 lowest
+overlap$score_olap = ifelse(overlap$olap_percent >30, 3, 
+                     ifelse(overlap$olap_percent >10 & overlap$olap_percent <30, 2,
+                     ifelse(overlap$olap_percent <10, 1,  0)))
+#price scoring ategories 3 highest 1 lowest
+overlap$score_pr   = ifelse(overlap$price >1.25, 3, 
+                     ifelse(overlap$price >0.8 & overlap$price <1.25, 2,
+                     ifelse(overlap$price <0.8, 1,  0)))
+
+#selectivity groupings 3 high, 2 medium 1 low
+overlap$sel_olap   = ifelse(overlap$gear %in% c("BEAM") & overlap$speciesgp %in% c("BLL","TUR","GUG","SKA"), 3,
+                     ifelse(overlap$gear %in% c("OTTER") & overlap$speciesgp %in% c("BLL","TUR", "SKA", "GUG", "JOD","LIN","POK","POL"), 3,   
+                     ifelse(overlap$gear %in% c("GILL") & overlap$speciesgp %in% c("POK","POL"), 3, 
+                     ifelse(overlap$gear %in% c("GILL") & overlap$speciesgp %in% c("LIN", "TUR"), 2,        
+                     ifelse(overlap$gear %in% c("LONGLINE") & overlap$speciesgp %in% c("LIN"), 3,  
+                     ifelse(overlap$gear %in% c("LONGLINE") & overlap$speciesgp %in% c("POL"), 2,  
+                     ifelse(overlap$gear %in% c("PEL_TRAWL") & overlap$speciesgp %in% c("SPR"), 3,   
+                     ifelse(overlap$gear %in% c("GILL") & overlap$speciesgp %in% c("POK","POL"), 3, 1))))))))  
+
+
+#Determination of susceptibility scores, adopted from Hobday et al. (2011)
+#Evidence of post-capture release and survival =1, released alive =2, majority dead or retained =3
+overlap$survival   = ifelse(overlap$speciesgp %in% c("SKA"), 1,
+                     ifelse(overlap$speciesgp %in% c("BLL","TUR","POL", "LIN","POK"), 2,  3))
+                     
+#calculate susceptibility
+attach(overlap)
+overlap$S          = (((survival*sel_olap*score_pr*score_olap)-1)/40)+1
+#create metier
+
+#over all countries avera
+suscept            = ddply(overlap, .(gear, stock), summarise, avg=mean(S))
+
+
+ggplot(suscept,aes(x=gear,y=avg,fill=factor(stock)))+
+   geom_bar(stat="identity",position="dodge")+theme_bw()+scale_fill_brewer(palette="Spectral")+  coord_cartesian(ylim = c(1, 2)) +
+   theme( text = element_text(size=16), strip.text.x = element_text(size = 16),strip.text.y = element_text(size = 16),
+   panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))+
+  ylab("Susceptibility") + guides(fill=guide_legend("stock")) 
+
+
+
+```
+
+```{r r}
+l=leslie(eql,fmult=refpts(eql)["crash","harvest"])
+
+adply(l,3,lambda)
+```
+**Figure `r iFig=iFig+1; iFig`** 
+

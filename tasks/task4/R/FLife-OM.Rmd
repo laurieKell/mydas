@@ -1,0 +1,171 @@
+---
+title: "Operating Models Conditioned using Life History Relationships"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+vignette: >
+  %\VignetteIndexEntry{FLife}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+github_document:
+    mathjax: TRUE
+bibliography: refs.bib
+tags: FLife FLR
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+# Revisions 
++  Natural mortality is always a tricky one. M is likely to be related to body length but other factors must also play a role. I personally like the idea that age at first maturity should be a good indicator as this makes intuitive sense but Then et al (2015 I think) concluded that the oldest observed age was the best predictor. Even so, the uncertainty around the predictions by Then is huge. Anyway, I suppose Gislason is as good as any but we should test the sensitivity
++   I don’t understand equations 4,5,6 [now 6, 9,10] in the document; the parameters are not explained
++   How do you estimate selectivity from life-history parameters?
++   Is S in eq 7 spawner or ssb?
++   Is S in eq 8 SSB? Then why is fecundity in there and not weight-at-age?
++   How do you use the life-history parameters to estimate the SR?
+
+```{r knitr_init, echo=FALSE, results="hide"}
+library(knitr)
+## Global options
+opts_chunk$set(cache     =TRUE,
+               cache.path="../cache/FLife-OM/",
+               echo      =FALSE,
+               eval      =TRUE,
+               prompt    =FALSE,
+               comment   =NA,
+               message   =FALSE,
+               warning   =FALSE,
+               tidy      =TRUE,
+               fig.height=6,
+               fig.width =8,
+               fig.path  ="../tex/FLife-OM-")
+
+options(digits=3)
+```
+
+LIfe history relationships were used to create operating models for data poor stocks based on life history relationships. 
+
+# Introduction
+
+An objective of Management Strategy Evaluation is to develop stock assessment methods, reference points and harvest control rules that are robust to uncertainty. Many Operating Models have been developed using a stock assessment parigdim, however, there are many processes for which there is little infomation about in stock assessment datasets, e.g. natural mortality, the steepness of the stock recruitment relationship, the form of population regulation and density dependence. The **FLife** package therefore allows operating models to be developed based on life history relationships and ecological processes. Doing this is particularly valuable in data poor situtations where knowledge and data are limited, but also in data rich situtaions as simulation testing an assessment procedure using a model conditioned on the same assumptions is not necessarily a true test of robustness.  
+
+# Material and Methods
+
+Life history parameters for growth, natural mortality and maturity were used to develop an age-based Operating Model. To do this the parameters were first used to parameterise functional forms for mass ($W$), proportion mature ($Q$), natural mortality ($M$) and fishing mortality ($F$) at age. These were then used to calculate the  spawner ($S/R$) and yield-per-recruit ($Y/R$) which were then combined with a stock recruitment relationship [@sissenwine1987alternative] to calculate the equilibrium stock size as a function of fishing mortality ($F$). 
+
+This analysis allows a variety of reference points such as those based on Maximum Sustainable Yield ($MSY$), i.e. $B_{MSY}$ the spawning stock biomass ($S$) and $F_{MSY}$ the fishing mortality that produces $MSY$ at equilibrium to be estimated. Other reference points are $F_{0.1}$ the fishing mortality on the yield per recruit curve where the slope is 10\%  of that at the origin, a conservative proxy for $F_{MSY}$; and
+$F_{Crash}$ which is the fishing mortality that will drive the stock to extinction since it is equivalent to a $R/S$ greater than the slope at the origin of the stock recruitment relationship, i.e. recruitment can not replace removals for a fishing mortality equal to $F_{Crash}$.  
+
+The equilibrium relationships can then be turned into a forward dynamic model and projected forward.
+
+A variety of functional forms can be assumed for all of the various process, i.e. growth, mortality, maturity, the selection pattern of the fisheries and the stock recruitment relationship. Commonly processes such as growth an maturity-at-age are well known while those for natural mortality and the stock recruitment relationship are poorly known [@michielsens2004bayesian]. In the later case assumptions have to be made and to evaluate the sensitivity of any analysis to those assumptions a variety of scenarios are considered. Below a base case is defined that can then be modified to create a variety of scenarios.
+
+
+## Life history processes
+
+### Individual Growth
+
+Growth in length is modelled by the Von Bertalanffy growth equation @vonbert1957quantitative
+
+\begin{equation} L = L_\infty(1 - exp(-k(t-t_0)) \end{equation}
+         
+where $k$ is the rate at which the rate of growth in length declines as length approaches the asymptotic length  $L_\infty$ and $t_{0}$ is the hypothetical time at which an individual is of zero length.
+
+Length is converted to mass using the length-weight relationship 
+    
+\begin{equation} W = aL_t^b \end{equation}
+
+\noindent where $a$ is the condition factor and $b$ is the allometric growth coefficient.
+
+
+### Maturity-at-age
+
+Proportion mature-at-age is modelled by the logistic equation with 2 parameters: age at 50\% ($a_{50}$) and 95\% ($a_{95}$) mature.
+
+\begin{equation}
+f(x) = \left\{ \begin{array}{ll}
+			0                                 &\mbox{ if $(a_{50}-x)/a_{95} >  5$} \\
+			a_{\infty}                        &\mbox{ if $(a_{50}-x)/a_{95} < -5$} \\
+			\frac{m_{\infty}}{1.0+19.0^{(a_{50}-x)/_{95})}} &\mbox{ otherwise}
+		\end{array}
+       \right.
+\end{equation}
+
+### Natural Mortality
+
+Natural mortality of exploited fish populations is often assumed to be a species-specific constant independent of body size. This assumption has important implications for size-based fish population models and for predicting the outcome of size-dependent fisheries management measures such as mesh-size regulations [@gislason2010does]. Direct estimates of the instantaneous natural mortality made in controlled studies, however, are shown to vary by age [@lorenzen2002density]. Although $M$ can sometimes be estimated within an assessment model for example where data from tagging provide information independent of fishing mortality rates [@haist1997integrated, @pine2003review] in most cases $M$ is derived from a variety of life history relationships, e.g. based on size [@jensen1985comparison,@griffiths2007natural, @gunderson1980using, @hoenig1983empirical, @gunderson1988reproductive,@hewitt2005comparison]. The large and ever increasing literature on this subject is a reflection of the uncertainty. @gislason2010does in an emprirical study showed that $M$ is significantly related to body length, asymptotic length and k. Temperature is non-significant when $k$ is included, since $k$ itself is correlated with temperature, i.e.
+
+\begin{equation}
+            M =  0.55L^{1.61}L_\infty^{1.44}k
+\end{equation} 
+
+### Selection Pattern
+
+By default the fishery is assumed to catch mature fish and so the selection pattern is based on the maturity ogive. It is modelled by a double normal curve, however, to allow scenarios to be implemented where older fish are less vulnerable to the fisheries.    
+
+The double normal has three parameters that describe the age at maximum selection ($a1$), the rate at which the left-hand  limb increases ($sl$) and the right-hand limb decreases ($sr$) which allows flat topped or domed shaped selection patterns to be chosen, i.e.
+         
+\begin{equation}
+f(x) = \left\{ \begin{array}{ll}
+			0                                 &\mbox{ if $(a_{50}-x)/a_{95} >  5$} \\
+			a_\infty                        &\mbox{ if $(a_{50}-x)/a_{95} < -5$} \\
+			\frac{m_\infty}{1.0+19.0^{(a_{50}-x)/_{95})}} &\mbox{ otherwise}
+		\end{array}
+       \right.
+\end{equation}
+
+## Stock Recruitment Relationship
+
+By default a Beverton and Holt stock recruitment relationship @beverton1993dynamics was assumed, This relationship is derived from a simple density dependent mortality model where the more survivors there are the higher the mortality. It is assumed that the number of recruits ($R$) increases towards an asymptotic level ($R_{max}$) as egg production increases i.e.  
+ 
+ \begin{equation} R=Sa/(b+S) \end{equation} 
+
+
+The relationship between stock and recruitment was modelled by a Beverton and Holt stock-recruitment relationship @beverton1993dynamics reformulated in terms of steepness ($h$), virgin biomass ($v$) and $S/R_{F=0}$. Where steepness is the proportion of the expected recruitment produced at 20\% of virgin biomass relative to virgin recruitment  $(R_0)$. However, there is often insufficient information to allow its estimation from stock assessment [@pepin2015reconsidering] and so by default a value of 0.8 was assumed. Virgin biomass was set at 1000 Mt to allow comparisons to be made across scenarios.
+
+\begin{equation}
+R=\frac{0.8R_0h}{0.2S/R_{F=0}R_0(1-h)+(h-0.2)S}
+\end{equation} 
+
+$S$ the spawning stock biomass, is the sum of the products of the numbers of females, $N$, proportion mature-at-age, $Q$ and their mean fecundity-at-age, $G$, which is taken to be proporational to their weight-at-age i.e. 
+
+\begin{equation} S = \sum\limits_{i=0}^{p} {N_iQ_iW_i} \end{equation}
+
+where fecundity-at-age is assumed proportional to biomass and the sex ratio to be 1:1. Proportion mature is 50\% at the age that attains a length of $l50$, 0\% below this age and 100\% above. 
+
+## Equilibrium Analysis 
+
+@sissenwine1987alternative, estimated surplus production using an age-based analysis using an equilbirium analysis that by combining a stock-recruitment relationship, a spawning-stock-biomass-per-recruit analysis, and a yield-per-recruit analysis. For any specified rate of fishing mortality, an associated value of spawning stock biomass ($S$) per recruit ($R$) is $S/R$ is defined, based on the assumed processes for growth, natural mortality and selection pattern-at-age detailed in the previous sections.
+
+\begin{equation}
+S/R=\sum\limits_{i=0}^{p-1} {e^{\sum\limits_{j=0}^{i-1} {-F_j-M_j}}} W_i Q_i + e^{\sum\limits_{i=0}^{p-1} {-F_i-M_i}} \frac{W_p Q_p}{1-e^{-F_p-M_p}}\\
+\end{equation} 
+
+When the value of $S/R$ obtained is inverted and superimposed on the stock-recruitment function as a slope ($R/S$), the intersection of this slope with the stock-recruitment function defines an equilibrium level of recruitment. When this value of recruitment is multiplied by the yield per recruit calculated for the same fishing mortality rate, the equilibrium yield associated with the fishing mortality rate emerges [@gabriel1999review]. 
+
+\begin{equation}
+Y/R=\sum\limits_{a=r}^{n-1} {e^{\sum\limits_{i=r}^{a-1} {-F_i-M_i}}} W_a\frac{F_a}{F_a+M_a}\left(1-e^{-F_i-M_i} \right) + e^{\sum\limits_{i=r}^{n-1} {-F_n-M_n}} W_n\frac{F_n}{F_n+M_n}\\
+\end{equation} 
+
+The second term is the plus-group, i.e. the summation of all ages from the last age to infinity. 
+
+## Forward Projection
+
+The stock recruitment relationship and the vectors of weigth, natural mortality, maturity and selectivity-at-age allow a forward projection model to be created, which forms the basis of the Operating Model.
+
+\begin{equation}
+N_{t,a} =
+\left\{
+\begin{array}{ll}
+\vspace{0.2cm}
+R_t, & \rm{if} \ a=0,\\
+\vspace{0.2cm}
+N_{t-1,a-1} e^{-Z_{t-1,a-1}}, & \rm{if} \ 1 \leq a \leq A-1,\\
+N_{t-1,A-1} e^{-Z_{t-1,A-1}}+N_{t-1,A} e^{-Z_{t-1,A}}, & \rm{if} \ a=A,
+\end{array}
+\right.
+\end{equation}
+
+where $N_{t,a}$ is the number of fish of age $a$ at the beginning of year $t$, $R_t$ is the total number of recruits born in year $t$. Here, $A$ is the so-called plus group age, which is an aggregated age greater than or equal to the actual age $A$.
+
+
+# References {#References}
+

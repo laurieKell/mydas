@@ -1,0 +1,47 @@
+---
+title: "MyDas"
+subtitle: "Task 5: Work Plan"
+date: "June 28, 2018"
+output: html_document
+---
+
+```{r libraries, echo=FALSE}
+library(grid)
+library(png)
+```
+
+## Operating Models
+
++ Brill, Turbot, Pollack, Thornback Ray, Sprat, Razor Clam, Lobster
+
+### Life History
+
+```{r fig.height=7.5,echo=FALSE}
+grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/tasks/task5/tex/om-brill-om-1.png"))
+```
+
+ 
+### Data Rich
+
+```{r fig.height=7.5,echo=FALSE}
+#grid.raster(readPNG("/home/laurence/Desktop/sea++/mydas/tasks/task5/tex/om-brill-om-1.pdf"))
+```
+
+
+## Stock Assessments
+
++ 2/3 ICES Catch
++ DBSRA
++ LPSPR
++ MPB
++ SS-ASPM
++ SS-Lencomp
++ Delay Difference
+
+
+# Cross tests
+
+Run 
+
+# MSE
+
