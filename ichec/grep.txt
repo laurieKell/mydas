@@ -1,0 +1,3 @@
+grep -r --include *.Rmd "source(" \pkg     >source.txt
+grep -r --include *.Rmd "source(" \project >>source.txt
+
