@@ -20,4 +20,6 @@
 *.docx
 *.docx#
 mydas-project.Rproj
-_rslurm_randomD
+pkg
+wiki
+
