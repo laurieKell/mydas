@@ -512,30 +512,17 @@ p <- ggplotly(p)
 
 
 ```{r, parerto, eval=!FALSE}
-ks=ddply(subset(YFronts,plim>0.975),.(cv,nyr), with,
-      data.frame(yield    =quantile(yield,    probs=c(0.5,0.75,0.975)),
-                 yieldAav1=quantile(yieldAav1,probs=c(0.5,0.75,0.975)),
-                 pctl     =c(0.5,0.75,0.975)))
-
-ks=merge(subset(YFronts,plim>0.975),subset(ks,pctl==0.975),by=c("cv","nyr"))
-ks=transform(ks,yTar=(yield.y-yield.x)^2,
-                vTar=(yieldAav1.y-yieldAav1.x)^2)
-
-yTar=ddply(ks,.(cv,nyr), with, data.frame(k1=k1[yTar==min(yTar)],
-                                          k2=k2[yTar==min(yTar)],
-                                          y =yield.x[    yTar==min(yTar)],
-                                          v =1-yieldAav1.x[yTar==min(yTar)]))
-
-vTar=ddply(ks,.(cv,nyr), with, data.frame(k1=k1[vTar==min(vTar)],
-                                          k2=k2[vTar==min(vTar)],
-                                          y =yield.x[      vTar==min(vTar)],
-                                          v =1-yieldAav1.x[vTar==min(vTar)]))
-
-tar=rbind(cbind(Objective="Yield",yTar),
-          cbind(Objective="AAV",  vTar))
-names(tar)[6:7]=c("Yield","AAV")
+tar=ddply(subset(YFronts,yieldAav1>=0.8&plim>0.975),.(nyr,cv), with, 
+                   data.frame(k1=k1[yield==max(yield)],
+                              k2=k2[yield==max(yield)],
+                              y =max(yield),
+                              v =1-yieldAav1[yield==max(yield)]))
+                              
 tar$ctrl=1
 tar$spp="pollack"
+
+cast(Tar,nyr~cv,value="y")
+cast(Tar,nyr~cv,value="v")
 ```
 
 
@@ -543,7 +530,7 @@ tar$spp="pollack"
 ## Run MSE
 load(file.path(dirRes,"pollack-om.RData"))
 
-mseD<-foreach(i=seq(dim(tar)[1]), 
+mseD<-foreach(i=seq(dim(subset(tar,cv==0.2))[1]), 
                 .combine=rbind,
                 .multicombine=TRUE,
                 .export=c("dirRes","dirOM","tar","srDev"),
