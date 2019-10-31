@@ -27,7 +27,7 @@
 \usepackage{hyperref}
 \usepackage{url}
 \hypersetup{colorlinks, urlcolor=darkblue}
-
+\usepackage{pdfpages}
 
 \usepackage{lscape}
 % figs to be 75% of test width
@@ -124,8 +124,6 @@ morekeywords={*,...}  % if you want to add more keywords to the set
 %
 \begin{document}
 
-\input{wklifeviii-future-directions.tex}
-
 \onehalfspacing
 \lhead{\normalsize\textsf{MyDas- Ref: ITT17-015}}
 \rhead{}
@@ -137,15 +135,16 @@ morekeywords={*,...}  % if you want to add more keywords to the set
 \pagestyle{empty}
 
 %
-\begin{abstract}
 
-\textit{}
-
-
-\end{abstract}
-
+\newpage
 \tableofcontents
 \newpage
+
+\begin{abstract}
+
+\textit{\input{wklifeviii-future-directions.tex}}
+
+\end{abstract}
 
 \onehalfspacing
 \lhead{\normalsize\textsf{SCRS/2014/025}}
@@ -182,7 +181,6 @@ this research contract will focus on the available data for each stock first and
 \item Galway Mayo Institute of Technology GMIT had been awarded a Cullen fellowship for a PhD project on management strategy evaluation for monkfish. It is expected that the Cullen PhD and service provider will closely collaborate on tasks like data collation, assessment model implementation, simulation model development and management strategy evaluation. 
 \end{itemize}
 \end{description}
-
 
 
 \section{Project Plan}
@@ -434,7 +432,6 @@ There are a variety of manuscripts that the project will produce, i.e. on new me
     \end{description}
 \end{description}
 
-
 \newpage\section{Tables}
 
 \begin{center}
@@ -473,12 +470,39 @@ There are a variety of manuscripts that the project will produce, i.e. on new me
 \section{Appendices} 
 \end{center}
 
-\newpage
-\begin{center}
-\section*{GMIT tax clearance certificate} 
-\end{center}
-%\includepdf[pages=-]{GMIT_tax_clearance.pdf}
+\section{Appendix 1: Peer Review Papers}
 
+
+\subsubsection{Linking the performance of a data-limited empirical catch rule to life-history traits}
+
+\includepdf[pages=-,pagecommand={},width=\textwidth]{../papers/empricalRule/ICESJMS_2019_350_R1_Proof_hi.pdf}
+
+\subsubsection{Performance of length-based data-limited methods in a multi-fleet context}
+
+\includepdf[pages=-,pagecommand={},width=\textwidth]{../papers/catchLength/12553688_File000007_240052393.pdf}
+
+
+\subsubsection{ROC}
+
+\includepdf[pages=1,pagecommand={},width=\textwidth]{../papers/roc/tex/roc.pdf}
+
+\subsubsection{Pareto}
+
+\includepdf[pages=1,pagecommand={},width=\textwidth]{../papers/pareto/tex/pareto.pdf}
+
+\subsubsection{FLife}
+
+\includepdf[pages=1,pagecommand={},width=\textwidth]{../papers/flife/tex/FLife.pdf}
+
+
+\end{document}
+
+
+%\newpage
+%\begin{center}
+%\section*{GMIT tax clearance certificate} 
+%\end{center}
+%\includepdf[pages=-]{GMIT_tax_clearance.pdf}
 
 \end{document}
 
@@ -697,7 +721,6 @@ length-based  indicators  and  reference  points,  spawning  potential  ratio (S
 catch  and  cpue
 -based  methods,  and  catch
 -based  methods.  The  prospects  of managing other crustaceans and molluscs using minimum legal size was also evaluated.  The  methods  most  suitable  to  the  data  and  expertise  available  were  identified  for each of the requested stocks on the western shelf for ICES  WKProxy.
-
 
 \end{document}
 

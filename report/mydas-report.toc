@@ -1,0 +1,23 @@
+\contentsline {section}{\numberline {1.}The Call}{4}{section.1}
+\contentsline {section}{\numberline {2.}Project Plan}{5}{section.2}
+\contentsline {subsection}{\numberline {2.1}Workplan}{6}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Tasks}{8}{subsection.2.2}
+\contentsline {subsubsection}{\numberline {2.21}Task 1: Stock prioritisation (\leavevmode {\color {blue}Laurie})}{8}{subsubsection.2.2.1}
+\contentsline {subsubsection}{\numberline {2.22}Task 2: Data collation (\leavevmode {\color {blue}Laurie})}{8}{subsubsection.2.2.2}
+\contentsline {subsubsection}{\numberline {2.23}Task 3: Framework Development (\leavevmode {\color {blue}Laurie})}{9}{subsubsection.2.2.3}
+\contentsline {subsubsection}{\numberline {2.24}Task 4: Method Performance Appraisal (\leavevmode {\color {blue}Laurie})}{10}{subsubsection.2.2.4}
+\contentsline {subsubsection}{\numberline {2.25}Task 5: Reference Point Comparisons (\leavevmode {\color {blue}Laurie}, \leavevmode {\color {green}C\'oil\'in})}{10}{subsubsection.2.2.5}
+\contentsline {subsubsection}{\numberline {2.26}Task 6: Liaison with Marine Institute (\leavevmode {\color {green}C\'oil\'in}, \leavevmode {\color {blue}Laurie}, \leavevmode {\color {blue}Laurie})}{10}{subsubsection.2.2.6}
+\contentsline {subsubsection}{\numberline {2.27}Task 7: Linkage with other Projects (\leavevmode {\color {green}C\'oil\'in})}{10}{subsubsection.2.2.7}
+\contentsline {subsection}{\numberline {2.3}Project Management and Milestones}{12}{subsection.2.3}
+\contentsline {subsubsection}{\numberline {2.31}Task Summary}{13}{subsubsection.2.3.1}
+\contentsline {subsection}{\numberline {2.4}Outputs}{14}{subsection.2.4}
+\contentsline {subsection}{\numberline {2.5}Deliverables}{14}{subsection.2.5}
+\contentsline {section}{\numberline {3.}Tables}{16}{section.3}
+\contentsline {section}{\numberline {4.}Appendices}{20}{section.4}
+\contentsline {section}{\numberline {5.}Appendix 1: Peer Review Papers}{20}{section.5}
+\contentsline {subsubsection}{\numberline {5.01}Linking the performance of a data-limited empirical catch rule to life-history traits}{20}{subsubsection.5.0.1}
+\contentsline {subsubsection}{\numberline {5.02}Performance of length-based data-limited methods in a multi-fleet context}{56}{subsubsection.5.0.2}
+\contentsline {subsubsection}{\numberline {5.03}ROC}{122}{subsubsection.5.0.3}
+\contentsline {subsubsection}{\numberline {5.04}Pareto}{124}{subsubsection.5.0.4}
+\contentsline {subsubsection}{\numberline {5.05}FLife}{126}{subsubsection.5.0.5}

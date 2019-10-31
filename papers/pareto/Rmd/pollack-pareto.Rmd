@@ -253,7 +253,7 @@ ranD<-foreach(i=seq(dim(scen)[1])[-c(1,3:6)],
                 sr_deviances=srDev,
                 u_deviances =uDev,
                 start  =108,end=140,
-                nyrs   =nyr,lag=0,maxF=1.5)
+                nyrs   =nyr,lag=0,maxF=refpts(eq)["msy","harvest"]*1.5)
           
     save(mse,file=file.path(dirRes,paste("ranD-",
                 spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep="")))
@@ -530,7 +530,7 @@ cast(Tar,nyr~cv,value="v")
 ## Run MSE
 load(file.path(dirRes,"pollack-om.RData"))
 
-mseD<-foreach(i=seq(dim(subset(tar,cv==0.2))[1]), 
+mseD<-foreach(i=seq(dim(tar)[1])), 
                 .combine=rbind,
                 .multicombine=TRUE,
                 .export=c("dirRes","dirOM","tar","srDev"),
@@ -558,7 +558,7 @@ mseD<-foreach(i=seq(dim(subset(tar,cv==0.2))[1]),
   nyrs  =5,
   cpueFn=ssb,
   lag   =0,
-  maxF  =1.5){
+  maxF  =c(refpts(eq)["msy","harvest"]*1.5)){
 
   ##So you dont run to the end then crash
   end=min(end,range(om)["maxyear"]-interval)
@@ -603,13 +603,13 @@ mseD<-foreach(i=seq(dim(subset(tar,cv==0.2))[1]),
     print(paste("mse-",spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep=""))
                                   
     set.seed(1235)
-    uDev =FLife:::rlnoise(500,FLQuant(0,dimnames=dimnames(iter(fbar(om),1))),cv,b=0.0)
+    uDev =FLife:::rlnoise(dim(om)[6],FLQuant(0,dimnames=dimnames(iter(fbar(om),1))),cv,b=0.0)
     mse=mseSBTD(om,eq,
                 control=k1k2,
                 sr_deviances=srDev,
                 u_deviances =uDev,
                 start  =108,end=140,
-                nyrs   =nyr,lag=0,maxF=1.5)
+                nyrs   =nyr,lag=0,maxF=refpts(eq)["msy","harvest"]*1.5)
           
     save(mse,file=file.path(dirRes,paste("mse-",
                 spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep="")))
