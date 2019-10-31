@@ -166,9 +166,9 @@ The ROC curve is constructed by sorting the observed outcomes from the OM by the
 Laurence Kell's involvement was funded through the MyDas project under the Marine Biodiversity Scheme which is financed by the Irish government and the European Maritime and Fisheries Fund (EMFF) as part of the EMFF Operational Programme for 2014-2020. 
 
 \clearpage
-\bibliography{/home/laurence/Desktop/refs.bib}
-\bibliographystyle{apalike}
-
+%\bibliography{/home/laurence/Desktop/sea++/mydas/papers/refs.bib}
+%\bibliographystyle{apalike}
+\input{roc.bbl}
 
 \clearpage
 \section{Figures}
@@ -176,8 +176,8 @@ Laurence Kell's involvement was funded through the MyDas project under the Marin
 \newpage
 \begin{figure}[h]
 \centering
-\includepdf[pages=1,pagecommand={},width=\textwidth]{roc-cor-1.pdf}
-%\includegraphics[width=\textwidth]{om.png}
+%\includepdf[pages=1,pagecommand={},width=\textwidth]{roc-cor-1.pdf}
+\includegraphics[width=\textwidth]{roc-cor-1.png}
 \caption{Life history parameters.}
 \label{fig:cor}
 \end{figure}
@@ -185,8 +185,7 @@ Laurence Kell's involvement was funded through the MyDas project under the Marin
 \newpage
 \begin{figure}[h]
 \centering
-\includepdf[pages=1,pagecommand={},width=\textwidth]{roc-ts-1.pdf}
-%\includegraphics[width=\textwidth]{lensamples.png}
+\includegraphics[width=\textwidth]{roc-ts-1.png}
 \caption{Operating Models, showing exploitation history relative to $MSY$ reference points; fishing was initially low then increased to twice $F_{MSY}$ following which a recovery plan was implemented in order to reduce $F$ to $F_{MSY}$.}
 \label{fig:oms}
 \end{figure}
@@ -205,8 +204,7 @@ Laurence Kell's involvement was funded through the MyDas project under the Marin
 \newpage
 \begin{figure}[h]
 \centering
-\includepdf[pages=1,pagecommand={},width=\textwidth]{roc-inds-1.png}
-%\includegraphics[width=\textwidth]{indicatorTab.png}
+\includegraphics[width=\textwidth]{roc-inds-1.png}
 \caption{Examples of indicators for the turbot base case; the coloured regions indicate exploitation levels relative to $F_{MSY}$, $F<F_{MSY}$ (green),  $F_{MSY} <F< 1.5F_{MSY}$ (yellow), and $F \geq 1.5F_{MSY}$ (red).}
 \label{fig:indicators}
 \end{figure}

@@ -1,0 +1,61 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: roc.aux
+The style file: apalike.bst
+Database file #1: /home/laurence/Desktop/sea++/mydas/papers/refs.bib.bib
+Repeated entry---line 12370 of file /home/laurence/Desktop/sea++/mydas/papers/refs.bib.bib
+ : @article{kell2015spawning
+ :                          ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 12597 of file /home/laurence/Desktop/sea++/mydas/papers/refs.bib.bib
+ : @article{reynolds2001life
+ :                          ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 12702 of file /home/laurence/Desktop/sea++/mydas/papers/refs.bib.bib
+ : @article{thorson2015introduction
+ :                                 ,
+I'm skipping whatever remains of this entry
+Warning--I didn't find a database entry for "ref"
+Warning--there's a number but no series in caddy1998short
+You've used 30 entries,
+            1935 wiz_defined-function locations,
+            662 strings with 9709 characters,
+and the built_in function-call counts, 12471 in all, are:
+= -- 1216
+> -- 533
+< -- 22
++ -- 190
+- -- 180
+* -- 1077
+:= -- 2161
+add.period$ -- 91
+call.type$ -- 30
+change.case$ -- 233
+chr.to.int$ -- 30
+cite$ -- 31
+duplicate$ -- 456
+empty$ -- 845
+format.name$ -- 222
+if$ -- 2438
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 34
+newline$ -- 153
+num.names$ -- 90
+pop$ -- 196
+preamble$ -- 1
+purify$ -- 237
+quote$ -- 0
+skip$ -- 365
+stack$ -- 0
+substring$ -- 894
+swap$ -- 73
+text.length$ -- 9
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 172
+warning$ -- 1
+while$ -- 101
+width$ -- 0
+write$ -- 389
+(There were 3 error messages)

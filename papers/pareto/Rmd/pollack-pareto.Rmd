@@ -1,0 +1,697 @@
+---
+title: "Pareto Multi-objective Trade-offs"
+subtitle: "Pollack"
+author: "L Kell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+<!-- The real world displays many multi-objective problems. With applications as diverse as electoral zone design \cite{Ponsich2017} to generation expansion planning \cite{Kannan2009}. In fisheries modelling a major problem is noise, where evaluating the same solution twice leads to different objective function values. This means that control rules are simulation tested -->
+
+<!-- Classical optimisation methods, such as non-linear programming, find single solutions per simulation run. However, many real-world problems naturally have multiple objectives to optimise. Traditionally, classical optimisation methods were used to optimise these multi-objective problems by artificially converting them into a single-objective problem and solved.  -->
+
+<!-- This, however, does not take into account the various trade-offs between optimal solutions, known as Pareto-optimal solutions. Finally, it becomes important to find more than just a single Pareto-optimal solution. A Pareto frontier is made up of many Pareto-optimal solutions. The results of which can be displayed graphically, enabling a user to make a choice between the various solutions. -->
+
+<!-- Classical methods require multiple applications of an optimisation algorithm, with various scalings between rewards to achieve a single reward. The population approach of genetic algorithms, however, enable the Pareto frontier to be found in a single simulation run.  -->
+
+<!-- Therefore support vector regression was used to first smooth the simulation results and then a genetic algorithm was used to find the pareto curves. -->
+
+<!-- Therefore run MSE for a simple empirical HCR rule, based on an index of abundance where next years catch is decreased if the index decreases and is increased if it is increasing. Since the risk of an increase is different from a decrease there are two parameters (K1 & K2) that affect how much the changes are. -->
+
+<!-- The idea is to develop a framework that allows us to not just to test HCRs but to evaluate the benefits of using stock specific rather than generic rules,  improving knowledge, and getting better data. For example would a recruit index help in the management of sprat or a stock where there are regime shifts. -->
+
+<!-- Although I used an index of abundance for the example we could any other quantities and we can also look at values relative to reference points. We can even combine may rules into a combined rule. The problem then becomes how to tune the multiple parameters required, that is where Machine Learning will come in. But 1st we need a way of filtering rules and coming up with best candidates. -->
+
+<!-- This is an example of where I have got to. I ran the MP for pollack and randomly varied K1 & K2 then estimated mean yield/msy and safety i.e. P(B>Blim). The red line is fitted using support vector regression and a genetic algorithm. The points are the results from 6000 MSE -->
+
+<!-- You can see that there is a relationship between yield and safety, i.e. if you can have high yield you have a high risk of stock collapse,  K2 is the increase if the index is increasing, i.e. if you have a high increase when the stock is increasing risk also increases (the opposite is seen for K1). -->
+
+<!-- Using such a curve we can ask a manager for their risk levels, i.e. how safe do they want to be and how much catch are they happy to forgo. Once we know that we can read off the values of K1 and K2 from the red curve (i.e. the Pareto frontier) and run an MSE and derive all the other quantities of interest. -->
+
+<!-- If we run this procedure for the different component rules in your paper we can then compare them before we combine them using machine learning. The benefit of ML is that we will be able to look at many more interactions. -->
+
+
+<!-- looks like we have 3 regions -->
+<!-- i) righthand curve where we can evaluate the trade offs between safety and yield ii) a lefthand region where you get high yield but low safety if K1 and K are outside of given values and iii) a transition between them -->
+<!-- this gives us bounds on K1 and K2 and a way of choosing the best values -->
+
+
+<!-- but we can run simulations say for a safety of 0.7 for the stocks under the best and generic rules and then tabulate the results -->
+<!-- so we have 2 figures, 1 explaining how SVR & GA were used. 2nd showing the trade-offs between rewards that allows managers to choose actions. and then a table that summarises the results of the managers choices, which also validates the method -->
+
+
+```{r, knitr, eval=TRUE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(knitr)
+
+opts_chunk$set(comment   =NA, 
+               warning   =FALSE, 
+               message   =FALSE, 
+               error     =FALSE, 
+               echo      =FALSE,
+               fig.width =10, 
+               fig.height=10,
+               cache     =TRUE, 
+               fig.path  ="tex/pareto/pollack-",
+               cache.path="cache/pareto/pollack/")
+
+iFig=0
+iTab=0
+```
+```{r, dir}  
+dirOM ="/home/laurence/Desktop/sea++/mydas/papers/pareto/data"
+dirRes="/home/laurence/Desktop/sea++/mydas/papers/pareto/Results"
+```
+
+```{r, pkgs}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(reshape)
+
+library(FLCore)
+library(FLBRP)
+library(FLasher)
+library(ggplotFL)
+library(FLife)
+library(randtests)
+
+library(mvtnorm)
+
+library(GGally)
+library(mydas)
+library(popbio)
+```
+```{r, parallel}
+library(doParallel)
+library(foreach)
+
+cl=makeCluster(3)
+registerDoParallel(cl)
+```
+
+```{r, conditioning, eval=FALSE}
+load(file.path(dirOM,"pollack.RData"))
+load(file.path(dirOm,"lhs.RData"))
+
+nits=500
+
+set.seed(1233)
+srDev=FLife:::rlnoise(nits,FLQuant(0,dimnames=list(year=1:140)),.5,b=0.6)
+
+simCovar<-function(x,cv,cor,nits=100){
+  
+  mn=aaply(x,1,mean,na.rm=TRUE)
+  y =exp(rmvnorm(nits,       log(mn[dimnames(cor)[[1]]]),
+                 cor2cov(cor,log(mn[dimnames(cor)[[1]]])*cv*cv)))
+  
+  res=FLPar(t(array(unlist(c(y)),c(nits,dim(cor)[1]),
+                    dimnames=list(iter=seq(nits),params=dimnames(cor)[[1]]))))
+  
+  mn=propagate(FLPar(mn),nits)
+  mn[dimnames(cor)[[1]]]=res
+  mn["l50"]=res["linf"]*res["l50linf"]
+  lhPar(mn)}
+
+cor=cor(model.frame(lh)[,c("linf","k","l50","t0","a","b","l50linf")],
+        use="pairwise.complete.obs")
+lhs=dlply(lh,.(species), with, 
+             FLPar(linf=linf,k=k,t0=t0,l50=l50,a=a,b=b,bg=b,l50linf=l50linf))
+
+lh=simCovar(lhs[[4]],cv=0.1,cor=cor[c("linf","k","l50linf"),
+                                    c("linf","k","l50linf")],nits=nits)
+
+eq=lhEql(lhPar(apply(lhs[[4]],1,mean,na.rm=TRUE)))
+
+pars=popdyn(FLPar(aaply(lh,1,mean,na.rm=TRUE)))
+
+gt=round(pars["gt"])
+eq@fbar=refpts(eq)["msy","harvest"]%*%
+  FLQuant(c(rep(0.1,60),
+            seq(0.1,2.5,length.out=40)[-40],                                                     seq(2.5,1,length.out=gt),rep(1,40)))[,1:140]
+
+om=as(eq,"FLStock")
+om=fwd(propagate(om,500),fbar=fbar(om)[,-1],sr=eq,residuals=srDev)
+
+save(lh,eq,om,srDev,file=file.path(dirRes,"pollack-om.RData"),compress="xz")
+```
+```{r, om}
+plot(om,iter=4)+
+  theme_bw()
+```
+
+**Figure `r iFig=iFig+1; iFig`.**  Operating Model.
+
+
+```{r, prodFunc}
+ggplot(model.frame(FLQuants(eq,"ssb","catch")))+
+  geom_path(aes(ssb,catch))+
+  geom_path(aes(ssb, catch,col=iter),
+            data=model.frame(FLQuants(iter(om,iter=1:5),"ssb","catch")))
+```
+
+**Figure `r iFig=iFig+1; iFig`.**  Operating Model production function with simulated trajectories.
+
+```{r, scenarios, eval=FALSE}
+scen=expand.grid(nyr    =c(3,5,7),
+                 cv     =c(0.1,0.2,0.3),
+                 spp    ="pollack",
+                 ctrl   =1:10,
+                 stringsAsFactors=FALSE)
+
+### Random variaton for control
+controls=list()
+set.seed(123456)
+for (j in 1:10){
+    controls[[j]]=rbind(FLPar(k1   =runif(nits, 0.0, 2.0)),
+                        FLPar(k2   =runif(nits, 0.0, 2.0)),
+                        FLPar(gamma=runif(nits, 1.0, 1.0)),
+                        FLPar(gamma=rep(1, nits)))
+    }
+controls=FLPars(controls)
+
+save(scen,controls,file=file.path(dirRes,"scenarios.RData"),compress="xz")
+```
+
+```{r, ranD, eval=FALSE}
+load(file.path(dirRes,"scenarios.RData"))
+load(file.path(dirRes,"pollack-om.RData"))
+
+ranD<-foreach(i=seq(dim(scen)[1])[-c(1,3:6)], 
+                .combine=rbind,
+                .multicombine=TRUE,
+                .export=c("dirRes","dirOM","scen","srDev","controls"),
+                .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
+                            "FLasher","FLBRP","FLife","mydas")) %dopar%{
+   
+ mseSBTD<-function(
+  #OM as FLStock and FLBRP
+  om,eq,
+  
+  #MP
+  control="missing",
+  
+  sr_deviances,
+  u_deviances,
+  
+  #years over which to run MSE, doesnt work if interval==1, this is a bug
+  interval=1,start=range(om)["maxyear"]-30,end=range(om)["maxyear"]-interval,
+  
+  #Capacity, i.e. F in OM can not be greater than this
+  nyrs  =5,
+  cpueFn=ssb,
+  lag   =0,
+  maxF  =1.5){
+
+  ##So you dont run to the end then crash
+  end=min(end,range(om)["maxyear"]-interval)
+  
+  ## Make sure number of iterations are consistent
+  nits=c(om=dims(om)$iter, eq=dims(params(eq))$iter, rsdl=dims(sr_deviances)$iter)
+  if (length(unique(nits))>=2 & !(1 %in% nits)) ("Stop, iters not '1 or n' in om")
+  if (nits['om']==1) stock(om)=propagate(stock(om),max(nits))
+
+  ## Observation Error (OEM) setup
+  cpue=window(cpueFn(om),end=start)
+  cpue=cpue%*%u_deviances[,dimnames(cpue)$year]
+
+  ## Loop round years
+  cat('\n==')
+  for (iYr in seq(start,end,interval)){
+    cat(iYr,", ",sep="")
+
+    ## Observation Error, using data from last year back to the last assessment
+    ## CPUE
+    cpue=window(cpue,end=iYr-lag)
+    uYrs=rev(seq(nyrs))-1+lag
+    cpue[,ac(iYr-uYrs)]=(cpueFn(om))[,ac(iYr-uYrs)]%*%u_deviances[,ac(iYr-uYrs)]
+
+    #### Management Procedure
+    ##Constant catch
+    #tac=hcrConstantCatch(iYr+1,catch=catch(om)[,ac(iYr-(21))]) 
+    tac=hcrSBTD(iYr+seq(interval),
+                control=control,
+                cpue[,ac(iYr-uYrs)],
+                catch(om)[,ac(iYr-rev(seq(interval))+1)])
+   
+    #### Operating Model update
+    om=fwd(om,catch=tac,sr=eq,residual=sr_deviances,maxF=maxF)
+    }
+  cat('==\n')
+  
+  return(om)}
+
+  fn<-function(spp,cv,nyr,ctrl,srDev,k1k2){
+    load(file.path(dirRes,paste(spp,"-om.RData",sep="")))
+    print(paste("ranD-",spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep=""))
+                                  
+    set.seed(1235)
+    uDev =FLife:::rlnoise(500,FLQuant(0,dimnames=dimnames(iter(fbar(om),1))),cv,b=0.0)
+    mse=mseSBTD(om,eq,
+                control=k1k2,
+                sr_deviances=srDev,
+                u_deviances =uDev,
+                start  =108,end=140,
+                nyrs   =nyr,lag=0,maxF=1.5)
+          
+    save(mse,file=file.path(dirRes,paste("ranD-",
+                spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep="")))
+                                  
+    data.frame(spp=spp,cv=cv,nyr=nyr)}
+      
+with(scen[i,], fn(spp,cv,nyr,ctrl,srDev,controls[[ctrl]]))}
+```
+
+```{r, sims, eval=FALSE}
+load(file.path(dirRes,"scenarios.RData"))
+load(file.path(dirRes,"pollack-om.RData"))
+
+mses=FLStocks("OM"=om)
+load(file.path(dirRes,"ranD-pollack-1-0.2-3.RData"))
+mses["3"]=mse
+load(file.path(dirRes,"ranD-pollack-1-0.2-5.RData"))
+mses["5"]=mse
+load(file.path(dirRes,"ranD-pollack-1-0.2-7.RData"))
+mses["7"]=mse
+
+plot(mses)
+```
+
+**Figure `r iFig=iFig+1; iFig`.**  Operating Model, MP compared to $F_{MSY}$ projection.
+
+```{r, pMeasures, eval=FALSE}
+## Get summary stats
+source('~/Desktop/sea++/mydas/pkg/R/smryStat.R')
+source('~/Desktop/sea++/mydas/pkg/R/omOut.R')
+
+pm=mdply(scen,function(spp,ctrl,nyr,cv,start=121,end=140){
+  
+  load(file.path(dirRes,"pollack-om.RData"))
+  load(file.path(dirRes,paste("ranD-",
+                          spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep="")))
+
+  mse=window(mse,start=start,end=end)
+  res=transform(omSmry(mse,eq,lh),
+                iter=factor(iter,level=ac(sort(as.numeric(ac(unique(iter)))))))
+  res=transform(res,year=year-start)
+  pm =ddply(res,.(iter), smryStat)
+  
+  pm=merge(pm,transform(model.frame(controls[[ctrl]]),
+                iter=factor(iter,level=ac(sort(as.numeric(ac(iter)))))),
+           by="iter")
+  
+  pm$kobe    =pm$kobe.n/(end-start+1)
+  
+  pm})
+
+save(pm,file=file.path(dirRes,"pollack-pm.RData"))
+```
+
+```{r, kCheck}
+load(file.path(dirRes,"base-pollack-pm.RData"))
+
+ggplot(pm)+
+  geom_point(aes(k1,k2,fill=plim>0.95,col=plim>0.95),shape=21,size=0.25,alpha=0.5)+
+  scale_fill_manual(values=c("white","black"))+
+  theme_bw()+
+  facet_grid(nyr~cv)
+```
+
+**Figure `r iFig=iFig+1; iFig`.**  Summary of control parameters where $P(SSB>B_{lim})>0.95$.
+
+```{r, svrFuncs, eval=!FALSE}
+library(caret)
+library(ggplot2)
+library(mco)
+library(kernlab)
+
+fitSvr=function(dat, target, predictors, tuneLength=5){
+  
+  ctrl=caret::trainControl(
+    method ="repeatedcv",
+    repeats=5)
+  
+  print(paste(target, "~", predictors, sep=" "))
+  
+  svrFit = caret::train(
+    as.formula(paste(target, "~", predictors, sep=" ")),
+    data      =dat,
+    method    ='svmRadial',
+    tuneLength=tuneLength,
+    trControl =ctrl,
+    metric    ="MAE")
+  
+  return(svrFit)}
+
+svrFn=function(ind,svr1,svr2){
+  ind         =t(data.frame(ind))
+  prediction1 =predict(svr1,ind)
+  prediction2 =predict(svr2,ind)
+  result      =c(prediction1, prediction2)
+  
+  return(result)}
+
+svrFn2=function(ind,...)
+    laply(list(...), function(x) predict(x,t(data.frame(ind))))
+```
+
+```{r, svr, eval=FALSE}
+load(file.path(dirRes,"pollack-pm.RData"))
+
+predictors='k1+k2'
+rewards=c('yield','yieldAav1','plim',
+          'safety','ftar','btar',
+          'yieldAav2','yieldAav3',
+          'blim','btar')[1:3]
+
+svr=dlply(pm, .(cv,nyr), with, {
+              svr=mlply(rewards,function(x) 
+                          fitSvr(data.frame(yield    =yield,
+                                            yieldAav1=1-yieldAav,
+                                            safety   =safety,
+                                            ftar     =ftar,
+                                            yieldAav2=1-yieldAav2,
+                                            yieldAav3=1-yieldAav3,
+                                            blim     =blim,
+                                            plim     =plim,
+                                            btar     =btar,
+                                            k1=k1,   k2=k2),
+                                 x, 
+                                 predictors,tuneLength=10)$finalModel)
+              names(svr)=rewards
+              svr})
+save(svr, file=file.path(dirRes,"pollack-svr.RData"))
+```
+
+```{r, frontiers, eval=!FALSE}
+YFronts=ldply(svr, function(x) {
+  
+  pareto=mco::nsga2(fn=svrFn2, x[["yield"]],x[["yieldAav1"]],x[["plim"]],
+                               #x[["safety"]],x[["ftar"]],
+                    idim=2, odim=3, 
+                    lower.bounds=rep(0.0, 2),upper.bounds=rep(1.5, 2), 
+                    popsize=1000, generations=100, cprob=0.9)
+  YFronts=data.frame(par=pareto$par,value=pareto$value)
+  names(YFronts)=c("k1","k2",'yield','yieldAav1','plim')
+  
+  YFronts})
+
+save(YFronts,file=file.path(dirRes,"pollack-YFronts.RData"))
+```
+
+
+```{r, calibrationYield, eval=!FALSE}
+ggplot(melt(YFronts[,c("k1","k2","yield","plim","nyr","cv")],
+            id=c("yield","plim","nyr","cv")))+
+  facet_grid(nyr~cv)+
+  geom_point(aes(yield,value,col=variable,size=(plim>=0.95)))+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab("Yield")+ylab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_colour_manual(values=c("red","black"))+
+  scale_size_manual(values=c(0.01,1))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** 
+
+```{r, calibrartionYieldAav, eval=!FALSE}
+ggplot(melt(YFronts[,c("k1","k2","yieldAav1","plim","nyr","cv")],
+            id=c("yieldAav1","plim","nyr","cv")))+
+  facet_grid(nyr~cv)+
+  geom_point(aes(1-yieldAav1,value,col=variable,size=(plim>=0.95)))+
+  theme_bw()+theme(legend.position="bottom")+
+  xlab("Yield AAV")+ylab("Control Value")+
+  guides(col=guide_legend(title="Control",size=2))+
+  scale_colour_manual(values=c("red","black"))+
+  scale_size_manual(values=c(0.02,1))
+```
+
+**Figure `r iFig=iFig+1; iFig`.** 
+
+
+```{r, calibrartionYieldAav, eval=!FALSE}
+ggplot(subset(YFronts,plim>0.97)[,c(1:2,5:6)])+
+  geom_point(aes(yield,1-yieldAav1))+
+  facet_grid(nyr~cv)
+```
+
+**Figure `r iFig=iFig+1; iFig`.** 
+
+```{r}
+pts=rbind(cbind("What"="good",subset(pm,plim>=0.95&as.numeric(iter)<100)[,c("k1","k2",                                                       'yield','yieldAav1','plim','nyr','cv')]),
+          cbind("What"="bad", subset(pm,plim< 0.95&as.numeric(iter)<100)[,c("k1","k2",                                                       'yield','yieldAav1','plim','nyr','cv')]))
+
+pts=rbind.fill(pts,cbind("What"="fits", YFronts))
+pts$What=factor(pts$What,levels=c("good","bad","fits"))
+```
+
+```{r, parerto, eval=FALSE}
+p=ggpairs(subset(pts,What!="b.d"),
+        columns=c('yield','yieldAav1','plim'),
+        mapping = ggplot2::aes(color=What),
+        #lower=list(continuous='points'), 
+        lower = list(continuous = wrap("points", size = 0.1), 
+                     combo = wrap("dot", alpha = 0.4)),
+        #axisLabels='none',  
+        diag=list(continuous="blank"),
+        upper=list(continuous = wrap("points", size = 0.1), 
+                     combo = wrap("dot", alpha = 0.4)))
+
+for(i in 1:p$nrow) 
+  for(j in 1:p$ncol)
+    p[i,j] <- p[i,j] + 
+        scale_fill_manual(values=c("green","red","black")) +
+        scale_color_manual(values=c("green","red","black"))  
+p+theme_bw() 
+```
+**Figure `r iFig=iFig+1; iFig`.** Pairwise plots of summary statistics with pareto frontiers for the Base Case.
+
+
+```{r, parerto, eval=!FALSE}
+ggplot(pts)+
+  geom_point(aes(yield,1-yieldAav1,col=What,size=What,alpha=plim>=0.95))+
+  facet_grid(nyr~cv)+
+  scale_size_manual(values=c(.5,.5,1))+
+  scale_color_manual(values=c("green","red","black"))+
+  theme_bw()
+```
+
+
+**Figure `r iFig=iFig+1; iFig`.** Pairwise plots of summary statistics with pareto frontiers for the Base Case.
+
+
+```{r, figScatter1}
+ggplot(subset(pts,cv==0.3&nyr==5&What!="fits"))+
+  geom_density(aes(yield,fill=What),position="identity",alpha=0.3)
+```
+
+```{r}
+library(plotly)
+set.seed(123)
+
+
+p <- ggplot(subset(pts,What!="fits"), aes(yield, yieldAav1,group=plim>0.95,col=plim>0.95)) + 
+  geom_point(alpha = 0.5,size=0.2) + 
+  geom_density_2d() + 
+  geom_point(aes(yield,yieldAav1),col="black",data=
+               cbind(plim=0.8,subset(pts,What=="fits")[,c("yield","yieldAav1")]))+ 
+  geom_point(aes(yield,yieldAav1),col="black",data=
+               cbind(plim=0.99,subset(pts,What=="fits")[,c("yield","yieldAav1")]))+ 
+  theme(panel.background = element_rect(fill = '#ffffff')) + 
+  ggtitle("2D density plot with scatterplot overlay")+
+  facet_wrap(~plim>0.95)
+
+p <- ggplotly(p)
+
+# Create a shareable link to your chart
+# Set up API credentials: https://plot.ly/r/getting-started
+#chart_link = plotly_POST(p, filename="geom_density/scatter")
+#chart_link
+```
+
+
+```{r, parerto, eval=!FALSE}
+ks=ddply(subset(YFronts,plim>0.975),.(cv,nyr), with,
+      data.frame(yield    =quantile(yield,    probs=c(0.5,0.75,0.975)),
+                 yieldAav1=quantile(yieldAav1,probs=c(0.5,0.75,0.975)),
+                 pctl     =c(0.5,0.75,0.975)))
+
+ks=merge(subset(YFronts,plim>0.975),subset(ks,pctl==0.975),by=c("cv","nyr"))
+ks=transform(ks,yTar=(yield.y-yield.x)^2,
+                vTar=(yieldAav1.y-yieldAav1.x)^2)
+
+yTar=ddply(ks,.(cv,nyr), with, data.frame(k1=k1[yTar==min(yTar)],
+                                          k2=k2[yTar==min(yTar)],
+                                          y =yield.x[    yTar==min(yTar)],
+                                          v =1-yieldAav1.x[yTar==min(yTar)]))
+
+vTar=ddply(ks,.(cv,nyr), with, data.frame(k1=k1[vTar==min(vTar)],
+                                          k2=k2[vTar==min(vTar)],
+                                          y =yield.x[      vTar==min(vTar)],
+                                          v =1-yieldAav1.x[vTar==min(vTar)]))
+
+tar=rbind(cbind(Objective="Yield",yTar),
+          cbind(Objective="AAV",  vTar))
+names(tar)[6:7]=c("Yield","AAV")
+tar$ctrl=1
+tar$spp="pollack"
+```
+
+
+```{r, run, eval=FALSE}
+## Run MSE
+load(file.path(dirRes,"pollack-om.RData"))
+
+mseD<-foreach(i=seq(dim(tar)[1]), 
+                .combine=rbind,
+                .multicombine=TRUE,
+                .export=c("dirRes","dirOM","tar","srDev"),
+                .packages=c("plyr","dplyr","reshape","ggplot2","FLCore","ggplotFL",
+                            "FLasher","FLBRP","FLife","mydas")) %dopar%{
+   
+  control=rbind(FLPar(k1   =rep(tar[i,"k1"],nits)),
+                FLPar(k2   =rep(tar[i,"k2"],nits)),
+                FLPar(gamma=rep(1,  nits)))
+
+ mseSBTD<-function(
+  #OM as FLStock and FLBRP
+  om,eq,
+  
+  #MP
+  control="missing",
+  
+  sr_deviances,
+  u_deviances,
+  
+  #years over which to run MSE, doesnt work if interval==1, this is a bug
+  interval=1,start=range(om)["maxyear"]-30,end=range(om)["maxyear"]-interval,
+  
+  #Capacity, i.e. F in OM can not be greater than this
+  nyrs  =5,
+  cpueFn=ssb,
+  lag   =0,
+  maxF  =1.5){
+
+  ##So you dont run to the end then crash
+  end=min(end,range(om)["maxyear"]-interval)
+  
+  ## Make sure number of iterations are consistent
+  nits=c(om=dims(om)$iter, eq=dims(params(eq))$iter, rsdl=dims(sr_deviances)$iter)
+  if (length(unique(nits))>=2 & !(1 %in% nits)) ("Stop, iters not '1 or n' in om")
+  if (nits['om']==1) stock(om)=propagate(stock(om),max(nits))
+
+  ## Observation Error (OEM) setup
+  cpue=window(cpueFn(om),end=start)
+  cpue=cpue%*%u_deviances[,dimnames(cpue)$year]
+
+  ## Loop round years
+  cat('\n==')
+  for (iYr in seq(start,end,interval)){
+    cat(iYr,", ",sep="")
+
+    ## Observation Error, using data from last year back to the last assessment
+    ## CPUE
+    cpue=window(cpue,end=iYr-lag)
+    uYrs=rev(seq(nyrs))-1+lag
+    cpue[,ac(iYr-uYrs)]=(cpueFn(om))[,ac(iYr-uYrs)]%*%u_deviances[,ac(iYr-uYrs)]
+
+    #### Management Procedure
+    ##Constant catch
+    #tac=hcrConstantCatch(iYr+1,catch=catch(om)[,ac(iYr-(21))]) 
+    tac=hcrSBTD(iYr+seq(interval),
+                control=control,
+                cpue[,ac(iYr-uYrs)],
+                catch(om)[,ac(iYr-rev(seq(interval))+1)])
+   
+    #### Operating Model update
+    om=fwd(om,catch=tac,sr=eq,residual=sr_deviances,maxF=maxF)
+    }
+  cat('==\n')
+  
+  return(om)}
+
+  fn<-function(spp,cv,nyr,ctrl,srDev,k1k2){
+    load(file.path(dirRes,paste(spp,"-om.RData",sep="")))
+    print(paste("mse-",spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep=""))
+                                  
+    set.seed(1235)
+    uDev =FLife:::rlnoise(500,FLQuant(0,dimnames=dimnames(iter(fbar(om),1))),cv,b=0.0)
+    mse=mseSBTD(om,eq,
+                control=k1k2,
+                sr_deviances=srDev,
+                u_deviances =uDev,
+                start  =108,end=140,
+                nyrs   =nyr,lag=0,maxF=1.5)
+          
+    save(mse,file=file.path(dirRes,paste("mse-",
+                spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep="")))
+                                  
+    data.frame(spp=spp,cv=cv,nyr=nyr)}
+      
+with(tar[i,], fn(spp,cv,nyr,ctrl,srDev,control))}
+```
+
+```{r, msePm, eval=FALSE}
+source('~/Desktop/sea++/mydas/pkg/R/smryStat.R')
+source('~/Desktop/sea++/mydas/pkg/R/omOut.R')
+
+pm=mdply(scen,function(spp,ctrl,nyr,cv,start=121,end=140){
+  
+  load(file.path(dirRes,"pollack-om.RData"))
+  load(file.path(dirRes,paste("mse-",
+                          spp,"-",ctrl,"-",cv,"-",nyr,".RData",sep="")))
+
+  mse=window(mse,start=start,end=end)
+  res=transform(omSmry(mse,eq,lh),
+                iter=factor(iter,level=ac(sort(as.numeric(ac(unique(iter)))))))
+  res=transform(res,year=year-start)
+  pm =ddply(res,.(iter), smryStat)
+  
+  pm=merge(pm,transform(model.frame(controls[[ctrl]]),
+                iter=factor(iter,level=ac(sort(as.numeric(ac(iter)))))),
+           by="iter")
+  
+  pm$kobe    =pm$kobe.n/(end-start+1)
+  
+  pm})
+
+save(pm,file=file.path(dirRes,"base-pollack-pm.RData"))
+```
+
+```{r}
+load(file.path(dirRes,"base-pollack-pm.RData"))
+
+ggplot(melt(pm[,c("safety","blim","ftar","yield","yieldAav")]))+
+  geom_boxplot(aes(x=variable,y=value))+
+  theme_bw()
+```
+
+
+\newpage
+## Software Versions
+
+* `r version$version.string`
+* FLCore:    `r packageVersion('FLCore')`
+* FLBRP:     `r packageVersion('FLBRP')`
+* FLasher:   `r packageVersion('FLasher')`
+* FLife:     `r packageVersion('FLife')`
+* ggplotFL:  `r packageVersion('ggplotFL')`
+* **Compiled**: `r date()`
+
+## Author information
+
+**Laurence Kell**. laurie@seaplusplus.es
+
+## Acknowledgements
+
+This vignette and many of the methods documented in it were developed under the MyDas project funded by the Irish exchequer and EMFF 2014-2020. The overall aim of MyDas is to develop and test a range of assessment models and methods to establish Maximum Sustainable Yield (MSY) reference points (or proxy MSY reference points) across the spectrum of data-limited stocks.
+
+# References {#References}
+
+\newpage
+# Session Info
+
+```{r}
+sessionInfo()
+```
